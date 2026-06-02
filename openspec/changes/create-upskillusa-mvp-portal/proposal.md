@@ -10,7 +10,7 @@ UpSkill USA needs a minimal, elegant web portal that turns the "One Portal. Four
 - Add static/client-side demo flows:
   - IKIGAI prompts and purpose statement on Inspire.
   - Learning hub content on Learn.
-  - Seminar interest flow and simple five-year plan builder on Adapt.
+  - Seminar interest flow and simple action plan builder on Adapt.
   - Clearly mocked company audit/workflow-builder experience on Implement.
 - Add a simple client-side `EN / ES / PT` language toggle for key UI copy and concise page content.
 - Add `DESIGN.md` to define the MVP design system based on the Lovable reference app: deep navy, royal blue, gold, elegant enterprise cards, pill navigation, Lucide-style iconography, and polished responsive layouts.

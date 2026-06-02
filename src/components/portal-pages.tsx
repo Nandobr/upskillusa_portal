@@ -68,8 +68,71 @@ function FrameworkCards() {
   );
 }
 
+function StepNavCard({ keyName, variant }: { keyName: FrameworkKey; variant: "previous" | "next" }) {
+  const { content } = usePortalContent();
+  const framework = content.frameworks[keyName];
+  const Icon = icons[keyName];
+
+  return (
+    <Link className={`step-nav-card ${variant}`} href={framework.route}>
+      <div>
+        <div className="step-nav-step">
+          <span>{framework.tab}</span>
+          <Icon size={16} aria-hidden />
+        </div>
+        <h3>{framework.title}</h3>
+        <p className="framework-question">{framework.question}</p>
+      </div>
+      <span className="button-row">
+        <span className="button blue">
+          {framework.cta}
+          <ArrowRight size={16} aria-hidden />
+        </span>
+      </span>
+    </Link>
+  );
+}
+
+function StepNavItem({ keyName, variant }: { keyName: FrameworkKey; variant: "previous" | "next" }) {
+  return (
+    <div className={`step-nav-item ${variant}`}>
+      {variant === "previous" ? (
+        <span className="step-nav-arrow" aria-hidden>
+          &lt;-
+        </span>
+      ) : null}
+      <StepNavCard keyName={keyName} variant={variant} />
+      {variant === "next" ? (
+        <span className="step-nav-arrow" aria-hidden>
+          -&gt;
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function StepNavigation({ keyName }: { keyName: FrameworkKey }) {
+  const currentIndex = frameworkOrder.indexOf(keyName);
+  const previousKey = frameworkOrder[currentIndex - 1];
+  const nextKey = frameworkOrder[currentIndex + 1];
+
+  return (
+    <div className={`step-nav-grid ${previousKey ? "" : "single-next"}`}>
+      {previousKey ? <StepNavItem keyName={previousKey} variant="previous" /> : null}
+      {nextKey ? <StepNavItem keyName={nextKey} variant="next" /> : null}
+    </div>
+  );
+}
+
 export function OverviewPage() {
   const { content } = usePortalContent();
+  const heroLines = content.brand.lockup.split(". ").map((line, index, lines) => {
+    if (index < lines.length - 1 && !line.endsWith(".")) {
+      return `${line}.`;
+    }
+
+    return line;
+  });
 
   return (
     <>
@@ -79,7 +142,13 @@ export function OverviewPage() {
             <Sparkles size={15} aria-hidden />
             {content.overview.eyebrow}
           </span>
-          <h1>{content.brand.lockup}</h1>
+          <h1>
+            {heroLines.map((line) => (
+              <span className="hero-title-line" key={line}>
+                {line}
+              </span>
+            ))}
+          </h1>
           <p>{content.overview.intro}</p>
           <div className="hero-actions">
             <Link className="button primary" href="/inspire">
@@ -106,23 +175,6 @@ export function OverviewPage() {
           <FrameworkCards />
         </div>
       </section>
-
-      <section className="section muted">
-        <div className="section-inner">
-          <div className="metric-row">
-            {content.overview.arc.map((item, index) => (
-              <div className="metric-card" key={item}>
-                <strong>0{index + 1}</strong>
-                <p>{item}</p>
-              </div>
-            ))}
-            <div className="metric-card">
-              <strong>22%</strong>
-              <p>{content.overview.metricNote}</p>
-            </div>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
@@ -131,13 +183,14 @@ function PageHero({ keyName }: { keyName: FrameworkKey }) {
   const { content } = usePortalContent();
   const framework = content.frameworks[keyName];
   const Icon = icons[keyName];
+  const heroLabel = `${framework.tab} : ${framework.title}`.toUpperCase();
 
   return (
     <section className="page-hero">
       <div className="section-inner">
-        <span className="eyebrow">
+        <span className="eyebrow page-step-label">
           <Icon size={15} aria-hidden />
-          {framework.tab}
+          {heroLabel}
         </span>
         <h1>{framework.question}</h1>
         <p>{content.pages[keyName].hero}</p>
@@ -164,6 +217,22 @@ function PageSections({ keyName }: { keyName: FrameworkKey }) {
           ) : null}
         </article>
       ))}
+    </div>
+  );
+}
+
+function DemoNotes({ demo }: { demo: { commentsLabel?: string; notes?: string[]; nextStep?: string } }) {
+  if (!demo.notes) {
+    return null;
+  }
+
+  return (
+    <div className="demo-notes">
+      <strong>{demo.commentsLabel ?? "Comments:"}</strong>
+      {demo.notes.map((note) => (
+        <p key={note}>{note}</p>
+      ))}
+      {demo.nextStep ? <p className="demo-next-step">{demo.nextStep}</p> : null}
     </div>
   );
 }
@@ -207,6 +276,7 @@ function IkigaiDemo() {
       <div className="result-panel">
         {complete ? <p>{statement}</p> : <p className="empty-state">{demo.emptyState}</p>}
       </div>
+      <DemoNotes demo={demo} />
     </article>
   );
 }
@@ -241,6 +311,7 @@ function LearnDemo() {
           ))}
         </ul>
       </div>
+      <DemoNotes demo={demo} />
     </article>
   );
 }
@@ -248,7 +319,7 @@ function LearnDemo() {
 function AdaptDemo() {
   const { content } = usePortalContent();
   const seminar = content.forms.seminar;
-  const plan = content.forms.fiveYearPlan;
+  const plan = content.forms.adaptationPlan;
   const demo = content.pages.adapt.demo;
   const [interest, setInterest] = useState({ name: "", organization: "", role: "", city: "" });
   const [values, setValues] = useState({
@@ -300,6 +371,7 @@ function AdaptDemo() {
       <div className="result-panel">
         <p>{summary}</p>
       </div>
+      <DemoNotes demo={demo} />
     </article>
   );
 }
@@ -340,6 +412,7 @@ function ImplementDemo() {
         <p>{audit.mockFinding}</p>
         <p>{workflow}</p>
       </div>
+      <DemoNotes demo={demo} />
     </article>
   );
 }
@@ -416,17 +489,27 @@ export function FrameworkPage({ keyName }: { keyName: FrameworkKey }) {
         </div>
       </section>
 
-      <section className="section muted">
-        <div className="section-inner">
-          <PageSections keyName={keyName} />
-        </div>
-      </section>
+      {content.pages[keyName].sections.length > 0 ? (
+        <section className="section muted">
+          <div className="section-inner">
+            <PageSections keyName={keyName} />
+          </div>
+        </section>
+      ) : null}
 
-      <section className="section">
-        <div className="section-inner">
-          {keyName === "implement" ? <AgentsPanel /> : <FrameworkCards />}
-        </div>
-      </section>
+      {keyName === "implement" ? (
+        <section className="section">
+          <div className="section-inner">
+            <AgentsPanel />
+          </div>
+        </section>
+      ) : (
+        <section className="section step-nav-section">
+          <div className="section-inner">
+            <StepNavigation keyName={keyName} />
+          </div>
+        </section>
+      )}
     </>
   );
 }

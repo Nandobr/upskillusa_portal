@@ -59,7 +59,7 @@ Use navy as the brand anchor, blue for clear interaction, and gold sparingly for
 - Overview: introduce "One Portal. Four Frameworks." and the Gift -> Learn -> Adapt -> Innovate arc.
 - Inspire: emotional entry point with IKIGAI prompts and the dignity reframe.
 - Learn: two learning channels, AI tool library, and custom GPT role preparation.
-- Adapt: Saturday seminar, employer/employee alignment, and five-year plan builder.
+- Adapt: Saturday seminar, employer/employee alignment, and action plan builder.
 - Implement: bottom-up workflow builder, mock audit, human review gates, and installer-agent concept.
 
 ## Accessibility And Responsiveness

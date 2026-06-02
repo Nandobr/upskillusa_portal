@@ -34,6 +34,9 @@ export type DemoCopy = {
   emptyState: string;
   submit: string;
   resultTitle: string;
+  commentsLabel?: string;
+  notes?: string[];
+  nextStep?: string;
 };
 
 export type PortalContent = {
@@ -80,7 +83,7 @@ export type PortalContent = {
       city: string;
       confirmation: string;
     };
-    fiveYearPlan: {
+    adaptationPlan: {
       role: string;
       automate: string;
       augment: string;
@@ -130,10 +133,10 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     overview: {
       eyebrow: "AI workforce upgrade portal",
-      title: "One portal. Four steps.",
+      title: "Four steps to create value for your Business without leaving employees behind.",
       intro:
         "A practical portal for business leaders to find AI-ready opportunities, prepare teams, and launch human-reviewed workflows that create measurable value.",
-      arc: ["Find your gift", "Learn AI", "Build a plan", "Upgrade the work"],
+      arc: ["Find your gift", "Learn AI for free", "Build a plan", "Implement at business"],
       primaryCta: "Map Your AI Opportunity",
       secondaryCta: "Explore the Four Steps",
       metricNote: "Source-note: use the DOCX-corrected figure of 22% of jobs disrupted by 2030.",
@@ -141,146 +144,114 @@ export const portalContent: Record<Language, PortalContent> = {
     frameworks: {
       inspire: {
         key: "inspire",
-        tab: "Tab 1",
+        tab: "STEP 1",
         route: "/inspire",
-        title: "Inspiration & IKIGAI",
+        title: "Inspiration",
         question: "What's your gift?",
         audience: "Students, workers, and anyone who needs a reason to care before learning.",
         summary:
           "A guided IKIGAI flow helps visitors connect what they love, what they do well, what the world needs, and what can become paid work.",
-        cta: "Discover your gift",
+        cta: "Find your gift",
       },
       learn: {
         key: "learn",
-        tab: "Tab 2",
+        tab: "STEP 2",
         route: "/learn",
-        title: "Education for Everybody",
+        title: "Education",
         question: "How do you learn?",
         audience: "Community colleges, professors, workers, employers, and the public.",
         summary:
           "A formal college channel and a free public channel make AI learning accessible, supported by role-ready tools and custom GPT preparation.",
-        cta: "Open the learning hub",
+        cta: "Learn AI for free",
       },
       adapt: {
         key: "adapt",
-        tab: "Tab 3",
+        tab: "STEP 3",
         route: "/adapt",
-        title: "Seminars & Events",
+        title: "Adaptation",
         question: "How do you adapt?",
         audience: "Employees, employers, Chambers of Commerce, City Halls, and trained educators.",
         summary:
-          "Six-hour Saturday sessions bring people into one room to learn, practice, align, and leave with a personal five-year plan.",
+          "Six-hour Saturday sessions bring people into one room to learn, practice, align, and leave with a practical action plan.",
         cta: "Build a plan",
       },
       implement: {
         key: "implement",
-        tab: "Tab 4",
+        tab: "STEP 4",
         route: "/implement",
         title: "Implementation",
         question: "How do you innovate?",
         audience: "Companies ready to upgrade work from the bottom up.",
         summary:
           "Employees design workflows in their own domains, add human audit gates, and prove value through demo hours-saved and ROI summaries.",
-        cta: "Mock an implementation",
+        cta: "Implement at business",
       },
     },
     pages: {
       inspire: {
         hero:
           "The front door is a mirror: before anyone learns a tool, they name the human value they bring.",
-        sections: [
-          {
-            title: "IKIGAI self-discovery",
-            body: "Four prompts produce a short purpose statement grounded in love, skill, world need, and paid work.",
-          },
-          {
-            title: "Dignity reframe",
-            body: "AI can extend reach, but empathy, judgment, care, and creativity remain human strengths.",
-          },
-          {
-            title: "On-ramp",
-            body: "The next step is simple: once visitors see their purpose, send them to Learn.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "IKIGAI demo",
           emptyState: "Complete the four prompts to draft a purpose statement.",
           submit: "Draft purpose",
           resultTitle: "Draft purpose statement",
+          notes: [
+            "IKIGAI self-discovery: Four prompts produce a short purpose statement grounded in love, skill, world need, and paid work.",
+            "Dignity reframe: AI can extend reach, but empathy, judgment, care, and creativity remain human strengths.",
+          ],
+          nextStep: "NEXT STEP: Once visitors see their purpose, send them to Learn.",
         },
       },
       learn: {
         hero:
           "Education is the engine: colleges train deeply, public resources reach widely, and role preparation makes live learning faster.",
-        sections: [
-          {
-            title: "Community college channel",
-            body: "The AI Institute trains professors, who carry practical AI education through community colleges and credential pathways.",
-            items: ["20-hour professor program", "AI Agent classes", "Portable micro-credentials"],
-          },
-          {
-            title: "Public channel",
-            body: "A free YouTube learning library and curated tool guides make the curriculum available beyond enrolled students.",
-          },
-          {
-            title: "Custom GPT preparation",
-            body: "Role-specific GPTs can be prepared before seminars so learners begin with a co-pilot shaped around their work.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "Learning hub demo",
           emptyState: "Choose a track to preview suggested resources.",
           submit: "Preview resources",
           resultTitle: "Suggested learning path",
+          notes: [
+            "Community college channel: The AI Institute trains professors, who carry practical AI education through community colleges and credential pathways. Includes: 20-hour professor program, AI Agent classes, portable micro-credentials.",
+            "Public channel: A free YouTube learning library and curated tool guides make the curriculum available beyond enrolled students.",
+          ],
+          nextStep:
+            "NEXT STEP: Role-specific GPTs can be prepared before seminars so learners begin with a co-pilot shaped around their work.",
         },
       },
       adapt: {
         hero:
-          "Knowledge becomes change when employees and employers sit together and turn learning into a five-year plan.",
-        sections: [
-          {
-            title: "Saturday session",
-            body: "A six-hour format: learn the basics, practice with real tools, align around shared change, and plan the next five years.",
-          },
-          {
-            title: "Where it happens",
-            body: "Trained educators can deliver sessions through Chambers of Commerce, City Halls, colleges, and employer groups.",
-          },
-          {
-            title: "What people leave with",
-            body: "Each participant names what to automate, what to augment, what to own, and what to become.",
-          },
-        ],
+          "Knowledge becomes change when employees and employers sit together and turn learning into a practical action plan.",
+        sections: [],
         demo: {
           label: "Seminar and plan demo",
           emptyState: "Add seminar interest or plan inputs to see a local preview.",
           submit: "Create preview",
-          resultTitle: "Draft five-year plan",
+          resultTitle: "Draft action plan",
+          notes: [
+            "Saturday session: A six-hour format: learn the basics, practice with real tools, align around shared change, and define next actions.",
+            "Where it happens: Trained educators can deliver sessions through Chambers of Commerce, City Halls, colleges, and employer groups.",
+          ],
+          nextStep:
+            "NEXT STEP: Each participant names what to automate, what to augment, what to own, and what to become.",
         },
       },
       implement: {
         hero:
           "Implementation starts with the person who knows the work: each employee designs the upgrade in their own domain.",
-        sections: [
-          {
-            title: "Bottom-up process",
-            body: "Audit, invite, build, and prove. The workflow starts with recoverable value and ends with human-reviewed deployment.",
-            items: ["Audit the opportunity", "Invite every employee", "Build with human gates", "Prove hours saved"],
-          },
-          {
-            title: "Installer Agents",
-            body: "Installer Agents help businesses install AI, educate teams, and coordinate the four-step implementation process.",
-          },
-          {
-            title: "Demo boundaries",
-            body: "Audit findings, ROI, and hours-saved values are mock outputs in this MVP.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "Mock implementation demo",
           emptyState: "Enter a company URL or workflow idea to generate demo-only findings.",
           submit: "Generate mock output",
           resultTitle: "Demo workflow summary",
+          notes: [
+            "Bottom-up process: Audit, invite, build, and prove. The workflow starts with recoverable value and ends with human-reviewed deployment. Includes: audit the opportunity, invite every employee, build with human gates, prove hours saved.",
+            "Installer Agents: Installer Agents help businesses install AI, educate teams, and coordinate the four-step implementation process.",
+            "Demo boundaries: Audit findings, ROI, and hours-saved values are mock outputs in this MVP.",
+          ],
         },
       },
     },
@@ -300,14 +271,14 @@ export const portalContent: Record<Language, PortalContent> = {
         city: "City",
         confirmation: "Demo confirmation: your interest is recorded locally for this preview only.",
       },
-      fiveYearPlan: {
+      adaptationPlan: {
         role: "Current role",
         automate: "What should be automated?",
         augment: "What should be augmented?",
         own: "What will you own?",
         become: "What will you become?",
         summaryTemplate:
-          "In five years as {role}, I will automate {automate}, augment {augment}, own {own}, and grow toward {become}.",
+          "As {role}, I will automate {automate}, augment {augment}, own {own}, and grow toward {become}.",
       },
       audit: {
         companyUrl: "Company URL",
@@ -381,7 +352,7 @@ export const portalContent: Record<Language, PortalContent> = {
         question: "¿Cómo te adaptas?",
         audience: "Empleados, empleadores, Cámaras de Comercio, alcaldías y educadores.",
         summary:
-          "Sesiones sabatinas de seis horas reúnen a las personas para aprender, practicar, alinearse y salir con un plan personal de cinco años.",
+          "Sesiones sabatinas de seis horas reúnen a las personas para aprender, practicar, alinearse y salir con un plan de acción práctico.",
         cta: "Crear un plan",
       },
       implement: {
@@ -400,99 +371,71 @@ export const portalContent: Record<Language, PortalContent> = {
       inspire: {
         hero:
           "La puerta de entrada es un espejo: antes de aprender una herramienta, cada persona nombra el valor humano que aporta.",
-        sections: [
-          {
-            title: "Autodescubrimiento IKIGAI",
-            body: "Cuatro preguntas crean una declaración breve de propósito basada en amor, habilidad, necesidad y trabajo pagado.",
-          },
-          {
-            title: "Dignidad",
-            body: "La IA puede ampliar el alcance, pero empatía, juicio, cuidado y creatividad siguen siendo fortalezas humanas.",
-          },
-          {
-            title: "Siguiente paso",
-            body: "Cuando la persona ve su propósito, el portal la guía hacia Aprender.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "Demo IKIGAI",
           emptyState: "Completa las cuatro preguntas para crear un borrador de propósito.",
           submit: "Crear propósito",
           resultTitle: "Borrador de propósito",
+          commentsLabel: "Comentarios:",
+          notes: [
+            "Autodescubrimiento IKIGAI: Cuatro preguntas crean una declaración breve de propósito basada en amor, habilidad, necesidad y trabajo pagado.",
+            "Dignidad: La IA puede ampliar el alcance, pero empatía, juicio, cuidado y creatividad siguen siendo fortalezas humanas.",
+          ],
+          nextStep: "SIGUIENTE PASO: Cuando la persona ve su propósito, el portal la guía hacia Aprender.",
         },
       },
       learn: {
         hero:
           "La educación es el motor: las universidades entrenan en profundidad, los recursos públicos llegan ampliamente y la preparación por rol acelera el aprendizaje.",
-        sections: [
-          {
-            title: "Canal de community colleges",
-            body: "El AI Institute entrena profesores que llevan educación práctica en IA a programas y credenciales.",
-            items: ["Programa de 20 horas", "Clases de AI Agent", "Microcredenciales portables"],
-          },
-          {
-            title: "Canal público",
-            body: "Una biblioteca gratuita en YouTube y guías de herramientas abren el currículo al público.",
-          },
-          {
-            title: "Preparación con GPTs",
-            body: "GPTs por rol pueden prepararse antes de los seminarios para que cada persona comience con un copiloto de su trabajo.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "Demo de aprendizaje",
           emptyState: "Elige una ruta para ver recursos sugeridos.",
           submit: "Ver recursos",
           resultTitle: "Ruta sugerida",
+          commentsLabel: "Comentarios:",
+          notes: [
+            "Canal de community colleges: El AI Institute entrena profesores que llevan educación práctica en IA a programas y credenciales. Incluye: programa de 20 horas, clases de AI Agent, microcredenciales portables.",
+            "Canal público: Una biblioteca gratuita en YouTube y guías de herramientas abren el currículo al público.",
+          ],
+          nextStep:
+            "SIGUIENTE PASO: GPTs por rol pueden prepararse antes de los seminarios para que cada persona comience con un copiloto de su trabajo.",
         },
       },
       adapt: {
         hero:
-          "El conocimiento cambia la realidad cuando empleados y empleadores se sientan juntos y lo convierten en un plan de cinco años.",
-        sections: [
-          {
-            title: "Sesión sabatina",
-            body: "Seis horas para aprender, practicar con herramientas reales, alinear expectativas y planear los próximos cinco años.",
-          },
-          {
-            title: "Dónde ocurre",
-            body: "Educadores entrenados pueden facilitar sesiones en Cámaras de Comercio, alcaldías, universidades y empresas.",
-          },
-          {
-            title: "Resultado",
-            body: "Cada participante define qué automatizar, qué aumentar, qué poseer y en qué convertirse.",
-          },
-        ],
+          "El conocimiento cambia la realidad cuando empleados y empleadores se sientan juntos y lo convierten en un plan de acción práctico.",
+        sections: [],
         demo: {
           label: "Demo de seminario y plan",
           emptyState: "Agrega interés o datos del plan para ver una vista previa local.",
           submit: "Crear vista previa",
-          resultTitle: "Borrador de plan de cinco años",
+          resultTitle: "Borrador de plan de acción",
+          commentsLabel: "Comentarios:",
+          notes: [
+            "Sesión sabatina: Seis horas para aprender, practicar con herramientas reales, alinear expectativas y definir próximas acciones.",
+            "Dónde ocurre: Educadores entrenados pueden facilitar sesiones en Cámaras de Comercio, alcaldías, universidades y empresas.",
+          ],
+          nextStep:
+            "SIGUIENTE PASO: Cada participante define qué automatizar, qué aumentar, qué poseer y en qué convertirse.",
         },
       },
       implement: {
         hero:
           "La implementación empieza con quien conoce el trabajo: cada empleado diseña la mejora en su propio dominio.",
-        sections: [
-          {
-            title: "Proceso desde abajo",
-            body: "Auditar, invitar, construir y demostrar. El flujo termina con revisión humana y valor visible.",
-            items: ["Auditar oportunidad", "Invitar empleados", "Construir con controles humanos", "Demostrar horas ahorradas"],
-          },
-          {
-            title: "Installer Agents",
-            body: "Los Installer Agents ayudan a empresas a instalar IA, educar equipos y coordinar la implementación.",
-          },
-          {
-            title: "Límites de demo",
-            body: "Hallazgos, ROI y horas ahorradas son resultados simulados en este MVP.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "Demo de implementación simulada",
           emptyState: "Ingresa una URL o idea de flujo para generar hallazgos solo de demo.",
           submit: "Generar demo",
           resultTitle: "Resumen de flujo demo",
+          commentsLabel: "Comentarios:",
+          notes: [
+            "Proceso desde abajo: Auditar, invitar, construir y demostrar. El flujo termina con revisión humana y valor visible. Incluye: auditar oportunidad, invitar empleados, construir con controles humanos, demostrar horas ahorradas.",
+            "Installer Agents: Los Installer Agents ayudan a empresas a instalar IA, educar equipos y coordinar la implementación.",
+            "Límites de demo: Hallazgos, ROI y horas ahorradas son resultados simulados en este MVP.",
+          ],
         },
       },
     },
@@ -512,14 +455,14 @@ export const portalContent: Record<Language, PortalContent> = {
         city: "Ciudad",
         confirmation: "Confirmación demo: tu interés queda guardado localmente solo para esta vista previa.",
       },
-      fiveYearPlan: {
+      adaptationPlan: {
         role: "Rol actual",
         automate: "¿Qué debería automatizarse?",
         augment: "¿Qué debería aumentarse?",
         own: "¿Qué vas a poseer?",
         become: "¿En qué te convertirás?",
         summaryTemplate:
-          "En cinco años como {role}, automatizaré {automate}, aumentaré {augment}, poseeré {own} y creceré hacia {become}.",
+          "Como {role}, automatizaré {automate}, aumentaré {augment}, poseeré {own} y creceré hacia {become}.",
       },
       audit: {
         companyUrl: "URL de empresa",
@@ -593,7 +536,7 @@ export const portalContent: Record<Language, PortalContent> = {
         question: "Como você se adapta?",
         audience: "Empregados, empregadores, Câmaras de Comércio, prefeituras e educadores.",
         summary:
-          "Sessões de sábado com seis horas reúnem pessoas para aprender, praticar, alinhar e sair com um plano pessoal de cinco anos.",
+          "Sessões de sábado com seis horas reúnem pessoas para aprender, praticar, alinhar e sair com um plano de ação prático.",
         cta: "Criar um plano",
       },
       implement: {
@@ -612,99 +555,71 @@ export const portalContent: Record<Language, PortalContent> = {
       inspire: {
         hero:
           "A porta de entrada é um espelho: antes de aprender uma ferramenta, cada pessoa nomeia o valor humano que traz.",
-        sections: [
-          {
-            title: "Autodescoberta IKIGAI",
-            body: "Quatro perguntas geram uma declaração curta de propósito baseada em amor, habilidade, necessidade e trabalho remunerado.",
-          },
-          {
-            title: "Dignidade",
-            body: "A IA amplia alcance, mas empatia, julgamento, cuidado e criatividade continuam sendo forças humanas.",
-          },
-          {
-            title: "Próximo passo",
-            body: "Quando a pessoa enxerga seu propósito, o portal a guia para Aprender.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "Demo IKIGAI",
           emptyState: "Complete as quatro perguntas para criar um rascunho de propósito.",
           submit: "Criar propósito",
           resultTitle: "Rascunho de propósito",
+          commentsLabel: "Comentários:",
+          notes: [
+            "Autodescoberta IKIGAI: Quatro perguntas geram uma declaração curta de propósito baseada em amor, habilidade, necessidade e trabalho remunerado.",
+            "Dignidade: A IA amplia alcance, mas empatia, julgamento, cuidado e criatividade continuam sendo forças humanas.",
+          ],
+          nextStep: "PRÓXIMO PASSO: Quando a pessoa enxerga seu propósito, o portal a guia para Aprender.",
         },
       },
       learn: {
         hero:
           "A educação é o motor: faculdades treinam em profundidade, recursos públicos chegam amplamente e preparo por função acelera o aprendizado.",
-        sections: [
-          {
-            title: "Canal de community colleges",
-            body: "O AI Institute treina professores que levam educação prática em IA para programas e credenciais.",
-            items: ["Programa de 20 horas", "Aulas de AI Agent", "Microcredenciais portáteis"],
-          },
-          {
-            title: "Canal público",
-            body: "Uma biblioteca gratuita no YouTube e guias de ferramentas abrem o currículo para todos.",
-          },
-          {
-            title: "Preparo com GPTs",
-            body: "GPTs por função podem ser preparados antes dos seminários para que cada pessoa comece com um copiloto do seu trabalho.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "Demo de aprendizagem",
           emptyState: "Escolha uma trilha para visualizar recursos sugeridos.",
           submit: "Ver recursos",
           resultTitle: "Trilha sugerida",
+          commentsLabel: "Comentários:",
+          notes: [
+            "Canal de community colleges: O AI Institute treina professores que levam educação prática em IA para programas e credenciais. Inclui: programa de 20 horas, aulas de AI Agent, microcredenciais portáteis.",
+            "Canal público: Uma biblioteca gratuita no YouTube e guias de ferramentas abrem o currículo para todos.",
+          ],
+          nextStep:
+            "PRÓXIMO PASSO: GPTs por função podem ser preparados antes dos seminários para que cada pessoa comece com um copiloto do seu trabalho.",
         },
       },
       adapt: {
         hero:
-          "Conhecimento vira mudança quando empregados e empregadores sentam juntos e transformam aprendizado em um plano de cinco anos.",
-        sections: [
-          {
-            title: "Sessão de sábado",
-            body: "Seis horas para aprender, praticar com ferramentas reais, alinhar expectativas e planejar os próximos cinco anos.",
-          },
-          {
-            title: "Onde acontece",
-            body: "Educadores treinados podem facilitar sessões em Câmaras de Comércio, prefeituras, faculdades e empresas.",
-          },
-          {
-            title: "Resultado",
-            body: "Cada participante define o que automatizar, o que aumentar, o que possuir e no que se tornar.",
-          },
-        ],
+          "Conhecimento vira mudança quando empregados e empregadores sentam juntos e transformam aprendizado em um plano de ação prático.",
+        sections: [],
         demo: {
           label: "Demo de seminário e plano",
           emptyState: "Adicione interesse ou dados do plano para ver uma prévia local.",
           submit: "Criar prévia",
-          resultTitle: "Rascunho do plano de cinco anos",
+          resultTitle: "Rascunho do plano de ação",
+          commentsLabel: "Comentários:",
+          notes: [
+            "Sessão de sábado: Seis horas para aprender, praticar com ferramentas reais, alinhar expectativas e definir próximas ações.",
+            "Onde acontece: Educadores treinados podem facilitar sessões em Câmaras de Comércio, prefeituras, faculdades e empresas.",
+          ],
+          nextStep:
+            "PRÓXIMO PASSO: Cada participante define o que automatizar, o que aumentar, o que possuir e no que se tornar.",
         },
       },
       implement: {
         hero:
           "A implementação começa com quem conhece o trabalho: cada funcionário desenha a melhoria em seu próprio domínio.",
-        sections: [
-          {
-            title: "Processo de baixo para cima",
-            body: "Auditar, convidar, construir e provar. O fluxo termina com revisão humana e valor visível.",
-            items: ["Auditar oportunidade", "Convidar funcionários", "Construir com controles humanos", "Provar horas economizadas"],
-          },
-          {
-            title: "Installer Agents",
-            body: "Installer Agents ajudam empresas a instalar IA, educar equipes e coordenar a implementação.",
-          },
-          {
-            title: "Limites de demo",
-            body: "Achados, ROI e horas economizadas são resultados simulados neste MVP.",
-          },
-        ],
+        sections: [],
         demo: {
           label: "Demo de implementação simulada",
           emptyState: "Insira uma URL ou ideia de fluxo para gerar achados apenas de demo.",
           submit: "Gerar demo",
           resultTitle: "Resumo de fluxo demo",
+          commentsLabel: "Comentários:",
+          notes: [
+            "Processo de baixo para cima: Auditar, convidar, construir e provar. O fluxo termina com revisão humana e valor visível. Inclui: auditar oportunidade, convidar funcionários, construir com controles humanos, provar horas economizadas.",
+            "Installer Agents: Installer Agents ajudam empresas a instalar IA, educar equipes e coordenar a implementação.",
+            "Limites de demo: Achados, ROI e horas economizadas são resultados simulados neste MVP.",
+          ],
         },
       },
     },
@@ -724,14 +639,14 @@ export const portalContent: Record<Language, PortalContent> = {
         city: "Cidade",
         confirmation: "Confirmação demo: seu interesse fica salvo localmente apenas para esta prévia.",
       },
-      fiveYearPlan: {
+      adaptationPlan: {
         role: "Função atual",
         automate: "O que deve ser automatizado?",
         augment: "O que deve ser aumentado?",
         own: "O que você vai possuir?",
         become: "No que você vai se tornar?",
         summaryTemplate:
-          "Em cinco anos como {role}, vou automatizar {automate}, aumentar {augment}, possuir {own} e crescer em direção a {become}.",
+          "Como {role}, vou automatizar {automate}, aumentar {augment}, possuir {own} e crescer em direção a {become}.",
       },
       audit: {
         companyUrl: "URL da empresa",

@@ -51,16 +51,16 @@ The Learn route SHALL present concise DOCX-derived learning content for communit
 - **WHEN** a visitor navigates to `/learn`
 - **THEN** the system displays learning sections for the formal college channel, public learning channel, AI tool library, and custom GPT or role-preparation concept
 
-### Requirement: Adapt seminar and five-year plan demo
-The Adapt route SHALL include a static seminar interest experience and a simple client-side five-year plan builder.
+### Requirement: Adapt seminar and action plan demo
+The Adapt route SHALL include a static seminar interest experience and a simple client-side action plan builder.
 
 #### Scenario: Visitor submits seminar interest
 - **WHEN** a visitor enters seminar interest details
 - **THEN** the system displays a local confirmation state without sending data to a backend
 
-#### Scenario: Visitor builds a five-year plan
+#### Scenario: Visitor builds an action plan
 - **WHEN** a visitor enters plan inputs such as role, automation opportunity, augmentation opportunity, ownership goal, and future skill
-- **THEN** the system displays a draft five-year plan summary using those inputs
+- **THEN** the system displays a draft action plan summary using those inputs
 
 ### Requirement: Implement mock audit and workflow demo
 The Implement route SHALL include a clearly labeled mock company audit and bottom-up workflow-builder demo inspired by the Lovable reference app.

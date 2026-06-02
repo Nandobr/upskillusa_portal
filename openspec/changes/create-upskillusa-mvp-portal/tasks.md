@@ -21,7 +21,7 @@
 
 - [x] 4.1 Build `/inspire` with DOCX-derived mission copy and the IKIGAI prompt-to-purpose demo.
 - [x] 4.2 Build `/learn` with the community college channel, public learning channel, AI tool library, and custom GPT preparation sections.
-- [x] 4.3 Build `/adapt` with seminar interest confirmation and a client-side five-year plan builder.
+- [x] 4.3 Build `/adapt` with seminar interest confirmation and a client-side action plan builder.
 - [x] 4.4 Build `/implement` with clearly labeled mock audit results and a bottom-up workflow-builder demo.
 
 ## 5. Cleanup And Verification
