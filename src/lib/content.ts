@@ -337,14 +337,14 @@ export const portalContent: Record<Language, PortalContent> = {
       lockup: "Un portal. Cuatro marcos.",
       tagline: "Don -> Aprender -> Adaptar -> Innovar",
       promise: "No despedimos. Mejoramos capacidades.",
-      jfkLine: "No preguntes que puede hacer la IA por ti. Pregunta que puedes hacer con la IA.",
+      jfkLine: "No preguntes qué puede hacer la IA por ti. Pregunta qué puedes hacer con la IA.",
       giBillLine: "El G.I. Bill para la era de la IA.",
     },
     overview: {
-      eyebrow: "Portal MVP publico",
-      title: "Una secuencia para trabajadores, empresas y el pais.",
+      eyebrow: "Portal MVP público",
+      title: "Una secuencia para trabajadores, empresas y el país.",
       intro:
-        "UpSkill USA convierte la ansiedad por la IA en un recorrido practico: descubrir tu don, aprender IA gratis, adaptarte con un plan de cinco años e implementar flujos desde abajo hacia arriba.",
+        "UpSkill USA convierte la ansiedad por la IA en un recorrido práctico: descubrir tu don, aprender IA gratis, adaptarte con un plan de cinco años e implementar flujos desde abajo hacia arriba.",
       arc: ["Encuentra tu don", "Aprende IA", "Crea un plan", "Mejora el trabajo"],
       primaryCta: "Comenzar con Inspirar",
       secondaryCta: "Explorar el marco",
@@ -355,9 +355,9 @@ export const portalContent: Record<Language, PortalContent> = {
         key: "inspire",
         tab: "Pestaña 1",
         route: "/inspire",
-        title: "Inspiracion e IKIGAI",
-        question: "Cual es tu don?",
-        audience: "Estudiantes, trabajadores y personas que necesitan una razon para aprender.",
+        title: "Inspiración e IKIGAI",
+        question: "¿Cuál es tu don?",
+        audience: "Estudiantes, trabajadores y personas que necesitan una razón para aprender.",
         summary:
           "Un flujo IKIGAI conecta lo que amas, lo que haces bien, lo que el mundo necesita y lo que puede convertirse en trabajo pagado.",
         cta: "Descubrir tu don",
@@ -366,11 +366,11 @@ export const portalContent: Record<Language, PortalContent> = {
         key: "learn",
         tab: "Pestaña 2",
         route: "/learn",
-        title: "Educacion para todos",
-        question: "Como aprendes?",
-        audience: "Community colleges, profesores, trabajadores, empleadores y publico general.",
+        title: "Educación para todos",
+        question: "¿Cómo aprendes?",
+        audience: "Community colleges, profesores, trabajadores, empleadores y público general.",
         summary:
-          "Un canal universitario formal y un canal publico gratuito hacen accesible el aprendizaje de IA, con herramientas y preparacion por rol.",
+          "Un canal universitario formal y un canal público gratuito hacen accesible el aprendizaje de IA, con herramientas y preparación por rol.",
         cta: "Abrir recursos",
       },
       adapt: {
@@ -378,22 +378,22 @@ export const portalContent: Record<Language, PortalContent> = {
         tab: "Pestaña 3",
         route: "/adapt",
         title: "Seminarios y eventos",
-        question: "Como te adaptas?",
-        audience: "Empleados, empleadores, Camaras de Comercio, alcaldias y educadores.",
+        question: "¿Cómo te adaptas?",
+        audience: "Empleados, empleadores, Cámaras de Comercio, alcaldías y educadores.",
         summary:
-          "Sesiones sabatinas de seis horas reunen a las personas para aprender, practicar, alinearse y salir con un plan personal de cinco años.",
+          "Sesiones sabatinas de seis horas reúnen a las personas para aprender, practicar, alinearse y salir con un plan personal de cinco años.",
         cta: "Crear un plan",
       },
       implement: {
         key: "implement",
         tab: "Pestaña 4",
         route: "/implement",
-        title: "Implementacion",
-        question: "Como innovas?",
+        title: "Implementación",
+        question: "¿Cómo innovas?",
         audience: "Empresas listas para mejorar el trabajo desde abajo hacia arriba.",
         summary:
           "Los empleados diseñan flujos en sus propios dominios, agregan revisiones humanas y demuestran valor con resultados de demo.",
-        cta: "Probar implementacion",
+        cta: "Probar implementación",
       },
     },
     pages: {
@@ -403,39 +403,39 @@ export const portalContent: Record<Language, PortalContent> = {
         sections: [
           {
             title: "Autodescubrimiento IKIGAI",
-            body: "Cuatro preguntas crean una declaracion breve de proposito basada en amor, habilidad, necesidad y trabajo pagado.",
+            body: "Cuatro preguntas crean una declaración breve de propósito basada en amor, habilidad, necesidad y trabajo pagado.",
           },
           {
             title: "Dignidad",
-            body: "La IA puede ampliar el alcance, pero empatia, juicio, cuidado y creatividad siguen siendo fortalezas humanas.",
+            body: "La IA puede ampliar el alcance, pero empatía, juicio, cuidado y creatividad siguen siendo fortalezas humanas.",
           },
           {
             title: "Siguiente paso",
-            body: "Cuando la persona ve su proposito, el portal la guia hacia Aprender.",
+            body: "Cuando la persona ve su propósito, el portal la guía hacia Aprender.",
           },
         ],
         demo: {
           label: "Demo IKIGAI",
-          emptyState: "Completa las cuatro preguntas para crear un borrador de proposito.",
-          submit: "Crear proposito",
-          resultTitle: "Borrador de proposito",
+          emptyState: "Completa las cuatro preguntas para crear un borrador de propósito.",
+          submit: "Crear propósito",
+          resultTitle: "Borrador de propósito",
         },
       },
       learn: {
         hero:
-          "La educacion es el motor: las universidades entrenan en profundidad, los recursos publicos llegan ampliamente y la preparacion por rol acelera el aprendizaje.",
+          "La educación es el motor: las universidades entrenan en profundidad, los recursos públicos llegan ampliamente y la preparación por rol acelera el aprendizaje.",
         sections: [
           {
             title: "Canal de community colleges",
-            body: "El AI Institute entrena profesores que llevan educacion practica en IA a programas y credenciales.",
+            body: "El AI Institute entrena profesores que llevan educación práctica en IA a programas y credenciales.",
             items: ["Programa de 20 horas", "Clases de AI Agent", "Microcredenciales portables"],
           },
           {
-            title: "Canal publico",
-            body: "Una biblioteca gratuita en YouTube y guias de herramientas abren el curriculo al publico.",
+            title: "Canal público",
+            body: "Una biblioteca gratuita en YouTube y guías de herramientas abren el currículo al público.",
           },
           {
-            title: "Preparacion con GPTs",
+            title: "Preparación con GPTs",
             body: "GPTs por rol pueden prepararse antes de los seminarios para que cada persona comience con un copiloto de su trabajo.",
           },
         ],
@@ -451,45 +451,45 @@ export const portalContent: Record<Language, PortalContent> = {
           "El conocimiento cambia la realidad cuando empleados y empleadores se sientan juntos y lo convierten en un plan de cinco años.",
         sections: [
           {
-            title: "Sesion sabatina",
-            body: "Seis horas para aprender, practicar con herramientas reales, alinear expectativas y planear los proximos cinco años.",
+            title: "Sesión sabatina",
+            body: "Seis horas para aprender, practicar con herramientas reales, alinear expectativas y planear los próximos cinco años.",
           },
           {
-            title: "Donde ocurre",
-            body: "Educadores entrenados pueden facilitar sesiones en Camaras de Comercio, alcaldias, universidades y empresas.",
+            title: "Dónde ocurre",
+            body: "Educadores entrenados pueden facilitar sesiones en Cámaras de Comercio, alcaldías, universidades y empresas.",
           },
           {
             title: "Resultado",
-            body: "Cada participante define que automatizar, que aumentar, que poseer y en que convertirse.",
+            body: "Cada participante define qué automatizar, qué aumentar, qué poseer y en qué convertirse.",
           },
         ],
         demo: {
           label: "Demo de seminario y plan",
-          emptyState: "Agrega interes o datos del plan para ver una vista previa local.",
+          emptyState: "Agrega interés o datos del plan para ver una vista previa local.",
           submit: "Crear vista previa",
           resultTitle: "Borrador de plan de cinco años",
         },
       },
       implement: {
         hero:
-          "La implementacion empieza con quien conoce el trabajo: cada empleado diseña la mejora en su propio dominio.",
+          "La implementación empieza con quien conoce el trabajo: cada empleado diseña la mejora en su propio dominio.",
         sections: [
           {
             title: "Proceso desde abajo",
-            body: "Auditar, invitar, construir y demostrar. El flujo termina con revision humana y valor visible.",
+            body: "Auditar, invitar, construir y demostrar. El flujo termina con revisión humana y valor visible.",
             items: ["Auditar oportunidad", "Invitar empleados", "Construir con controles humanos", "Demostrar horas ahorradas"],
           },
           {
             title: "Installer Agents",
-            body: "Los Installer Agents ayudan a empresas a instalar IA, educar equipos y coordinar la implementacion.",
+            body: "Los Installer Agents ayudan a empresas a instalar IA, educar equipos y coordinar la implementación.",
           },
           {
-            title: "Limites de demo",
+            title: "Límites de demo",
             body: "Hallazgos, ROI y horas ahorradas son resultados simulados en este MVP.",
           },
         ],
         demo: {
-          label: "Demo de implementacion simulada",
+          label: "Demo de implementación simulada",
           emptyState: "Ingresa una URL o idea de flujo para generar hallazgos solo de demo.",
           submit: "Generar demo",
           resultTitle: "Resumen de flujo demo",
@@ -498,47 +498,47 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     forms: {
       ikigai: {
-        love: "Que amas?",
-        skill: "En que eres bueno?",
-        need: "Que necesita el mundo?",
-        paid: "Por que te pueden pagar?",
+        love: "¿Qué amas?",
+        skill: "¿En qué eres bueno?",
+        need: "¿Qué necesita el mundo?",
+        paid: "¿Por qué te pueden pagar?",
         purposeTemplate:
           "Puedo usar IA para conectar {love} y {skill} con {need}, creando trabajo que puede crecer hacia {paid}.",
       },
       seminar: {
         name: "Nombre",
-        organization: "Organizacion",
+        organization: "Organización",
         role: "Rol",
         city: "Ciudad",
-        confirmation: "Confirmacion demo: tu interes queda guardado localmente solo para esta vista previa.",
+        confirmation: "Confirmación demo: tu interés queda guardado localmente solo para esta vista previa.",
       },
       fiveYearPlan: {
         role: "Rol actual",
-        automate: "Que deberia automatizarse?",
-        augment: "Que deberia aumentarse?",
-        own: "Que vas a poseer?",
-        become: "En que te convertiras?",
+        automate: "¿Qué debería automatizarse?",
+        augment: "¿Qué debería aumentarse?",
+        own: "¿Qué vas a poseer?",
+        become: "¿En qué te convertirás?",
         summaryTemplate:
-          "En cinco años como {role}, automatizare {automate}, aumentare {augment}, poseere {own} y crecere hacia {become}.",
+          "En cinco años como {role}, automatizaré {automate}, aumentaré {augment}, poseeré {own} y creceré hacia {become}.",
       },
       audit: {
         companyUrl: "URL de empresa",
         workflowName: "Nombre del flujo",
-        humanGate: "Revision humana",
+        humanGate: "Revisión humana",
         mockFinding: "Hallazgo demo: hay productividad recuperable en entrada, reportes y seguimiento.",
         workflowTemplate:
-          "Flujo demo: {workflowName} pasa trabajo asistido por IA por {humanGate} antes de cualquier decision final.",
+          "Flujo demo: {workflowName} pasa trabajo asistido por IA por {humanGate} antes de cualquier decisión final.",
       },
     },
     agents: {
-      installer: "Installer Agents ayudan a empresas a instalar IA y ejecutar implementacion desde abajo.",
-      educator: "Educator Agents entregan el curriculo, el AI Institute y las sesiones sabatinas.",
+      installer: "Installer Agents ayudan a empresas a instalar IA y ejecutar implementación desde abajo.",
+      educator: "Educator Agents entregan el currículo, el AI Institute y las sesiones sabatinas.",
     },
   },
   pt: {
     languageName: "Português",
     nav: [
-      { key: "overview", label: "Visao geral", href: sharedRoutes.overview },
+      { key: "overview", label: "Visão geral", href: sharedRoutes.overview },
       { key: "inspire", label: "Inspirar", href: sharedRoutes.inspire },
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Adaptar", href: sharedRoutes.adapt },
@@ -548,107 +548,107 @@ export const portalContent: Record<Language, PortalContent> = {
       name: "UpSkill USA",
       lockup: "Um portal. Quatro estruturas.",
       tagline: "Dom -> Aprender -> Adaptar -> Inovar",
-      promise: "Nao demitimos. Requalificamos.",
-      jfkLine: "Nao pergunte o que a IA pode fazer por voce. Pergunte o que voce pode fazer com a IA.",
+      promise: "Não demitimos. Requalificamos.",
+      jfkLine: "Não pergunte o que a IA pode fazer por você. Pergunte o que você pode fazer com a IA.",
       giBillLine: "O G.I. Bill para a era da IA.",
     },
     overview: {
-      eyebrow: "Portal MVP publico",
-      title: "Uma sequencia para trabalhadores, empresas e o pais.",
+      eyebrow: "Portal MVP público",
+      title: "Uma sequência para trabalhadores, empresas e o país.",
       intro:
-        "UpSkill USA transforma ansiedade com IA em uma jornada pratica: descobrir seu dom, aprender IA de graca, adaptar-se com um plano de cinco anos e implementar fluxos de baixo para cima.",
+        "UpSkill USA transforma ansiedade com IA em uma jornada prática: descobrir seu dom, aprender IA de graça, adaptar-se com um plano de cinco anos e implementar fluxos de baixo para cima.",
       arc: ["Encontre seu dom", "Aprenda IA", "Crie um plano", "Atualize o trabalho"],
-      primaryCta: "Comecar por Inspirar",
+      primaryCta: "Começar por Inspirar",
       secondaryCta: "Explorar a estrutura",
-      metricNote: "Nota de fonte: use o numero corrigido do DOCX de 22% dos empregos impactados ate 2030.",
+      metricNote: "Nota de fonte: use o número corrigido do DOCX de 22% dos empregos impactados até 2030.",
     },
     frameworks: {
       inspire: {
         key: "inspire",
         tab: "Aba 1",
         route: "/inspire",
-        title: "Inspiracao e IKIGAI",
-        question: "Qual e o seu dom?",
+        title: "Inspiração e IKIGAI",
+        question: "Qual é o seu dom?",
         audience: "Estudantes, trabalhadores e qualquer pessoa que precise de motivo para aprender.",
         summary:
-          "Um fluxo IKIGAI conecta o que voce ama, o que faz bem, o que o mundo precisa e o que pode virar trabalho remunerado.",
+          "Um fluxo IKIGAI conecta o que você ama, o que faz bem, o que o mundo precisa e o que pode virar trabalho remunerado.",
         cta: "Descobrir seu dom",
       },
       learn: {
         key: "learn",
         tab: "Aba 2",
         route: "/learn",
-        title: "Educacao para todos",
-        question: "Como voce aprende?",
-        audience: "Community colleges, professores, trabalhadores, empregadores e o publico.",
+        title: "Educação para todos",
+        question: "Como você aprende?",
+        audience: "Community colleges, professores, trabalhadores, empregadores e o público.",
         summary:
-          "Um canal formal de faculdades e um canal publico gratuito tornam o aprendizado de IA acessivel, com ferramentas e preparo por funcao.",
+          "Um canal formal de faculdades e um canal público gratuito tornam o aprendizado de IA acessível, com ferramentas e preparo por função.",
         cta: "Abrir hub de aprendizado",
       },
       adapt: {
         key: "adapt",
         tab: "Aba 3",
         route: "/adapt",
-        title: "Seminarios e eventos",
-        question: "Como voce se adapta?",
-        audience: "Empregados, empregadores, Camaras de Comercio, prefeituras e educadores.",
+        title: "Seminários e eventos",
+        question: "Como você se adapta?",
+        audience: "Empregados, empregadores, Câmaras de Comércio, prefeituras e educadores.",
         summary:
-          "Sessoes de sabado com seis horas reunem pessoas para aprender, praticar, alinhar e sair com um plano pessoal de cinco anos.",
+          "Sessões de sábado com seis horas reúnem pessoas para aprender, praticar, alinhar e sair com um plano pessoal de cinco anos.",
         cta: "Criar um plano",
       },
       implement: {
         key: "implement",
         tab: "Aba 4",
         route: "/implement",
-        title: "Implementacao",
-        question: "Como voce inova?",
+        title: "Implementação",
+        question: "Como você inova?",
         audience: "Empresas prontas para atualizar o trabalho de baixo para cima.",
         summary:
-          "Funcionarios desenham fluxos em seus proprios dominios, adicionam revisoes humanas e demonstram valor com resultados de demo.",
-        cta: "Simular implementacao",
+          "Funcionários desenham fluxos em seus próprios domínios, adicionam revisões humanas e demonstram valor com resultados de demo.",
+        cta: "Simular implementação",
       },
     },
     pages: {
       inspire: {
         hero:
-          "A porta de entrada e um espelho: antes de aprender uma ferramenta, cada pessoa nomeia o valor humano que traz.",
+          "A porta de entrada é um espelho: antes de aprender uma ferramenta, cada pessoa nomeia o valor humano que traz.",
         sections: [
           {
             title: "Autodescoberta IKIGAI",
-            body: "Quatro perguntas geram uma declaracao curta de proposito baseada em amor, habilidade, necessidade e trabalho remunerado.",
+            body: "Quatro perguntas geram uma declaração curta de propósito baseada em amor, habilidade, necessidade e trabalho remunerado.",
           },
           {
             title: "Dignidade",
-            body: "A IA amplia alcance, mas empatia, julgamento, cuidado e criatividade continuam sendo forcas humanas.",
+            body: "A IA amplia alcance, mas empatia, julgamento, cuidado e criatividade continuam sendo forças humanas.",
           },
           {
-            title: "Proximo passo",
-            body: "Quando a pessoa enxerga seu proposito, o portal a guia para Aprender.",
+            title: "Próximo passo",
+            body: "Quando a pessoa enxerga seu propósito, o portal a guia para Aprender.",
           },
         ],
         demo: {
           label: "Demo IKIGAI",
-          emptyState: "Complete as quatro perguntas para criar um rascunho de proposito.",
-          submit: "Criar proposito",
-          resultTitle: "Rascunho de proposito",
+          emptyState: "Complete as quatro perguntas para criar um rascunho de propósito.",
+          submit: "Criar propósito",
+          resultTitle: "Rascunho de propósito",
         },
       },
       learn: {
         hero:
-          "A educacao e o motor: faculdades treinam em profundidade, recursos publicos chegam amplamente e preparo por funcao acelera o aprendizado.",
+          "A educação é o motor: faculdades treinam em profundidade, recursos públicos chegam amplamente e preparo por função acelera o aprendizado.",
         sections: [
           {
             title: "Canal de community colleges",
-            body: "O AI Institute treina professores que levam educacao pratica em IA para programas e credenciais.",
-            items: ["Programa de 20 horas", "Aulas de AI Agent", "Microcredenciais portateis"],
+            body: "O AI Institute treina professores que levam educação prática em IA para programas e credenciais.",
+            items: ["Programa de 20 horas", "Aulas de AI Agent", "Microcredenciais portáteis"],
           },
           {
-            title: "Canal publico",
-            body: "Uma biblioteca gratuita no YouTube e guias de ferramentas abrem o curriculo para todos.",
+            title: "Canal público",
+            body: "Uma biblioteca gratuita no YouTube e guias de ferramentas abrem o currículo para todos.",
           },
           {
             title: "Preparo com GPTs",
-            body: "GPTs por funcao podem ser preparados antes dos seminarios para que cada pessoa comece com um copiloto do seu trabalho.",
+            body: "GPTs por função podem ser preparados antes dos seminários para que cada pessoa comece com um copiloto do seu trabalho.",
           },
         ],
         demo: {
@@ -660,15 +660,15 @@ export const portalContent: Record<Language, PortalContent> = {
       },
       adapt: {
         hero:
-          "Conhecimento vira mudanca quando empregados e empregadores sentam juntos e transformam aprendizado em um plano de cinco anos.",
+          "Conhecimento vira mudança quando empregados e empregadores sentam juntos e transformam aprendizado em um plano de cinco anos.",
         sections: [
           {
-            title: "Sessao de sabado",
-            body: "Seis horas para aprender, praticar com ferramentas reais, alinhar expectativas e planejar os proximos cinco anos.",
+            title: "Sessão de sábado",
+            body: "Seis horas para aprender, praticar com ferramentas reais, alinhar expectativas e planejar os próximos cinco anos.",
           },
           {
             title: "Onde acontece",
-            body: "Educadores treinados podem facilitar sessoes em Camaras de Comercio, prefeituras, faculdades e empresas.",
+            body: "Educadores treinados podem facilitar sessões em Câmaras de Comércio, prefeituras, faculdades e empresas.",
           },
           {
             title: "Resultado",
@@ -676,32 +676,32 @@ export const portalContent: Record<Language, PortalContent> = {
           },
         ],
         demo: {
-          label: "Demo de seminario e plano",
-          emptyState: "Adicione interesse ou dados do plano para ver uma previa local.",
-          submit: "Criar previa",
+          label: "Demo de seminário e plano",
+          emptyState: "Adicione interesse ou dados do plano para ver uma prévia local.",
+          submit: "Criar prévia",
           resultTitle: "Rascunho do plano de cinco anos",
         },
       },
       implement: {
         hero:
-          "A implementacao comeca com quem conhece o trabalho: cada funcionario desenha a melhoria em seu proprio dominio.",
+          "A implementação começa com quem conhece o trabalho: cada funcionário desenha a melhoria em seu próprio domínio.",
         sections: [
           {
             title: "Processo de baixo para cima",
-            body: "Auditar, convidar, construir e provar. O fluxo termina com revisao humana e valor visivel.",
-            items: ["Auditar oportunidade", "Convidar funcionarios", "Construir com controles humanos", "Provar horas economizadas"],
+            body: "Auditar, convidar, construir e provar. O fluxo termina com revisão humana e valor visível.",
+            items: ["Auditar oportunidade", "Convidar funcionários", "Construir com controles humanos", "Provar horas economizadas"],
           },
           {
             title: "Installer Agents",
-            body: "Installer Agents ajudam empresas a instalar IA, educar equipes e coordenar a implementacao.",
+            body: "Installer Agents ajudam empresas a instalar IA, educar equipes e coordenar a implementação.",
           },
           {
             title: "Limites de demo",
-            body: "Achados, ROI e horas economizadas sao resultados simulados neste MVP.",
+            body: "Achados, ROI e horas economizadas são resultados simulados neste MVP.",
           },
         ],
         demo: {
-          label: "Demo de implementacao simulada",
+          label: "Demo de implementação simulada",
           emptyState: "Insira uma URL ou ideia de fluxo para gerar achados apenas de demo.",
           submit: "Gerar demo",
           resultTitle: "Resumo de fluxo demo",
@@ -710,41 +710,41 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     forms: {
       ikigai: {
-        love: "O que voce ama?",
-        skill: "No que voce e bom?",
+        love: "O que você ama?",
+        skill: "No que você é bom?",
         need: "O que o mundo precisa?",
-        paid: "Pelo que podem pagar voce?",
+        paid: "Pelo que podem pagar você?",
         purposeTemplate:
-          "Posso usar IA para conectar {love} e {skill} com {need}, criando trabalho que pode crescer em direcao a {paid}.",
+          "Posso usar IA para conectar {love} e {skill} com {need}, criando trabalho que pode crescer em direção a {paid}.",
       },
       seminar: {
         name: "Nome",
-        organization: "Organizacao",
-        role: "Funcao",
+        organization: "Organização",
+        role: "Função",
         city: "Cidade",
-        confirmation: "Confirmacao demo: seu interesse fica salvo localmente apenas para esta previa.",
+        confirmation: "Confirmação demo: seu interesse fica salvo localmente apenas para esta prévia.",
       },
       fiveYearPlan: {
-        role: "Funcao atual",
+        role: "Função atual",
         automate: "O que deve ser automatizado?",
         augment: "O que deve ser aumentado?",
-        own: "O que voce vai possuir?",
-        become: "No que voce vai se tornar?",
+        own: "O que você vai possuir?",
+        become: "No que você vai se tornar?",
         summaryTemplate:
-          "Em cinco anos como {role}, vou automatizar {automate}, aumentar {augment}, possuir {own} e crescer em direcao a {become}.",
+          "Em cinco anos como {role}, vou automatizar {automate}, aumentar {augment}, possuir {own} e crescer em direção a {become}.",
       },
       audit: {
         companyUrl: "URL da empresa",
         workflowName: "Nome do fluxo",
-        humanGate: "Revisao humana",
-        mockFinding: "Achado demo: produtividade recuperavel aparece em entrada, relatorios e acompanhamento.",
+        humanGate: "Revisão humana",
+        mockFinding: "Achado demo: produtividade recuperável aparece em entrada, relatórios e acompanhamento.",
         workflowTemplate:
-          "Fluxo demo: {workflowName} passa trabalho assistido por IA por {humanGate} antes de qualquer decisao final.",
+          "Fluxo demo: {workflowName} passa trabalho assistido por IA por {humanGate} antes de qualquer decisão final.",
       },
     },
     agents: {
-      installer: "Installer Agents ajudam empresas a instalar IA e executar implementacao de baixo para cima.",
-      educator: "Educator Agents entregam o curriculo, o AI Institute e as sessoes de sabado.",
+      installer: "Installer Agents ajudam empresas a instalar IA e executar implementação de baixo para cima.",
+      educator: "Educator Agents entregam o currículo, o AI Institute e as sessões de sábado.",
     },
   },
 };
