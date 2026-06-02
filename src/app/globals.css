@@ -335,6 +335,14 @@ button {
   margin-bottom: 24px;
 }
 
+.overview-heading {
+  display: block;
+}
+
+.section-heading > div {
+  min-width: 0;
+}
+
 .section-heading h2 {
   margin: 8px 0 0;
   font-size: clamp(1.8rem, 4vw, 2.8rem);
@@ -347,6 +355,12 @@ button {
   margin: 0;
   color: var(--slate-600);
   line-height: 1.6;
+}
+
+.section-heading .overview-promise {
+  margin-top: 10px;
+  max-width: none;
+  white-space: nowrap;
 }
 
 .pill-label {
@@ -743,6 +757,10 @@ button {
 
   .section-heading p {
     margin-top: 10px;
+  }
+
+  .section-heading .overview-promise {
+    white-space: normal;
   }
 
   .footer-inner {

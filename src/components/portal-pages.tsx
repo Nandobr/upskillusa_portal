@@ -165,12 +165,12 @@ export function OverviewPage() {
 
       <section className="section">
         <div className="section-inner">
-          <div className="section-heading">
+          <div className="section-heading overview-heading">
             <div>
               <div className="pill-label">{content.overview.title}</div>
               <h2>{content.brand.tagline}</h2>
             </div>
-            <p>{content.brand.promise}</p>
+            <p className="overview-promise">{content.brand.promise}</p>
           </div>
           <FrameworkCards />
         </div>
