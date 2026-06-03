@@ -103,6 +103,18 @@ export type PortalContent = {
     installer: string;
     educator: string;
   };
+  ui: {
+    commentsLabel: string;
+    demoContentTitle: string;
+    languageLabel: string;
+    homeAriaLabel: string;
+    openMenuLabel: string;
+    closeMenuLabel: string;
+    agents: { installerTitle: string; educatorTitle: string };
+    learnDemo: {
+      tracks: Record<"worker" | "professor" | "employer", { label: string; resources: string[] }>;
+    };
+  };
 };
 
 const sharedRoutes = {
@@ -293,6 +305,34 @@ export const portalContent: Record<Language, PortalContent> = {
       installer: "Installer Agents help companies install AI and run bottom-up implementation.",
       educator: "Educator Agents deliver the curriculum, AI Institute training, and Saturday sessions.",
     },
+    ui: {
+      commentsLabel: "Comments:",
+      demoContentTitle: "Demo content",
+      languageLabel: "Language",
+      homeAriaLabel: "UpSkill USA home",
+      openMenuLabel: "Open menu",
+      closeMenuLabel: "Close menu",
+      agents: {
+        installerTitle: "Installer Agents",
+        educatorTitle: "Educator Agents",
+      },
+      learnDemo: {
+        tracks: {
+          worker: {
+            label: "Worker",
+            resources: ["AI basics", "Prompt practice", "Role-specific workflow ideas"],
+          },
+          professor: {
+            label: "Professor",
+            resources: ["AI Institute primer", "Classroom use cases", "Assessment patterns"],
+          },
+          employer: {
+            label: "Employer",
+            resources: ["Team readiness map", "Custom GPT preparation", "Seminar sponsorship"],
+          },
+        },
+      },
+    },
   },
   es: {
     languageName: "Español",
@@ -313,10 +353,10 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     overview: {
       eyebrow: "Portal para actualizar la fuerza laboral con IA",
-      title: "Un portal. Cuatro pasos.",
+      title: "Cuatro pasos para crear valor para tu empresa sin dejar atrás a los empleados.",
       intro:
         "Un portal práctico para líderes empresariales que necesitan encontrar oportunidades listas para IA, preparar equipos y lanzar flujos revisados por humanos que generen valor medible.",
-      arc: ["Encuentra tu don", "Aprende IA", "Crea un plan", "Mejora el trabajo"],
+      arc: ["Encuentra tu don", "Aprende IA gratis", "Crea un plan", "Implementa en la empresa"],
       primaryCta: "Mapear oportunidad de IA",
       secondaryCta: "Explorar los cuatro pasos",
       metricNote: "Nota de fuente: usar la cifra corregida del DOCX de 22% de empleos afectados para 2030.",
@@ -324,47 +364,47 @@ export const portalContent: Record<Language, PortalContent> = {
     frameworks: {
       inspire: {
         key: "inspire",
-        tab: "Pestaña 1",
+        tab: "PASO 1",
         route: "/inspire",
-        title: "Inspiración e IKIGAI",
+        title: "Inspiración",
         question: "¿Cuál es tu don?",
-        audience: "Estudiantes, trabajadores y personas que necesitan una razón para aprender.",
+        audience: "Estudiantes, trabajadores y cualquier persona que necesite una razón para interesarse antes de aprender.",
         summary:
-          "Un flujo IKIGAI conecta lo que amas, lo que haces bien, lo que el mundo necesita y lo que puede convertirse en trabajo pagado.",
+          "Un flujo IKIGAI conecta lo que amas, lo que haces bien, lo que el mundo necesita y lo que puede convertirse en trabajo remunerado.",
         cta: "Descubrir tu don",
       },
       learn: {
         key: "learn",
-        tab: "Pestaña 2",
+        tab: "PASO 2",
         route: "/learn",
-        title: "Educación para todos",
+        title: "Educación",
         question: "¿Cómo aprendes?",
         audience: "Community colleges, profesores, trabajadores, empleadores y público general.",
         summary:
-          "Un canal universitario formal y un canal público gratuito hacen accesible el aprendizaje de IA, con herramientas y preparación por rol.",
-        cta: "Abrir recursos",
+          "Un canal universitario formal y un canal público gratuito hacen accesible el aprendizaje de IA, con herramientas listas por rol y preparación de GPTs personalizados.",
+        cta: "Aprende IA gratis",
       },
       adapt: {
         key: "adapt",
-        tab: "Pestaña 3",
+        tab: "PASO 3",
         route: "/adapt",
-        title: "Seminarios y eventos",
+        title: "Adaptación",
         question: "¿Cómo te adaptas?",
-        audience: "Empleados, empleadores, Cámaras de Comercio, alcaldías y educadores.",
+        audience: "Empleados, empleadores, Cámaras de Comercio, alcaldías y educadores capacitados.",
         summary:
           "Sesiones sabatinas de seis horas reúnen a las personas para aprender, practicar, alinearse y salir con un plan de acción práctico.",
         cta: "Crear un plan",
       },
       implement: {
         key: "implement",
-        tab: "Pestaña 4",
+        tab: "PASO 4",
         route: "/implement",
         title: "Implementación",
         question: "¿Cómo innovas?",
         audience: "Empresas listas para mejorar el trabajo desde abajo hacia arriba.",
         summary:
-          "Los empleados diseñan flujos en sus propios dominios, agregan revisiones humanas y demuestran valor con resultados de demo.",
-        cta: "Probar implementación",
+          "Los empleados diseñan flujos de trabajo en sus propios dominios, agregan puntos de auditoría humana y demuestran valor con horas ahorradas en la demo y resúmenes de ROI.",
+        cta: "Implementar en la empresa",
       },
     },
     pages: {
@@ -379,7 +419,7 @@ export const portalContent: Record<Language, PortalContent> = {
           resultTitle: "Borrador de propósito",
           commentsLabel: "Comentarios:",
           notes: [
-            "Autodescubrimiento IKIGAI: Cuatro preguntas crean una declaración breve de propósito basada en amor, habilidad, necesidad y trabajo pagado.",
+            "Autodescubrimiento IKIGAI: Cuatro preguntas crean una declaración breve de propósito basada en amor, habilidad, necesidad del mundo y trabajo remunerado.",
             "Dignidad: La IA puede ampliar el alcance, pero empatía, juicio, cuidado y creatividad siguen siendo fortalezas humanas.",
           ],
           nextStep: "SIGUIENTE PASO: Cuando la persona ve su propósito, el portal la guía hacia Aprender.",
@@ -396,8 +436,8 @@ export const portalContent: Record<Language, PortalContent> = {
           resultTitle: "Ruta sugerida",
           commentsLabel: "Comentarios:",
           notes: [
-            "Canal de community colleges: El AI Institute entrena profesores que llevan educación práctica en IA a programas y credenciales. Incluye: programa de 20 horas, clases de AI Agent, microcredenciales portables.",
-            "Canal público: Una biblioteca gratuita en YouTube y guías de herramientas abren el currículo al público.",
+            "Canal de community colleges: El AI Institute capacita a profesores, quienes llevan educación práctica en IA a los community colleges y a rutas de credenciales. Incluye: programa de 20 horas para profesores, clases de AI Agent y microcredenciales portátiles.",
+            "Canal público: Una biblioteca gratuita de aprendizaje en YouTube y guías seleccionadas de herramientas hacen que el currículo esté disponible más allá de los estudiantes inscritos.",
           ],
           nextStep:
             "SIGUIENTE PASO: GPTs por rol pueden prepararse antes de los seminarios para que cada persona comience con un copiloto de su trabajo.",
@@ -415,10 +455,10 @@ export const portalContent: Record<Language, PortalContent> = {
           commentsLabel: "Comentarios:",
           notes: [
             "Sesión sabatina: Seis horas para aprender, practicar con herramientas reales, alinear expectativas y definir próximas acciones.",
-            "Dónde ocurre: Educadores entrenados pueden facilitar sesiones en Cámaras de Comercio, alcaldías, universidades y empresas.",
+            "Dónde ocurre: Educadores capacitados pueden facilitar sesiones en Cámaras de Comercio, alcaldías, colleges y grupos de empleadores.",
           ],
           nextStep:
-            "SIGUIENTE PASO: Cada participante define qué automatizar, qué aumentar, qué poseer y en qué convertirse.",
+            "SIGUIENTE PASO: Cada participante define qué automatizar, qué aumentar, qué asumir como propio y en qué convertirse.",
         },
       },
       implement: {
@@ -432,8 +472,8 @@ export const portalContent: Record<Language, PortalContent> = {
           resultTitle: "Resumen de flujo demo",
           commentsLabel: "Comentarios:",
           notes: [
-            "Proceso desde abajo: Auditar, invitar, construir y demostrar. El flujo termina con revisión humana y valor visible. Incluye: auditar oportunidad, invitar empleados, construir con controles humanos, demostrar horas ahorradas.",
-            "Installer Agents: Los Installer Agents ayudan a empresas a instalar IA, educar equipos y coordinar la implementación.",
+            "Proceso desde abajo: Auditar, invitar, construir y demostrar. El flujo comienza con valor recuperable y termina con una implementación revisada por humanos. Incluye: auditar la oportunidad, invitar a todos los empleados, construir con puntos de revisión humana y demostrar horas ahorradas.",
+            "Agentes de instalación: Los agentes de instalación ayudan a las empresas a instalar IA, educar equipos y coordinar la implementación.",
             "Límites de demo: Hallazgos, ROI y horas ahorradas son resultados simulados en este MVP.",
           ],
         },
@@ -444,7 +484,7 @@ export const portalContent: Record<Language, PortalContent> = {
         love: "¿Qué amas?",
         skill: "¿En qué eres bueno?",
         need: "¿Qué necesita el mundo?",
-        paid: "¿Por qué te pueden pagar?",
+        paid: "¿Por qué trabajo te pueden pagar?",
         purposeTemplate:
           "Puedo usar IA para conectar {love} y {skill} con {need}, creando trabajo que puede crecer hacia {paid}.",
       },
@@ -459,10 +499,10 @@ export const portalContent: Record<Language, PortalContent> = {
         role: "Rol actual",
         automate: "¿Qué debería automatizarse?",
         augment: "¿Qué debería aumentarse?",
-        own: "¿Qué vas a poseer?",
+        own: "¿De qué te harás responsable?",
         become: "¿En qué te convertirás?",
         summaryTemplate:
-          "Como {role}, automatizaré {automate}, aumentaré {augment}, poseeré {own} y creceré hacia {become}.",
+          "Como {role}, automatizaré {automate}, aumentaré {augment}, me haré responsable de {own} y creceré hacia {become}.",
       },
       audit: {
         companyUrl: "URL de empresa",
@@ -474,8 +514,36 @@ export const portalContent: Record<Language, PortalContent> = {
       },
     },
     agents: {
-      installer: "Installer Agents ayudan a empresas a instalar IA y ejecutar implementación desde abajo.",
-      educator: "Educator Agents entregan el currículo, el AI Institute y las sesiones sabatinas.",
+      installer: "Los agentes de instalación ayudan a las empresas a instalar IA y ejecutar una implementación desde abajo.",
+      educator: "Los agentes educadores imparten el currículo, la capacitación del AI Institute y las sesiones sabatinas.",
+    },
+    ui: {
+      commentsLabel: "Comentarios:",
+      demoContentTitle: "Contenido de demo",
+      languageLabel: "Idioma",
+      homeAriaLabel: "Inicio de UpSkill USA",
+      openMenuLabel: "Abrir menú",
+      closeMenuLabel: "Cerrar menú",
+      agents: {
+        installerTitle: "Agentes de instalación",
+        educatorTitle: "Agentes educadores",
+      },
+      learnDemo: {
+        tracks: {
+          worker: {
+            label: "Trabajador",
+            resources: ["Conceptos básicos de IA", "Práctica de prompts", "Ideas de flujos de trabajo por rol"],
+          },
+          professor: {
+            label: "Profesor",
+            resources: ["Introducción al AI Institute", "Casos de uso en el aula", "Patrones de evaluación"],
+          },
+          employer: {
+            label: "Empleador",
+            resources: ["Mapa de preparación del equipo", "Preparación de GPT personalizado", "Patrocinio de seminarios"],
+          },
+        },
+      },
     },
   },
   pt: {
@@ -497,10 +565,10 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     overview: {
       eyebrow: "Portal de atualização da força de trabalho com IA",
-      title: "Um portal. Quatro passos.",
+      title: "Quatro passos para criar valor para sua empresa sem deixar os funcionários para trás.",
       intro:
         "Um portal prático para líderes empresariais identificarem oportunidades prontas para IA, prepararem equipes e lançarem fluxos revisados por humanos que criam valor mensurável.",
-      arc: ["Encontre seu dom", "Aprenda IA", "Crie um plano", "Atualize o trabalho"],
+      arc: ["Encontre seu dom", "Aprenda IA de graça", "Crie um plano", "Implemente na empresa"],
       primaryCta: "Mapear oportunidade de IA",
       secondaryCta: "Explorar os quatro passos",
       metricNote: "Nota de fonte: use o número corrigido do DOCX de 22% dos empregos impactados até 2030.",
@@ -508,47 +576,47 @@ export const portalContent: Record<Language, PortalContent> = {
     frameworks: {
       inspire: {
         key: "inspire",
-        tab: "Aba 1",
+        tab: "PASSO 1",
         route: "/inspire",
-        title: "Inspiração e IKIGAI",
+        title: "Inspiração",
         question: "Qual é o seu dom?",
-        audience: "Estudantes, trabalhadores e qualquer pessoa que precise de motivo para aprender.",
+        audience: "Estudantes, trabalhadores e qualquer pessoa que precise de um motivo para se importar antes de aprender.",
         summary:
-          "Um fluxo IKIGAI conecta o que você ama, o que faz bem, o que o mundo precisa e o que pode virar trabalho remunerado.",
+          "Um fluxo IKIGAI conecta o que você ama, o que faz bem, o que o mundo precisa e o que pode se tornar trabalho remunerado.",
         cta: "Descobrir seu dom",
       },
       learn: {
         key: "learn",
-        tab: "Aba 2",
+        tab: "PASSO 2",
         route: "/learn",
-        title: "Educação para todos",
+        title: "Educação",
         question: "Como você aprende?",
         audience: "Community colleges, professores, trabalhadores, empregadores e o público.",
         summary:
-          "Um canal formal de faculdades e um canal público gratuito tornam o aprendizado de IA acessível, com ferramentas e preparo por função.",
-        cta: "Abrir hub de aprendizado",
+          "Um canal formal de faculdades e um canal público gratuito tornam o aprendizado de IA acessível, com ferramentas prontas por função e preparação de GPTs personalizados.",
+        cta: "Aprenda IA de graça",
       },
       adapt: {
         key: "adapt",
-        tab: "Aba 3",
+        tab: "PASSO 3",
         route: "/adapt",
-        title: "Seminários e eventos",
+        title: "Adaptação",
         question: "Como você se adapta?",
-        audience: "Empregados, empregadores, Câmaras de Comércio, prefeituras e educadores.",
+        audience: "Funcionários, empregadores, Câmaras de Comércio, prefeituras e educadores treinados.",
         summary:
           "Sessões de sábado com seis horas reúnem pessoas para aprender, praticar, alinhar e sair com um plano de ação prático.",
         cta: "Criar um plano",
       },
       implement: {
         key: "implement",
-        tab: "Aba 4",
+        tab: "PASSO 4",
         route: "/implement",
         title: "Implementação",
         question: "Como você inova?",
         audience: "Empresas prontas para atualizar o trabalho de baixo para cima.",
         summary:
-          "Funcionários desenham fluxos em seus próprios domínios, adicionam revisões humanas e demonstram valor com resultados de demo.",
-        cta: "Simular implementação",
+          "Funcionários desenham fluxos de trabalho em seus próprios domínios, adicionam pontos de auditoria humana e comprovam valor com horas economizadas na demo e resumos de ROI.",
+        cta: "Implementar na empresa",
       },
     },
     pages: {
@@ -563,7 +631,7 @@ export const portalContent: Record<Language, PortalContent> = {
           resultTitle: "Rascunho de propósito",
           commentsLabel: "Comentários:",
           notes: [
-            "Autodescoberta IKIGAI: Quatro perguntas geram uma declaração curta de propósito baseada em amor, habilidade, necessidade e trabalho remunerado.",
+            "Autodescoberta IKIGAI: Quatro perguntas geram uma declaração curta de propósito baseada em amor, habilidade, necessidade do mundo e trabalho remunerado.",
             "Dignidade: A IA amplia alcance, mas empatia, julgamento, cuidado e criatividade continuam sendo forças humanas.",
           ],
           nextStep: "PRÓXIMO PASSO: Quando a pessoa enxerga seu propósito, o portal a guia para Aprender.",
@@ -580,8 +648,8 @@ export const portalContent: Record<Language, PortalContent> = {
           resultTitle: "Trilha sugerida",
           commentsLabel: "Comentários:",
           notes: [
-            "Canal de community colleges: O AI Institute treina professores que levam educação prática em IA para programas e credenciais. Inclui: programa de 20 horas, aulas de AI Agent, microcredenciais portáteis.",
-            "Canal público: Uma biblioteca gratuita no YouTube e guias de ferramentas abrem o currículo para todos.",
+            "Canal de community colleges: O AI Institute treina professores, que levam educação prática em IA por meio de community colleges e trilhas de credenciais. Inclui: programa de 20 horas para professores, aulas de AI Agent e microcredenciais portáteis.",
+            "Canal público: Uma biblioteca gratuita de aprendizagem no YouTube e guias selecionados de ferramentas tornam o currículo disponível além dos alunos matriculados.",
           ],
           nextStep:
             "PRÓXIMO PASSO: GPTs por função podem ser preparados antes dos seminários para que cada pessoa comece com um copiloto do seu trabalho.",
@@ -599,10 +667,10 @@ export const portalContent: Record<Language, PortalContent> = {
           commentsLabel: "Comentários:",
           notes: [
             "Sessão de sábado: Seis horas para aprender, praticar com ferramentas reais, alinhar expectativas e definir próximas ações.",
-            "Onde acontece: Educadores treinados podem facilitar sessões em Câmaras de Comércio, prefeituras, faculdades e empresas.",
+            "Onde acontece: Educadores treinados podem facilitar sessões em Câmaras de Comércio, prefeituras, colleges e grupos de empregadores.",
           ],
           nextStep:
-            "PRÓXIMO PASSO: Cada participante define o que automatizar, o que aumentar, o que possuir e no que se tornar.",
+            "PRÓXIMO PASSO: Cada participante define o que automatizar, o que ampliar, o que assumir como seu e no que se tornar.",
         },
       },
       implement: {
@@ -616,8 +684,8 @@ export const portalContent: Record<Language, PortalContent> = {
           resultTitle: "Resumo de fluxo demo",
           commentsLabel: "Comentários:",
           notes: [
-            "Processo de baixo para cima: Auditar, convidar, construir e provar. O fluxo termina com revisão humana e valor visível. Inclui: auditar oportunidade, convidar funcionários, construir com controles humanos, provar horas economizadas.",
-            "Installer Agents: Installer Agents ajudam empresas a instalar IA, educar equipes e coordenar a implementação.",
+            "Processo de baixo para cima: Auditar, convidar, construir e comprovar. O fluxo começa com valor recuperável e termina com uma implantação revisada por humanos. Inclui: auditar a oportunidade, convidar todos os funcionários, construir com pontos de revisão humana e comprovar horas economizadas.",
+            "Agentes de instalação: Os agentes de instalação ajudam empresas a instalar IA, educar equipes e coordenar a implementação.",
             "Limites de demo: Achados, ROI e horas economizadas são resultados simulados neste MVP.",
           ],
         },
@@ -628,7 +696,7 @@ export const portalContent: Record<Language, PortalContent> = {
         love: "O que você ama?",
         skill: "No que você é bom?",
         need: "O que o mundo precisa?",
-        paid: "Pelo que podem pagar você?",
+        paid: "Pelo que você pode ser remunerado?",
         purposeTemplate:
           "Posso usar IA para conectar {love} e {skill} com {need}, criando trabalho que pode crescer em direção a {paid}.",
       },
@@ -642,11 +710,11 @@ export const portalContent: Record<Language, PortalContent> = {
       adaptationPlan: {
         role: "Função atual",
         automate: "O que deve ser automatizado?",
-        augment: "O que deve ser aumentado?",
-        own: "O que você vai possuir?",
+        augment: "O que deve ser ampliado?",
+        own: "Pelo que você vai se responsabilizar?",
         become: "No que você vai se tornar?",
         summaryTemplate:
-          "Como {role}, vou automatizar {automate}, aumentar {augment}, possuir {own} e crescer em direção a {become}.",
+          "Como {role}, vou automatizar {automate}, ampliar {augment}, me responsabilizar por {own} e crescer em direção a {become}.",
       },
       audit: {
         companyUrl: "URL da empresa",
@@ -658,8 +726,36 @@ export const portalContent: Record<Language, PortalContent> = {
       },
     },
     agents: {
-      installer: "Installer Agents ajudam empresas a instalar IA e executar implementação de baixo para cima.",
-      educator: "Educator Agents entregam o currículo, o AI Institute e as sessões de sábado.",
+      installer: "Os agentes de instalação ajudam empresas a instalar IA e executar uma implementação de baixo para cima.",
+      educator: "Os agentes educadores conduzem o currículo, a formação do AI Institute e as sessões de sábado.",
+    },
+    ui: {
+      commentsLabel: "Comentários:",
+      demoContentTitle: "Conteúdo de demo",
+      languageLabel: "Idioma",
+      homeAriaLabel: "Início da UpSkill USA",
+      openMenuLabel: "Abrir menu",
+      closeMenuLabel: "Fechar menu",
+      agents: {
+        installerTitle: "Agentes de instalação",
+        educatorTitle: "Agentes educadores",
+      },
+      learnDemo: {
+        tracks: {
+          worker: {
+            label: "Trabalhador",
+            resources: ["Conceitos básicos de IA", "Prática de prompts", "Ideias de fluxos de trabalho por função"],
+          },
+          professor: {
+            label: "Professor",
+            resources: ["Introdução ao AI Institute", "Casos de uso em sala de aula", "Padrões de avaliação"],
+          },
+          employer: {
+            label: "Empregador",
+            resources: ["Mapa de prontidão da equipe", "Preparação de GPT personalizado", "Patrocínio de seminários"],
+          },
+        },
+      },
     },
   },
 };

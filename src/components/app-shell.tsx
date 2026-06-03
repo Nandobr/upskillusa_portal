@@ -12,12 +12,19 @@ function ShellFrame({ children }: { children: ReactNode }) {
   const { content, language, setLanguage } = usePortalContent();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const jfkLines = content.brand.jfkLine.split(". ").map((line, index, lines) => {
+    if (index < lines.length - 1 && !line.endsWith(".")) {
+      return `${line}.`;
+    }
+
+    return line;
+  });
 
   return (
     <div className="app-shell">
       <header className="site-header">
         <div className="header-inner">
-          <Link className="brand-link" href="/" aria-label="UpSkill USA home">
+          <Link className="brand-link" href="/" aria-label={content.ui.homeAriaLabel}>
             <Image
               src="/assets/upskill-usa-logo.png"
               alt="UpSkill USA"
@@ -45,7 +52,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="header-actions">
-            <div className="language-toggle" aria-label="Language">
+            <div className="language-toggle" aria-label={content.ui.languageLabel}>
               {languages.map((option) => (
                 <button
                   key={option}
@@ -62,7 +69,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
             <button
               className="mobile-menu-button"
               type="button"
-              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-label={menuOpen ? content.ui.closeMenuLabel : content.ui.openMenuLabel}
               aria-expanded={menuOpen}
               aria-controls="mobile-nav"
               onClick={() => setMenuOpen((open) => !open)}
@@ -102,7 +109,13 @@ function ShellFrame({ children }: { children: ReactNode }) {
           </div>
           <div className="footer-lines">
             <p>{content.brand.giBillLine}</p>
-            <p>{content.brand.jfkLine}</p>
+            <p>
+              {jfkLines.map((line) => (
+                <span className="footer-line" key={line}>
+                  {line}
+                </span>
+              ))}
+            </p>
           </div>
         </div>
       </footer>

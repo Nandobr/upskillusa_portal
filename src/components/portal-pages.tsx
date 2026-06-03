@@ -222,13 +222,15 @@ function PageSections({ keyName }: { keyName: FrameworkKey }) {
 }
 
 function DemoNotes({ demo }: { demo: { commentsLabel?: string; notes?: string[]; nextStep?: string } }) {
+  const { content } = usePortalContent();
+
   if (!demo.notes) {
     return null;
   }
 
   return (
     <div className="demo-notes">
-      <strong>{demo.commentsLabel ?? "Comments:"}</strong>
+      <strong>{demo.commentsLabel ?? content.ui.commentsLabel}</strong>
       {demo.notes.map((note) => (
         <p key={note}>{note}</p>
       ))}
@@ -284,13 +286,10 @@ function IkigaiDemo() {
 function LearnDemo() {
   const { content } = usePortalContent();
   const demo = content.pages.learn.demo;
-  const [track, setTrack] = useState("worker");
-
-  const resources = {
-    worker: ["AI basics", "Prompt practice", "Role-specific workflow ideas"],
-    professor: ["AI Institute primer", "Classroom use cases", "Assessment patterns"],
-    employer: ["Team readiness map", "Custom GPT preparation", "Seminar sponsorship"],
-  };
+  const trackKeys = ["worker", "professor", "employer"] as const;
+  type TrackKey = (typeof trackKeys)[number];
+  const [track, setTrack] = useState<TrackKey>("worker");
+  const tracks = content.ui.learnDemo.tracks;
 
   return (
     <article className="demo-panel">
@@ -298,15 +297,17 @@ function LearnDemo() {
       <h2>{demo.resultTitle}</h2>
       <label className="field">
         <span>{demo.emptyState}</span>
-        <select value={track} onChange={(event) => setTrack(event.target.value)}>
-          <option value="worker">Worker</option>
-          <option value="professor">Professor</option>
-          <option value="employer">Employer</option>
+        <select value={track} onChange={(event) => setTrack(event.target.value as TrackKey)}>
+          {trackKeys.map((key) => (
+            <option key={key} value={key}>
+              {tracks[key].label}
+            </option>
+          ))}
         </select>
       </label>
       <div className="result-panel">
         <ul>
-          {resources[track as keyof typeof resources].map((item) => (
+          {tracks[track].resources.map((item) => (
             <li key={item}>{item}</li>
           ))}
         </ul>
@@ -408,7 +409,7 @@ function ImplementDemo() {
           ))}
       </div>
       <div className="result-panel">
-        <h3>Demo content</h3>
+        <h3>{content.ui.demoContentTitle}</h3>
         <p>{audit.mockFinding}</p>
         <p>{workflow}</p>
       </div>
@@ -424,12 +425,12 @@ function AgentsPanel() {
     <div className="card-grid">
       <article className="card">
         <Building2 size={22} aria-hidden />
-        <h3>Installer Agents</h3>
+        <h3>{content.ui.agents.installerTitle}</h3>
         <p>{content.agents.installer}</p>
       </article>
       <article className="card">
         <Brain size={22} aria-hidden />
-        <h3>Educator Agents</h3>
+        <h3>{content.ui.agents.educatorTitle}</h3>
         <p>{content.agents.educator}</p>
       </article>
       <article className="card">
