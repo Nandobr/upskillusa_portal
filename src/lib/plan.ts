@@ -1,4 +1,4 @@
-import type { FrameworkKey } from "@/lib/content";
+import type { FrameworkKey, Language } from "@/lib/content";
 
 export type UserTrack = "worker" | "educator" | "employer" | "partner";
 export type AiComfort = "beginner" | "some" | "advanced";
@@ -143,6 +143,597 @@ export const workCategories: Record<WorkCategoryKey, { label: string; examples: 
   },
 };
 
+export const planCopy = {
+  en: {
+    headings: {
+      opportunitySeed: "Opportunity Seed",
+      learningPath: "Learning Path",
+      opportunityDraft: "AI Opportunity Draft",
+      completePlan: "Complete AI Upgrade Plan",
+      pageEyebrow: "AI UPGRADE PLAN",
+      pageTitle: "Your plan so far",
+      pageIntro:
+        "This local MVP plan is generated from the four UpSkill USA steps you have completed: Inspire, Learn, Adapt, and Implement.",
+      nextThreeDays: "Next 3 Days",
+      nextSevenDays: "Next 7 Days",
+      afterSevenDays: "After 7 Days",
+    },
+    actions: {
+      saveAndContinue: "Save and continue",
+      viewPlanSoFar: "View plan so far",
+      saveToLearn: "Save and continue to Learn",
+      saveToAdapt: "Save and continue to Adapt",
+      saveToImplement: "Save and continue to Implement",
+      saveAndViewComplete: "Save and view complete plan",
+      continueTo: "Continue to",
+      reviewImplementation: "Review implementation",
+      copyPlan: "Copy plan",
+      downloadPlan: "Download plan",
+      clearPlan: "Clear plan",
+    },
+    fields: {
+      userType: "Who are you?",
+      role: "Current role",
+      organization: "Organization or context",
+      desiredOutcome: "Desired outcome",
+      motivation: "Why does this matter to you?",
+      humanStrengths: "Human strengths to protect",
+      track: "User track",
+      aiComfort: "AI comfort level",
+      timeAvailable: "Time available",
+      learningPreference: "Learning preference",
+      workArea: "Work area",
+      workflowPain: "Workflow that takes too long",
+      mainSteps: "Main workflow steps",
+      delay: "Where do people wait?",
+      repetitiveWork: "What is repetitive?",
+      judgmentNeeds: "What requires human judgment?",
+      own: "What will you own?",
+      become: "What will you become?",
+      pilotScope: "Pilot scope",
+    },
+    feedback: {
+      addRole: "Add your role to create the first seed of your plan.",
+      mapWorkflow: "Map a workflow pain to create your opportunity draft.",
+      copyUnavailable: "Copy is not available in this browser.",
+      copied: "Plan copied.",
+      copyFailed: "Copy failed. You can select the plan text manually.",
+      clearConfirm: "Clear your locally saved AI Upgrade Plan?",
+      notAssessed: "not assessed",
+    },
+    safetyQuestions: {
+      impactsPeople: "Could this affect jobs, pay, benefits, education, or access?",
+      usesSensitiveData: "Does this use sensitive personal or company data?",
+      harmIfWrong: "Could a wrong answer harm someone or the business?",
+      needsExplanation: "Would someone need to explain how the decision was made?",
+      hasAppealPath: "Can a person correct or appeal the result?",
+    },
+    tracks: {
+      worker: "Worker or student",
+      educator: "Educator",
+      employer: "Employer or business leader",
+      partner: "City, chamber, or community partner",
+    },
+    comfort: {
+      beginner: "Beginner",
+      some: "Some experience",
+      advanced: "Advanced",
+    },
+    time: {
+      "30-minutes": "30 minutes",
+      "2-hours": "2 hours",
+      saturday: "Saturday session",
+    },
+    preferences: {
+      watch: "Watch short lessons",
+      read: "Read guides",
+      practice: "Practice with prompts",
+      seminar: "Join a guided seminar",
+    },
+    workCategories: {
+      "customer-support": "Customer Support",
+      "sales-marketing": "Sales and Marketing",
+      "human-resources": "Human Resources",
+      "finance-admin": "Finance and Administration",
+      operations: "Operations",
+      "training-education": "Training and Education",
+      "it-data": "IT and Data",
+      "leadership-strategy": "Leadership and Strategy",
+    },
+    risk: {
+      low: "LOW",
+      medium: "MEDIUM",
+      high: "HIGH",
+    },
+    levels: {
+      0: "Start your AI Upgrade Plan",
+      1: "Level 1: Opportunity Seed",
+      2: "Level 2: Learning Path",
+      3: "Level 3: AI Opportunity Draft",
+      4: "Level 4: Complete AI Upgrade Plan",
+    },
+    plan: {
+      title: "UpSkill USA AI Upgrade Plan",
+      opportunityTitle: "Your AI Opportunity",
+      learningTitle: "Recommended Learning Path",
+      adaptationTitle: "Workflow Adaptation Plan",
+      pilotTitle: "First Workflow Pilot",
+      startTitle: "Start With Inspire",
+      opportunity: (role: string, outcome: string, strengths: string) =>
+        `As ${role}, your opportunity is to use AI to move toward ${outcome} while protecting the human strengths that matter most: ${strengths}.`,
+      context: (value: string) => `Context: ${value}`,
+      motivation: (value: string) => `Motivation: ${value}`,
+      learningBody: "Use this path to build confidence before changing real workflows.",
+      adaptation: (workflow: string, category: string) =>
+        `Focus on ${workflow} in ${category}. AI should assist the repetitive and delayed parts first, while humans keep ownership of judgment-heavy work.`,
+      currentSteps: (value: string) => `Current steps: ${value}`,
+      delay: (value: string) => `Delay or friction: ${value}`,
+      repetitive: (value: string) => `Repetitive work: ${value}`,
+      judgment: (value: string) => `Human judgment: ${value}`,
+      own: (value: string) => `Own: ${value}`,
+      become: (value: string) => `Become: ${value}`,
+      pilot: (workflow: string, scope: string) =>
+        `Pilot ${workflow} with a narrow scope: ${scope}.`,
+      humanGate: (value: string) => `Human review gate: ${value}`,
+      riskLevel: (value: string) => `Risk level: ${value}`,
+      companyUrl: (value: string) => `Company URL: ${value}`,
+      startBody:
+        "Complete the Inspire step first so the plan can connect AI adoption to a real role, motivation, and human strength.",
+    },
+    defaults: {
+      learner: "a learner",
+      clearOutcome: "a clearer work outcome",
+      strengths: "judgment, care, creativity, and domain knowledge",
+      notSpecified: "not specified",
+      notSpecifiedYet: "not specified yet",
+      painfulWorkflow: "one painful workflow",
+      selectedWorkArea: "the selected work area",
+      mapBeforePilot: "map these before the pilot",
+      humanReview: "the human review and final decision",
+      workflowDesigner: "an AI-assisted workflow designer",
+      oneWorkflow: "one workflow",
+      smallTest: "a small, reversible test",
+      approver: "assign a human approver before launch",
+      noCompanyUrl: "not required for MVP",
+    },
+    learning: {
+      incomplete: "Complete the Learn step to receive a learning path matched to your readiness.",
+      beginner: "Start with AI basics and prompt practice before changing live workflows.",
+      some: "Practice role-specific AI prompts and learn how to review AI-generated work.",
+      advanced: "Focus on workflow design, team enablement, and responsible AI review patterns.",
+      format: (time: string, preference: string) =>
+        `Use a ${time.toLowerCase()} learning block and a ${preference.toLowerCase()} format.`,
+      track: (track: string) => `Recommended track: ${track}.`,
+    },
+    nextActions: {
+      level4: [
+        "Day 1: Map the current workflow and choose one low-risk sample.",
+        "Day 2: Create one AI prompt or template for the repetitive part of the work.",
+        "Day 3: Test the prompt on sample cases and record what works.",
+        "Day 4: Add the human review gate and decide who approves output.",
+        "Day 5: Run the pilot on a small real example.",
+        "Day 6: Measure time saved, quality, and risks found.",
+        "Day 7: Decide whether to expand, revise, or stop the pilot.",
+      ],
+      level3: [
+        "Day 1: Write the workflow steps in order.",
+        "Day 2: Mark which steps are repetitive, delayed, or judgment-heavy.",
+        "Day 3: Choose one small pilot and continue to Implement.",
+      ],
+      level2: [
+        "Day 1: Complete one short learning resource.",
+        "Day 2: Practice three prompts related to your role.",
+        "Day 3: Pick one workflow pain and continue to Adapt.",
+      ],
+      level1: [
+        "Day 1: Write your role and three tasks you repeat weekly.",
+        "Day 2: Choose one task that feels low-risk to improve.",
+        "Day 3: Continue to Learn and pick your AI readiness path.",
+      ],
+    },
+    afterSevenDays: {
+      complete: [
+        "Learn More: return to Learn if confidence or skills still feel thin.",
+        "Run A Bigger Pilot: return to Adapt and map the full team workflow.",
+        "Get Help Implementing: request a seminar, educator agent, or installer agent when the workflow affects a team or has higher risk.",
+      ],
+      partial: ["Return to the portal and complete the next framework step to keep building momentum."],
+    },
+  },
+  es: {
+    headings: {
+      opportunitySeed: "Semilla de oportunidad",
+      learningPath: "Ruta de aprendizaje",
+      opportunityDraft: "Borrador de oportunidad con IA",
+      completePlan: "Plan completo de actualización con IA",
+      pageEyebrow: "PLAN DE ACTUALIZACIÓN CON IA",
+      pageTitle: "Tu plan hasta ahora",
+      pageIntro:
+        "Este plan MVP local se genera con los pasos de UpSkill USA que completaste: Inspirar, Aprender, Adaptar e Implementar.",
+      nextThreeDays: "Próximos 3 días",
+      nextSevenDays: "Próximos 7 días",
+      afterSevenDays: "Después de 7 días",
+    },
+    actions: {
+      saveAndContinue: "Guardar y continuar",
+      viewPlanSoFar: "Ver plan hasta ahora",
+      saveToLearn: "Guardar y continuar a Aprender",
+      saveToAdapt: "Guardar y continuar a Adaptar",
+      saveToImplement: "Guardar y continuar a Implementar",
+      saveAndViewComplete: "Guardar y ver plan completo",
+      continueTo: "Continuar a",
+      reviewImplementation: "Revisar implementación",
+      copyPlan: "Copiar plan",
+      downloadPlan: "Descargar plan",
+      clearPlan: "Borrar plan",
+    },
+    fields: {
+      userType: "¿Quién eres?",
+      role: "Rol actual",
+      organization: "Organización o contexto",
+      desiredOutcome: "Resultado deseado",
+      motivation: "¿Por qué importa esto?",
+      humanStrengths: "Fortalezas humanas que proteger",
+      track: "Ruta de usuario",
+      aiComfort: "Nivel de comodidad con IA",
+      timeAvailable: "Tiempo disponible",
+      learningPreference: "Preferencia de aprendizaje",
+      workArea: "Área de trabajo",
+      workflowPain: "Flujo de trabajo que toma demasiado tiempo",
+      mainSteps: "Pasos principales del flujo",
+      delay: "¿Dónde espera la gente?",
+      repetitiveWork: "¿Qué es repetitivo?",
+      judgmentNeeds: "¿Qué requiere juicio humano?",
+      own: "¿Qué vas a asumir como propio?",
+      become: "¿En qué te vas a convertir?",
+      pilotScope: "Alcance del piloto",
+    },
+    feedback: {
+      addRole: "Agrega tu rol para crear la primera semilla de tu plan.",
+      mapWorkflow: "Mapea un dolor de flujo de trabajo para crear tu borrador de oportunidad.",
+      copyUnavailable: "Copiar no está disponible en este navegador.",
+      copied: "Plan copiado.",
+      copyFailed: "No se pudo copiar. Puedes seleccionar el texto del plan manualmente.",
+      clearConfirm: "¿Borrar tu Plan de actualización con IA guardado localmente?",
+      notAssessed: "sin evaluar",
+    },
+    safetyQuestions: {
+      impactsPeople: "¿Esto podría afectar empleo, salario, beneficios, educación o acceso?",
+      usesSensitiveData: "¿Usa datos personales o empresariales sensibles?",
+      harmIfWrong: "¿Una respuesta incorrecta podría dañar a una persona o al negocio?",
+      needsExplanation: "¿Alguien tendría que explicar cómo se tomó la decisión?",
+      hasAppealPath: "¿Una persona puede corregir o apelar el resultado?",
+    },
+    tracks: {
+      worker: "Trabajador o estudiante",
+      educator: "Educador",
+      employer: "Empleador o líder empresarial",
+      partner: "Ciudad, cámara o socio comunitario",
+    },
+    comfort: {
+      beginner: "Principiante",
+      some: "Algo de experiencia",
+      advanced: "Avanzado",
+    },
+    time: {
+      "30-minutes": "30 minutos",
+      "2-hours": "2 horas",
+      saturday: "Sesión sabatina",
+    },
+    preferences: {
+      watch: "Ver lecciones cortas",
+      read: "Leer guías",
+      practice: "Practicar con prompts",
+      seminar: "Unirse a un seminario guiado",
+    },
+    workCategories: {
+      "customer-support": "Atención al cliente",
+      "sales-marketing": "Ventas y marketing",
+      "human-resources": "Recursos humanos",
+      "finance-admin": "Finanzas y administración",
+      operations: "Operaciones",
+      "training-education": "Capacitación y educación",
+      "it-data": "TI y datos",
+      "leadership-strategy": "Liderazgo y estrategia",
+    },
+    risk: {
+      low: "BAJO",
+      medium: "MEDIO",
+      high: "ALTO",
+    },
+    levels: {
+      0: "Comienza tu Plan de actualización con IA",
+      1: "Nivel 1: Semilla de oportunidad",
+      2: "Nivel 2: Ruta de aprendizaje",
+      3: "Nivel 3: Borrador de oportunidad con IA",
+      4: "Nivel 4: Plan completo de actualización con IA",
+    },
+    plan: {
+      title: "Plan de actualización con IA de UpSkill USA",
+      opportunityTitle: "Tu oportunidad con IA",
+      learningTitle: "Ruta de aprendizaje recomendada",
+      adaptationTitle: "Plan de adaptación del flujo de trabajo",
+      pilotTitle: "Primer piloto de flujo de trabajo",
+      startTitle: "Empieza con Inspirar",
+      opportunity: (role: string, outcome: string, strengths: string) =>
+        `Como ${role}, tu oportunidad es usar IA para avanzar hacia ${outcome} mientras proteges las fortalezas humanas más importantes: ${strengths}.`,
+      context: (value: string) => `Contexto: ${value}`,
+      motivation: (value: string) => `Motivación: ${value}`,
+      learningBody: "Usa esta ruta para ganar confianza antes de cambiar flujos reales.",
+      adaptation: (workflow: string, category: string) =>
+        `Enfócate en ${workflow} dentro de ${category}. La IA debe asistir primero las partes repetitivas y demoradas, mientras las personas mantienen la responsabilidad del trabajo que exige juicio.`,
+      currentSteps: (value: string) => `Pasos actuales: ${value}`,
+      delay: (value: string) => `Demora o fricción: ${value}`,
+      repetitive: (value: string) => `Trabajo repetitivo: ${value}`,
+      judgment: (value: string) => `Juicio humano: ${value}`,
+      own: (value: string) => `Asumirás: ${value}`,
+      become: (value: string) => `Te convertirás en: ${value}`,
+      pilot: (workflow: string, scope: string) =>
+        `Haz un piloto de ${workflow} con un alcance reducido: ${scope}.`,
+      humanGate: (value: string) => `Revisión humana: ${value}`,
+      riskLevel: (value: string) => `Nivel de riesgo: ${value}`,
+      companyUrl: (value: string) => `URL de empresa: ${value}`,
+      startBody:
+        "Completa primero Inspirar para que el plan conecte la adopción de IA con un rol, una motivación y una fortaleza humana reales.",
+    },
+    defaults: {
+      learner: "una persona que aprende",
+      clearOutcome: "un resultado laboral más claro",
+      strengths: "juicio, cuidado, creatividad y conocimiento del dominio",
+      notSpecified: "sin especificar",
+      notSpecifiedYet: "aún sin especificar",
+      painfulWorkflow: "un flujo de trabajo doloroso",
+      selectedWorkArea: "el área de trabajo seleccionada",
+      mapBeforePilot: "mapea esto antes del piloto",
+      humanReview: "la revisión humana y la decisión final",
+      workflowDesigner: "diseñador de flujos de trabajo asistidos por IA",
+      oneWorkflow: "un flujo de trabajo",
+      smallTest: "una prueba pequeña y reversible",
+      approver: "asigna una persona aprobadora antes del lanzamiento",
+      noCompanyUrl: "no requerida para el MVP",
+    },
+    learning: {
+      incomplete: "Completa Aprender para recibir una ruta ajustada a tu preparación.",
+      beginner: "Comienza con conceptos básicos de IA y práctica de prompts antes de cambiar flujos reales.",
+      some: "Practica prompts específicos para tu rol y aprende a revisar trabajo generado por IA.",
+      advanced: "Enfócate en diseño de flujos, preparación del equipo y patrones de revisión responsable de IA.",
+      format: (time: string, preference: string) =>
+        `Usa un bloque de aprendizaje de ${time.toLowerCase()} y un formato de ${preference.toLowerCase()}.`,
+      track: (track: string) => `Ruta recomendada: ${track}.`,
+    },
+    nextActions: {
+      level4: [
+        "Día 1: Mapea el flujo actual y elige una muestra de bajo riesgo.",
+        "Día 2: Crea un prompt o plantilla de IA para la parte repetitiva del trabajo.",
+        "Día 3: Prueba el prompt con casos de ejemplo y registra qué funciona.",
+        "Día 4: Agrega la revisión humana y decide quién aprueba el resultado.",
+        "Día 5: Ejecuta el piloto con un ejemplo real pequeño.",
+        "Día 6: Mide tiempo ahorrado, calidad y riesgos encontrados.",
+        "Día 7: Decide si expandir, ajustar o detener el piloto.",
+      ],
+      level3: [
+        "Día 1: Escribe los pasos del flujo en orden.",
+        "Día 2: Marca qué pasos son repetitivos, demorados o requieren juicio.",
+        "Día 3: Elige un piloto pequeño y continúa a Implementar.",
+      ],
+      level2: [
+        "Día 1: Completa un recurso corto de aprendizaje.",
+        "Día 2: Practica tres prompts relacionados con tu rol.",
+        "Día 3: Elige un dolor de flujo de trabajo y continúa a Adaptar.",
+      ],
+      level1: [
+        "Día 1: Escribe tu rol y tres tareas que repites cada semana.",
+        "Día 2: Elige una tarea de bajo riesgo para mejorar.",
+        "Día 3: Continúa a Aprender y elige tu ruta de preparación en IA.",
+      ],
+    },
+    afterSevenDays: {
+      complete: [
+        "Aprender más: vuelve a Aprender si la confianza o las habilidades aún se sienten débiles.",
+        "Ejecutar un piloto más grande: vuelve a Adaptar y mapea el flujo completo del equipo.",
+        "Pedir ayuda para implementar: solicita un seminario, agente educador o agente instalador cuando el flujo afecte a un equipo o tenga mayor riesgo.",
+      ],
+      partial: ["Vuelve al portal y completa el siguiente paso del marco para mantener el impulso."],
+    },
+  },
+  pt: {
+    headings: {
+      opportunitySeed: "Semente de oportunidade",
+      learningPath: "Trilha de aprendizagem",
+      opportunityDraft: "Rascunho de oportunidade com IA",
+      completePlan: "Plano completo de atualização com IA",
+      pageEyebrow: "PLANO DE ATUALIZAÇÃO COM IA",
+      pageTitle: "Seu plano até agora",
+      pageIntro:
+        "Este plano MVP local é gerado a partir dos passos da UpSkill USA que você completou: Inspirar, Aprender, Adaptar e Implementar.",
+      nextThreeDays: "Próximos 3 dias",
+      nextSevenDays: "Próximos 7 dias",
+      afterSevenDays: "Depois de 7 dias",
+    },
+    actions: {
+      saveAndContinue: "Salvar e continuar",
+      viewPlanSoFar: "Ver plano até agora",
+      saveToLearn: "Salvar e continuar para Aprender",
+      saveToAdapt: "Salvar e continuar para Adaptar",
+      saveToImplement: "Salvar e continuar para Implementar",
+      saveAndViewComplete: "Salvar e ver plano completo",
+      continueTo: "Continuar para",
+      reviewImplementation: "Revisar implementação",
+      copyPlan: "Copiar plano",
+      downloadPlan: "Baixar plano",
+      clearPlan: "Limpar plano",
+    },
+    fields: {
+      userType: "Quem é você?",
+      role: "Função atual",
+      organization: "Organização ou contexto",
+      desiredOutcome: "Resultado desejado",
+      motivation: "Por que isso importa?",
+      humanStrengths: "Forças humanas a proteger",
+      track: "Trilha do usuário",
+      aiComfort: "Nível de conforto com IA",
+      timeAvailable: "Tempo disponível",
+      learningPreference: "Preferência de aprendizagem",
+      workArea: "Área de trabalho",
+      workflowPain: "Fluxo de trabalho que demora demais",
+      mainSteps: "Principais passos do fluxo",
+      delay: "Onde as pessoas esperam?",
+      repetitiveWork: "O que é repetitivo?",
+      judgmentNeeds: "O que exige julgamento humano?",
+      own: "O que você vai assumir?",
+      become: "No que você vai se tornar?",
+      pilotScope: "Escopo do piloto",
+    },
+    feedback: {
+      addRole: "Adicione sua função para criar a primeira semente do seu plano.",
+      mapWorkflow: "Mapeie uma dor de fluxo de trabalho para criar seu rascunho de oportunidade.",
+      copyUnavailable: "Copiar não está disponível neste navegador.",
+      copied: "Plano copiado.",
+      copyFailed: "Não foi possível copiar. Você pode selecionar o texto do plano manualmente.",
+      clearConfirm: "Limpar seu Plano de atualização com IA salvo localmente?",
+      notAssessed: "não avaliado",
+    },
+    safetyQuestions: {
+      impactsPeople: "Isso pode afetar emprego, salário, benefícios, educação ou acesso?",
+      usesSensitiveData: "Isso usa dados pessoais ou empresariais sensíveis?",
+      harmIfWrong: "Uma resposta errada pode prejudicar alguém ou o negócio?",
+      needsExplanation: "Alguém precisaria explicar como a decisão foi tomada?",
+      hasAppealPath: "Uma pessoa pode corrigir ou contestar o resultado?",
+    },
+    tracks: {
+      worker: "Trabalhador ou estudante",
+      educator: "Educador",
+      employer: "Empregador ou líder empresarial",
+      partner: "Cidade, câmara ou parceiro comunitário",
+    },
+    comfort: {
+      beginner: "Iniciante",
+      some: "Alguma experiência",
+      advanced: "Avançado",
+    },
+    time: {
+      "30-minutes": "30 minutos",
+      "2-hours": "2 horas",
+      saturday: "Sessão de sábado",
+    },
+    preferences: {
+      watch: "Assistir aulas curtas",
+      read: "Ler guias",
+      practice: "Praticar com prompts",
+      seminar: "Participar de um seminário guiado",
+    },
+    workCategories: {
+      "customer-support": "Atendimento ao cliente",
+      "sales-marketing": "Vendas e marketing",
+      "human-resources": "Recursos humanos",
+      "finance-admin": "Finanças e administração",
+      operations: "Operações",
+      "training-education": "Treinamento e educação",
+      "it-data": "TI e dados",
+      "leadership-strategy": "Liderança e estratégia",
+    },
+    risk: {
+      low: "BAIXO",
+      medium: "MÉDIO",
+      high: "ALTO",
+    },
+    levels: {
+      0: "Comece seu Plano de atualização com IA",
+      1: "Nível 1: Semente de oportunidade",
+      2: "Nível 2: Trilha de aprendizagem",
+      3: "Nível 3: Rascunho de oportunidade com IA",
+      4: "Nível 4: Plano completo de atualização com IA",
+    },
+    plan: {
+      title: "Plano de atualização com IA da UpSkill USA",
+      opportunityTitle: "Sua oportunidade com IA",
+      learningTitle: "Trilha de aprendizagem recomendada",
+      adaptationTitle: "Plano de adaptação do fluxo de trabalho",
+      pilotTitle: "Primeiro piloto de fluxo de trabalho",
+      startTitle: "Comece por Inspirar",
+      opportunity: (role: string, outcome: string, strengths: string) =>
+        `Como ${role}, sua oportunidade é usar IA para avançar em direção a ${outcome}, protegendo as forças humanas mais importantes: ${strengths}.`,
+      context: (value: string) => `Contexto: ${value}`,
+      motivation: (value: string) => `Motivação: ${value}`,
+      learningBody: "Use esta trilha para ganhar confiança antes de mudar fluxos reais.",
+      adaptation: (workflow: string, category: string) =>
+        `Concentre-se em ${workflow} em ${category}. A IA deve ajudar primeiro nas partes repetitivas e demoradas, enquanto humanos mantêm a responsabilidade pelo trabalho que exige julgamento.`,
+      currentSteps: (value: string) => `Passos atuais: ${value}`,
+      delay: (value: string) => `Demora ou fricção: ${value}`,
+      repetitive: (value: string) => `Trabalho repetitivo: ${value}`,
+      judgment: (value: string) => `Julgamento humano: ${value}`,
+      own: (value: string) => `Você vai assumir: ${value}`,
+      become: (value: string) => `Você vai se tornar: ${value}`,
+      pilot: (workflow: string, scope: string) =>
+        `Faça um piloto de ${workflow} com um escopo reduzido: ${scope}.`,
+      humanGate: (value: string) => `Revisão humana: ${value}`,
+      riskLevel: (value: string) => `Nível de risco: ${value}`,
+      companyUrl: (value: string) => `URL da empresa: ${value}`,
+      startBody:
+        "Complete Inspirar primeiro para que o plano conecte a adoção de IA a uma função, motivação e força humana reais.",
+    },
+    defaults: {
+      learner: "uma pessoa em aprendizagem",
+      clearOutcome: "um resultado de trabalho mais claro",
+      strengths: "julgamento, cuidado, criatividade e conhecimento do domínio",
+      notSpecified: "não especificado",
+      notSpecifiedYet: "ainda não especificado",
+      painfulWorkflow: "um fluxo de trabalho doloroso",
+      selectedWorkArea: "a área de trabalho selecionada",
+      mapBeforePilot: "mapeie isso antes do piloto",
+      humanReview: "a revisão humana e a decisão final",
+      workflowDesigner: "designer de fluxos de trabalho assistidos por IA",
+      oneWorkflow: "um fluxo de trabalho",
+      smallTest: "um teste pequeno e reversível",
+      approver: "atribua uma pessoa aprovadora antes do lançamento",
+      noCompanyUrl: "não obrigatória para o MVP",
+    },
+    learning: {
+      incomplete: "Complete Aprender para receber uma trilha ajustada à sua prontidão.",
+      beginner: "Comece com conceitos básicos de IA e prática de prompts antes de mudar fluxos reais.",
+      some: "Pratique prompts específicos para sua função e aprenda a revisar trabalho gerado por IA.",
+      advanced: "Concentre-se em desenho de fluxos, preparação de equipe e padrões de revisão responsável de IA.",
+      format: (time: string, preference: string) =>
+        `Use um bloco de aprendizagem de ${time.toLowerCase()} e um formato de ${preference.toLowerCase()}.`,
+      track: (track: string) => `Trilha recomendada: ${track}.`,
+    },
+    nextActions: {
+      level4: [
+        "Dia 1: Mapeie o fluxo atual e escolha uma amostra de baixo risco.",
+        "Dia 2: Crie um prompt ou modelo de IA para a parte repetitiva do trabalho.",
+        "Dia 3: Teste o prompt em casos de exemplo e registre o que funciona.",
+        "Dia 4: Adicione a revisão humana e decida quem aprova a saída.",
+        "Dia 5: Rode o piloto em um exemplo real pequeno.",
+        "Dia 6: Meça tempo economizado, qualidade e riscos encontrados.",
+        "Dia 7: Decida se vai expandir, ajustar ou parar o piloto.",
+      ],
+      level3: [
+        "Dia 1: Escreva os passos do fluxo em ordem.",
+        "Dia 2: Marque quais passos são repetitivos, demorados ou exigem julgamento.",
+        "Dia 3: Escolha um piloto pequeno e continue para Implementar.",
+      ],
+      level2: [
+        "Dia 1: Complete um recurso curto de aprendizagem.",
+        "Dia 2: Pratique três prompts relacionados à sua função.",
+        "Dia 3: Escolha uma dor de fluxo de trabalho e continue para Adaptar.",
+      ],
+      level1: [
+        "Dia 1: Escreva sua função e três tarefas que você repete semanalmente.",
+        "Dia 2: Escolha uma tarefa de baixo risco para melhorar.",
+        "Dia 3: Continue para Aprender e escolha sua trilha de prontidão em IA.",
+      ],
+    },
+    afterSevenDays: {
+      complete: [
+        "Aprender mais: volte para Aprender se a confiança ou as habilidades ainda parecerem frágeis.",
+        "Rodar um piloto maior: volte para Adaptar e mapeie o fluxo completo da equipe.",
+        "Obter ajuda para implementar: solicite um seminário, agente educador ou agente instalador quando o fluxo afetar uma equipe ou tiver maior risco.",
+      ],
+      partial: ["Volte ao portal e complete o próximo passo do framework para manter o impulso."],
+    },
+  },
+} as const;
+
 export const defaultDraft: Required<PlanDraft> = {
   inspire: {
     userType: "worker",
@@ -217,163 +808,145 @@ function getRiskLevel(input?: ImplementPlanInput): RiskLevel | undefined {
   return "low";
 }
 
-function getLevelLabel(level: PlanLevel) {
-  if (level === 4) return "Level 4: Complete AI Upgrade Plan";
-  if (level === 3) return "Level 3: AI Opportunity Draft";
-  if (level === 2) return "Level 2: Learning Path";
-  if (level === 1) return "Level 1: Opportunity Seed";
-  return "Start your AI Upgrade Plan";
+export function getPlanCopy(language: Language) {
+  return planCopy[language] ?? planCopy.en;
+}
+
+function getLevelLabel(level: PlanLevel, language: Language) {
+  return getPlanCopy(language).levels[level];
 }
 
 function getCompletedSteps(level: PlanLevel): FrameworkKey[] {
   return ["inspire", "learn", "adapt", "implement"].slice(0, level) as FrameworkKey[];
 }
 
-function getLearningPath(input?: LearnPlanInput) {
+function getLearningPath(input: LearnPlanInput | undefined, language: Language) {
+  const copy = getPlanCopy(language);
+
   if (!input) {
-    return ["Complete the Learn step to receive a learning path matched to your readiness."];
+    return [copy.learning.incomplete];
   }
 
   const base =
     input.aiComfort === "beginner"
-      ? "Start with AI basics and prompt practice before changing live workflows."
+      ? copy.learning.beginner
       : input.aiComfort === "some"
-        ? "Practice role-specific AI prompts and learn how to review AI-generated work."
-        : "Focus on workflow design, team enablement, and responsible AI review patterns.";
+        ? copy.learning.some
+        : copy.learning.advanced;
 
   return [
     base,
-    `Use a ${timeOptions[input.timeCommitment].toLowerCase()} learning block and a ${learningPreferenceOptions[
-      input.learningPreference
-    ].toLowerCase()} format.`,
-    `Recommended track: ${trackOptions[input.track]}.`,
+    copy.learning.format(copy.time[input.timeCommitment], copy.preferences[input.learningPreference]),
+    copy.learning.track(copy.tracks[input.track]),
   ];
 }
 
-function getNextActions(level: PlanLevel): string[] {
+function getNextActions(level: PlanLevel, language: Language): string[] {
+  const copy = getPlanCopy(language);
+
   if (level === 4) {
-    return [
-      "Day 1: Map the current workflow and choose one low-risk sample.",
-      "Day 2: Create one AI prompt or template for the repetitive part of the work.",
-      "Day 3: Test the prompt on sample cases and record what works.",
-      "Day 4: Add the human review gate and decide who approves output.",
-      "Day 5: Run the pilot on a small real example.",
-      "Day 6: Measure time saved, quality, and risks found.",
-      "Day 7: Decide whether to expand, revise, or stop the pilot.",
-    ];
+    return [...copy.nextActions.level4];
   }
 
   if (level === 3) {
-    return [
-      "Day 1: Write the workflow steps in order.",
-      "Day 2: Mark which steps are repetitive, delayed, or judgment-heavy.",
-      "Day 3: Choose one small pilot and continue to Implement.",
-    ];
+    return [...copy.nextActions.level3];
   }
 
   if (level === 2) {
-    return [
-      "Day 1: Complete one short learning resource.",
-      "Day 2: Practice three prompts related to your role.",
-      "Day 3: Pick one workflow pain and continue to Adapt.",
-    ];
+    return [...copy.nextActions.level2];
   }
 
-  return [
-    "Day 1: Write your role and three tasks you repeat weekly.",
-    "Day 2: Choose one task that feels low-risk to improve.",
-    "Day 3: Continue to Learn and pick your AI readiness path.",
-  ];
+  return [...copy.nextActions.level1];
 }
 
-export function generateUpgradePlan(draft: PlanDraft): GeneratedPlan {
+export function generateUpgradePlan(draft: PlanDraft, language: Language = "en"): GeneratedPlan {
   const level = getPlanLevel(draft);
   const riskLevel = getRiskLevel(draft.implement);
-  const category = draft.adapt ? workCategories[draft.adapt.workCategory] : undefined;
+  const copy = getPlanCopy(language);
+  const category = draft.adapt ? copy.workCategories[draft.adapt.workCategory] : undefined;
   const nextStep = getNextPlanStep(level);
   const sections: GeneratedPlanSection[] = [];
 
   if (draft.inspire) {
     sections.push({
-      title: "Your AI Opportunity",
-      body: `As ${draft.inspire.role || "a learner"}, your opportunity is to use AI to move toward ${
-        draft.inspire.desiredOutcome || "a clearer work outcome"
-      } while protecting the human strengths that matter most: ${
-        draft.inspire.humanStrengths || "judgment, care, creativity, and domain knowledge"
-      }.`,
+      title: copy.plan.opportunityTitle,
+      body: copy.plan.opportunity(
+        draft.inspire.role || copy.defaults.learner,
+        draft.inspire.desiredOutcome || copy.defaults.clearOutcome,
+        draft.inspire.humanStrengths || copy.defaults.strengths,
+      ),
       items: [
-        `Context: ${draft.inspire.organization || "not specified"}`,
-        `Motivation: ${draft.inspire.motivation || "not specified yet"}`,
+        copy.plan.context(draft.inspire.organization || copy.defaults.notSpecified),
+        copy.plan.motivation(draft.inspire.motivation || copy.defaults.notSpecifiedYet),
       ],
     });
   }
 
   if (level >= 2) {
     sections.push({
-      title: "Recommended Learning Path",
-      body: "Use this path to build confidence before changing real workflows.",
-      items: getLearningPath(draft.learn),
+      title: copy.plan.learningTitle,
+      body: copy.plan.learningBody,
+      items: getLearningPath(draft.learn, language),
     });
   }
 
   if (draft.adapt) {
     sections.push({
-      title: "Workflow Adaptation Plan",
-      body: `Focus on ${draft.adapt.workflowPain || "one painful workflow"} in ${
-        category?.label || "the selected work area"
-      }. AI should assist the repetitive and delayed parts first, while humans keep ownership of judgment-heavy work.`,
+      title: copy.plan.adaptationTitle,
+      body: copy.plan.adaptation(
+        draft.adapt.workflowPain || copy.defaults.painfulWorkflow,
+        category || copy.defaults.selectedWorkArea,
+      ),
       items: [
-        `Current steps: ${draft.adapt.mainSteps || "map these before the pilot"}`,
-        `Delay or friction: ${draft.adapt.delay || "not specified"}`,
-        `Repetitive work: ${draft.adapt.repetitiveWork || "not specified"}`,
-        `Human judgment: ${draft.adapt.judgmentNeeds || "not specified"}`,
-        `Own: ${draft.adapt.own || "the human review and final decision"}`,
-        `Become: ${draft.adapt.become || "an AI-assisted workflow designer"}`,
+        copy.plan.currentSteps(draft.adapt.mainSteps || copy.defaults.mapBeforePilot),
+        copy.plan.delay(draft.adapt.delay || copy.defaults.notSpecified),
+        copy.plan.repetitive(draft.adapt.repetitiveWork || copy.defaults.notSpecified),
+        copy.plan.judgment(draft.adapt.judgmentNeeds || copy.defaults.notSpecified),
+        copy.plan.own(draft.adapt.own || copy.defaults.humanReview),
+        copy.plan.become(draft.adapt.become || copy.defaults.workflowDesigner),
       ],
     });
   }
 
   if (draft.implement) {
     sections.push({
-      title: "First Workflow Pilot",
-      body: `Pilot ${draft.implement.workflowName || "one workflow"} with a narrow scope: ${
-        draft.implement.pilotScope || "a small, reversible test"
-      }.`,
+      title: copy.plan.pilotTitle,
+      body: copy.plan.pilot(
+        draft.implement.workflowName || copy.defaults.oneWorkflow,
+        draft.implement.pilotScope || copy.defaults.smallTest,
+      ),
       items: [
-        `Human review gate: ${draft.implement.humanGate || "assign a human approver before launch"}`,
-        `Risk level: ${riskLevel ? riskLevel.toUpperCase() : "not assessed"}`,
-        `Company URL: ${draft.implement.companyUrl || "not required for MVP"}`,
+        copy.plan.humanGate(draft.implement.humanGate || copy.defaults.approver),
+        copy.plan.riskLevel(riskLevel ? copy.risk[riskLevel] : copy.feedback.notAssessed),
+        copy.plan.companyUrl(draft.implement.companyUrl || copy.defaults.noCompanyUrl),
       ],
     });
   }
 
   if (level === 0) {
     sections.push({
-      title: "Start With Inspire",
-      body: "Complete the Inspire step first so the plan can connect AI adoption to a real role, motivation, and human strength.",
+      title: copy.plan.startTitle,
+      body: copy.plan.startBody,
     });
   }
 
   return {
     level,
-    levelLabel: getLevelLabel(level),
+    levelLabel: getLevelLabel(level, language),
     completedSteps: getCompletedSteps(level),
     nextStep,
     riskLevel,
     sections,
-    nextActions: getNextActions(level),
+    nextActions: getNextActions(level, language),
     afterSevenDays:
       level === 4
-        ? [
-            "Learn More: return to Learn if confidence or skills still feel thin.",
-            "Run A Bigger Pilot: return to Adapt and map the full team workflow.",
-            "Get Help Implementing: request a seminar, educator agent, or installer agent when the workflow affects a team or has higher risk.",
-          ]
-        : ["Return to the portal and complete the next framework step to keep building momentum."],
+        ? [...copy.afterSevenDays.complete]
+        : [...copy.afterSevenDays.partial],
   };
 }
 
-export function planToText(plan: GeneratedPlan) {
+export function planToText(plan: GeneratedPlan, language: Language = "en") {
+  const copy = getPlanCopy(language);
   const sections = plan.sections
     .map((section) => {
       const items = section.items?.map((item) => `- ${item}`).join("\n");
@@ -382,15 +955,15 @@ export function planToText(plan: GeneratedPlan) {
     .join("\n\n");
 
   return [
-    "UpSkill USA AI Upgrade Plan",
+    copy.plan.title,
     plan.levelLabel,
     "",
     sections,
     "",
-    plan.level === 4 ? "Next 7 Days" : "Next 3 Days",
+    plan.level === 4 ? copy.headings.nextSevenDays : copy.headings.nextThreeDays,
     plan.nextActions.map((item) => `- ${item}`).join("\n"),
     "",
-    "After 7 Days",
+    copy.headings.afterSevenDays,
     plan.afterSevenDays.map((item) => `- ${item}`).join("\n"),
   ].join("\n");
 }

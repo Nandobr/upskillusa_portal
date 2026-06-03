@@ -25,6 +25,7 @@ import { mergeWithDefaults, usePlanDraft } from "@/components/plan-provider";
 import {
   comfortOptions,
   generateUpgradePlan,
+  getPlanCopy,
   learningPreferenceOptions,
   planToText,
   timeOptions,
@@ -272,6 +273,8 @@ function SavePlanActions({
   nextLabel?: string;
 }) {
   const router = useRouter();
+  const { language } = usePortalContent();
+  const copy = getPlanCopy(language);
 
   return (
     <div className="plan-actions">
@@ -284,7 +287,7 @@ function SavePlanActions({
             router.push(nextHref);
           }}
         >
-          {nextLabel ?? "Save and continue"}
+          {nextLabel ?? copy.actions.saveAndContinue}
           <ArrowRight size={16} aria-hidden />
         </button>
       ) : null}
@@ -296,7 +299,7 @@ function SavePlanActions({
           router.push("/plan");
         }}
       >
-        View plan so far
+        {copy.actions.viewPlanSoFar}
         <ClipboardListIcon />
       </button>
     </div>
@@ -308,7 +311,8 @@ function ClipboardListIcon() {
 }
 
 function IkigaiDemo() {
-  const { content } = usePortalContent();
+  const { content, language } = usePortalContent();
+  const copy = getPlanCopy(language);
   const demo = content.pages.inspire.demo;
   const { draft, updateInspire } = usePlanDraft();
   const values = mergeWithDefaults(draft).inspire;
@@ -317,17 +321,17 @@ function IkigaiDemo() {
   };
 
   const plan = useMemo(
-    () => generateUpgradePlan({ ...draft, inspire: values }),
-    [draft, values],
+    () => generateUpgradePlan({ ...draft, inspire: values }, language),
+    [draft, language, values],
   );
 
   return (
     <article className="demo-panel">
       <span className="demo-label">{demo.label}</span>
-      <h2>Opportunity Seed</h2>
+      <h2>{copy.headings.opportunitySeed}</h2>
       <div className="form-grid two">
         <label className="field">
-          <span>Who are you?</span>
+          <span>{copy.fields.userType}</span>
           <select
             value={values.userType}
             onChange={(event) =>
@@ -336,20 +340,20 @@ function IkigaiDemo() {
           >
             {userTrackKeys.map((key) => (
               <option key={key} value={key}>
-                {trackOptions[key]}
+                {copy.tracks[key]}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>Current role</span>
+          <span>{copy.fields.role}</span>
           <input
             value={values.role}
             onChange={(event) => setValues((current) => ({ ...current, role: event.target.value }))}
           />
         </label>
         <label className="field">
-          <span>Organization or context</span>
+          <span>{copy.fields.organization}</span>
           <input
             value={values.organization}
             onChange={(event) =>
@@ -358,7 +362,7 @@ function IkigaiDemo() {
           />
         </label>
         <label className="field">
-          <span>Desired outcome</span>
+          <span>{copy.fields.desiredOutcome}</span>
           <input
             value={values.desiredOutcome}
             onChange={(event) =>
@@ -367,7 +371,7 @@ function IkigaiDemo() {
           />
         </label>
         <label className="field">
-          <span>Why does this matter to you?</span>
+          <span>{copy.fields.motivation}</span>
           <textarea
             value={values.motivation}
             onChange={(event) =>
@@ -376,7 +380,7 @@ function IkigaiDemo() {
           />
         </label>
         <label className="field">
-          <span>Human strengths to protect</span>
+          <span>{copy.fields.humanStrengths}</span>
           <textarea
             value={values.humanStrengths}
             onChange={(event) =>
@@ -392,12 +396,12 @@ function IkigaiDemo() {
             <p>{plan.sections[0]?.body}</p>
           </>
         ) : (
-          <p className="empty-state">Add your role to create the first seed of your plan.</p>
+          <p className="empty-state">{copy.feedback.addRole}</p>
         )}
       </div>
       <SavePlanActions
         nextHref="/learn"
-        nextLabel="Save and continue to Learn"
+        nextLabel={copy.actions.saveToLearn}
         onSave={() => updateInspire(values)}
       />
       <DemoNotes demo={demo} />
@@ -406,7 +410,8 @@ function IkigaiDemo() {
 }
 
 function LearnDemo() {
-  const { content } = usePortalContent();
+  const { content, language } = usePortalContent();
+  const copy = getPlanCopy(language);
   const demo = content.pages.learn.demo;
   const { draft, updateLearn } = usePlanDraft();
   const values = mergeWithDefaults(draft).learn;
@@ -414,15 +419,18 @@ function LearnDemo() {
     updateLearn(updater(values));
   };
 
-  const plan = useMemo(() => generateUpgradePlan({ ...draft, learn: values }), [draft, values]);
+  const plan = useMemo(
+    () => generateUpgradePlan({ ...draft, learn: values }, language),
+    [draft, language, values],
+  );
 
   return (
     <article className="demo-panel">
       <span className="demo-label">{demo.label}</span>
-      <h2>Learning Path</h2>
+      <h2>{copy.headings.learningPath}</h2>
       <div className="form-grid two">
         <label className="field">
-          <span>User track</span>
+          <span>{copy.fields.track}</span>
           <select
             value={values.track}
             onChange={(event) =>
@@ -431,13 +439,13 @@ function LearnDemo() {
           >
             {userTrackKeys.map((key) => (
               <option key={key} value={key}>
-                {trackOptions[key]}
+                {copy.tracks[key]}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>AI comfort level</span>
+          <span>{copy.fields.aiComfort}</span>
           <select
             value={values.aiComfort}
             onChange={(event) =>
@@ -446,13 +454,13 @@ function LearnDemo() {
           >
             {comfortKeys.map((key) => (
               <option key={key} value={key}>
-                {comfortOptions[key]}
+                {copy.comfort[key]}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>Time available</span>
+          <span>{copy.fields.timeAvailable}</span>
           <select
             value={values.timeCommitment}
             onChange={(event) =>
@@ -464,13 +472,13 @@ function LearnDemo() {
           >
             {timeKeys.map((key) => (
               <option key={key} value={key}>
-                {timeOptions[key]}
+                {copy.time[key]}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>Learning preference</span>
+          <span>{copy.fields.learningPreference}</span>
           <select
             value={values.learningPreference}
             onChange={(event) =>
@@ -482,7 +490,7 @@ function LearnDemo() {
           >
             {learningPreferenceKeys.map((key) => (
               <option key={key} value={key}>
-                {learningPreferenceOptions[key]}
+                {copy.preferences[key]}
               </option>
             ))}
           </select>
@@ -491,7 +499,7 @@ function LearnDemo() {
       <div className="result-panel">
         <ul>
           {plan.sections
-            .find((section) => section.title === "Recommended Learning Path")
+            .find((section) => section.title === copy.plan.learningTitle)
             ?.items?.map((item) => (
             <li key={item}>{item}</li>
           ))}
@@ -499,7 +507,7 @@ function LearnDemo() {
       </div>
       <SavePlanActions
         nextHref="/adapt"
-        nextLabel="Save and continue to Adapt"
+        nextLabel={copy.actions.saveToAdapt}
         onSave={() => updateLearn(values)}
       />
       <DemoNotes demo={demo} />
@@ -508,7 +516,8 @@ function LearnDemo() {
 }
 
 function AdaptDemo() {
-  const { content } = usePortalContent();
+  const { content, language } = usePortalContent();
+  const copy = getPlanCopy(language);
   const seminar = content.forms.seminar;
   const demo = content.pages.adapt.demo;
   const { draft, updateAdapt } = usePlanDraft();
@@ -518,13 +527,16 @@ function AdaptDemo() {
     updateAdapt(updater(values));
   };
 
-  const plan = useMemo(() => generateUpgradePlan({ ...draft, adapt: values }), [draft, values]);
+  const plan = useMemo(
+    () => generateUpgradePlan({ ...draft, adapt: values }, language),
+    [draft, language, values],
+  );
   const hasInterest = Object.values(interest).some((value) => value.trim().length > 0);
 
   return (
     <article className="demo-panel">
       <span className="demo-label">{demo.label}</span>
-      <h2>AI Opportunity Draft</h2>
+      <h2>{copy.headings.opportunityDraft}</h2>
       <div className="form-grid two">
         {Object.entries(seminar)
           .filter(([key]) => key !== "confirmation")
@@ -543,7 +555,7 @@ function AdaptDemo() {
       {hasInterest ? <p className="result-panel">{seminar.confirmation}</p> : null}
       <div className="form-grid two">
         <label className="field">
-          <span>Work area</span>
+          <span>{copy.fields.workArea}</span>
           <select
             value={values.workCategory}
             onChange={(event) =>
@@ -555,13 +567,13 @@ function AdaptDemo() {
           >
             {workCategoryKeys.map((key) => (
               <option key={key} value={key}>
-                {workCategories[key].label}
+                {copy.workCategories[key]}
               </option>
             ))}
           </select>
         </label>
         <label className="field">
-          <span>Workflow that takes too long</span>
+          <span>{copy.fields.workflowPain}</span>
           <input
             value={values.workflowPain}
             onChange={(event) =>
@@ -570,7 +582,7 @@ function AdaptDemo() {
           />
         </label>
         <label className="field">
-          <span>Main workflow steps</span>
+          <span>{copy.fields.mainSteps}</span>
           <textarea
             value={values.mainSteps}
             onChange={(event) =>
@@ -579,7 +591,7 @@ function AdaptDemo() {
           />
         </label>
         <label className="field">
-          <span>Where do people wait?</span>
+          <span>{copy.fields.delay}</span>
           <textarea
             value={values.delay}
             onChange={(event) =>
@@ -588,7 +600,7 @@ function AdaptDemo() {
           />
         </label>
         <label className="field">
-          <span>What is repetitive?</span>
+          <span>{copy.fields.repetitiveWork}</span>
           <textarea
             value={values.repetitiveWork}
             onChange={(event) =>
@@ -597,7 +609,7 @@ function AdaptDemo() {
           />
         </label>
         <label className="field">
-          <span>What requires human judgment?</span>
+          <span>{copy.fields.judgmentNeeds}</span>
           <textarea
             value={values.judgmentNeeds}
             onChange={(event) =>
@@ -606,7 +618,7 @@ function AdaptDemo() {
           />
         </label>
         <label className="field">
-          <span>Desired outcome</span>
+          <span>{copy.fields.desiredOutcome}</span>
           <input
             value={values.desiredOutcome}
             onChange={(event) =>
@@ -615,14 +627,14 @@ function AdaptDemo() {
           />
         </label>
         <label className="field">
-          <span>What will you own?</span>
+          <span>{copy.fields.own}</span>
           <input
             value={values.own}
             onChange={(event) => setValues((current) => ({ ...current, own: event.target.value }))}
           />
         </label>
         <label className="field">
-          <span>What will you become?</span>
+          <span>{copy.fields.become}</span>
           <input
             value={values.become}
             onChange={(event) =>
@@ -634,13 +646,13 @@ function AdaptDemo() {
       <div className="result-panel">
         <h3>{plan.levelLabel}</h3>
         <p>
-          {plan.sections.find((section) => section.title === "Workflow Adaptation Plan")?.body ??
-            "Map a workflow pain to create your opportunity draft."}
+          {plan.sections.find((section) => section.title === copy.plan.adaptationTitle)?.body ??
+            copy.feedback.mapWorkflow}
         </p>
       </div>
       <SavePlanActions
         nextHref="/implement"
-        nextLabel="Save and continue to Implement"
+        nextLabel={copy.actions.saveToImplement}
         onSave={() => updateAdapt(values)}
       />
       <DemoNotes demo={demo} />
@@ -649,7 +661,8 @@ function AdaptDemo() {
 }
 
 function ImplementDemo() {
-  const { content } = usePortalContent();
+  const { content, language } = usePortalContent();
+  const copy = getPlanCopy(language);
   const audit = content.forms.audit;
   const demo = content.pages.implement.demo;
   const { draft, updateImplement } = usePlanDraft();
@@ -659,15 +672,15 @@ function ImplementDemo() {
   };
 
   const plan = useMemo(
-    () => generateUpgradePlan({ ...draft, implement: values }),
-    [draft, values],
+    () => generateUpgradePlan({ ...draft, implement: values }, language),
+    [draft, language, values],
   );
-  const pilot = plan.sections.find((section) => section.title === "First Workflow Pilot");
+  const pilot = plan.sections.find((section) => section.title === copy.plan.pilotTitle);
 
   return (
     <article className="demo-panel">
       <span className="demo-label">{demo.label}</span>
-      <h2>Complete AI Upgrade Plan</h2>
+      <h2>{copy.headings.completePlan}</h2>
       <div className="form-grid two">
         <label className="field">
           <span>{audit.companyUrl}</span>
@@ -688,7 +701,7 @@ function ImplementDemo() {
           />
         </label>
         <label className="field">
-          <span>Pilot scope</span>
+          <span>{copy.fields.pilotScope}</span>
           <input
             value={values.pilotScope}
             onChange={(event) =>
@@ -708,11 +721,11 @@ function ImplementDemo() {
       </div>
       <div className="check-grid">
         {[
-          ["impactsPeople", "Could this affect jobs, pay, benefits, education, or access?"],
-          ["usesSensitiveData", "Does this use sensitive personal or company data?"],
-          ["harmIfWrong", "Could a wrong answer harm someone or the business?"],
-          ["needsExplanation", "Would someone need to explain how the decision was made?"],
-          ["hasAppealPath", "Can a person correct or appeal the result?"],
+          ["impactsPeople", copy.safetyQuestions.impactsPeople],
+          ["usesSensitiveData", copy.safetyQuestions.usesSensitiveData],
+          ["harmIfWrong", copy.safetyQuestions.harmIfWrong],
+          ["needsExplanation", copy.safetyQuestions.needsExplanation],
+          ["hasAppealPath", copy.safetyQuestions.hasAppealPath],
         ].map(([key, label]) => (
           <label className="check-field" key={key}>
             <input
@@ -730,11 +743,15 @@ function ImplementDemo() {
         <h3>{content.ui.demoContentTitle}</h3>
         <p>{audit.mockFinding}</p>
         <p>{pilot?.body}</p>
-        <p>Risk level: {plan.riskLevel?.toUpperCase() ?? "not assessed"}</p>
+        <p>
+          {copy.plan.riskLevel(
+            plan.riskLevel ? copy.risk[plan.riskLevel] : copy.feedback.notAssessed,
+          )}
+        </p>
       </div>
       <SavePlanActions
         nextHref="/plan"
-        nextLabel="Save and view complete plan"
+        nextLabel={copy.actions.saveAndViewComplete}
         onSave={() => updateImplement(values)}
       />
       <DemoNotes demo={demo} />
@@ -840,23 +857,24 @@ export function FrameworkPage({ keyName }: { keyName: FrameworkKey }) {
 }
 
 export function PlanPage() {
-  const { content } = usePortalContent();
+  const { content, language } = usePortalContent();
+  const copy = getPlanCopy(language);
   const { draft, clearPlan } = usePlanDraft();
   const [copyStatus, setCopyStatus] = useState("");
-  const plan = useMemo(() => generateUpgradePlan(draft), [draft]);
+  const plan = useMemo(() => generateUpgradePlan(draft, language), [draft, language]);
   const nextFramework = plan.nextStep ? content.frameworks[plan.nextStep] : null;
-  const planText = useMemo(() => planToText(plan), [plan]);
+  const planText = useMemo(() => planToText(plan, language), [language, plan]);
 
   function copyPlan() {
     if (!navigator.clipboard) {
-      setCopyStatus("Copy is not available in this browser.");
+      setCopyStatus(copy.feedback.copyUnavailable);
       return;
     }
 
     navigator.clipboard
       .writeText(planText)
-      .then(() => setCopyStatus("Plan copied."))
-      .catch(() => setCopyStatus("Copy failed. You can select the plan text manually."));
+      .then(() => setCopyStatus(copy.feedback.copied))
+      .catch(() => setCopyStatus(copy.feedback.copyFailed));
   }
 
   function downloadPlan() {
@@ -870,7 +888,7 @@ export function PlanPage() {
   }
 
   function clearSavedPlan() {
-    if (window.confirm("Clear your locally saved AI Upgrade Plan?")) {
+    if (window.confirm(copy.feedback.clearConfirm)) {
       clearPlan();
       setCopyStatus("");
     }
@@ -882,13 +900,10 @@ export function PlanPage() {
         <div className="section-inner">
           <span className="eyebrow page-step-label">
             <CheckCircle2 size={15} aria-hidden />
-            AI UPGRADE PLAN
+            {copy.headings.pageEyebrow}
           </span>
-          <h1>Your plan so far</h1>
-          <p>
-            This local MVP plan is generated from the four UpSkill USA steps you have completed:
-            Inspire, Learn, Adapt, and Implement.
-          </p>
+          <h1>{copy.headings.pageTitle}</h1>
+          <p>{copy.headings.pageIntro}</p>
         </div>
       </section>
 
@@ -915,23 +930,23 @@ export function PlanPage() {
             <div className="button-row plan-sidebar-actions">
               {nextFramework ? (
                 <Link className="button blue" href={nextFramework.route}>
-                  Continue to {nextFramework.title}
+                  {copy.actions.continueTo} {nextFramework.title}
                   <ArrowRight size={16} aria-hidden />
                 </Link>
               ) : (
                 <Link className="button blue" href="/implement">
-                  Review implementation
+                  {copy.actions.reviewImplementation}
                   <ArrowRight size={16} aria-hidden />
                 </Link>
               )}
               <button className="button ghost" type="button" onClick={copyPlan}>
-                Copy plan
+                {copy.actions.copyPlan}
               </button>
               <button className="button ghost" type="button" onClick={downloadPlan}>
-                Download plan
+                {copy.actions.downloadPlan}
               </button>
               <button className="button danger" type="button" onClick={clearSavedPlan}>
-                Clear plan
+                {copy.actions.clearPlan}
               </button>
             </div>
             {copyStatus ? <p className="copy-status">{copyStatus}</p> : null}
@@ -953,7 +968,7 @@ export function PlanPage() {
             ))}
 
             <section className="plan-section">
-              <h2>{plan.level === 4 ? "Next 7 Days" : "Next 3 Days"}</h2>
+              <h2>{plan.level === 4 ? copy.headings.nextSevenDays : copy.headings.nextThreeDays}</h2>
               <ol>
                 {plan.nextActions.map((action) => (
                   <li key={action}>{action}</li>
@@ -962,7 +977,7 @@ export function PlanPage() {
             </section>
 
             <section className="plan-section">
-              <h2>After 7 Days</h2>
+              <h2>{copy.headings.afterSevenDays}</h2>
               <ul>
                 {plan.afterSevenDays.map((action) => (
                   <li key={action}>{action}</li>
