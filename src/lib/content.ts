@@ -110,6 +110,8 @@ export type PortalContent = {
     homeAriaLabel: string;
     openMenuLabel: string;
     closeMenuLabel: string;
+    planLabel: string;
+    viewPlanCta: string;
     agents: { installerTitle: string; educatorTitle: string };
     learnDemo: {
       tracks: Record<"worker" | "professor" | "employer", { label: string; resources: string[] }>;
@@ -312,6 +314,8 @@ export const portalContent: Record<Language, PortalContent> = {
       homeAriaLabel: "UpSkill USA home",
       openMenuLabel: "Open menu",
       closeMenuLabel: "Close menu",
+      planLabel: "AI Upgrade Plan",
+      viewPlanCta: "View Your Plan",
       agents: {
         installerTitle: "Installer Agents",
         educatorTitle: "Educator Agents",
@@ -524,6 +528,8 @@ export const portalContent: Record<Language, PortalContent> = {
       homeAriaLabel: "Inicio de UpSkill USA",
       openMenuLabel: "Abrir menú",
       closeMenuLabel: "Cerrar menú",
+      planLabel: "Plan de actualización con IA",
+      viewPlanCta: "Ver tu plan",
       agents: {
         installerTitle: "Agentes de instalación",
         educatorTitle: "Agentes educadores",
@@ -736,6 +742,8 @@ export const portalContent: Record<Language, PortalContent> = {
       homeAriaLabel: "Início da UpSkill USA",
       openMenuLabel: "Abrir menu",
       closeMenuLabel: "Fechar menu",
+      planLabel: "Plano de atualização com IA",
+      viewPlanCta: "Ver seu plano",
       agents: {
         installerTitle: "Agentes de instalação",
         educatorTitle: "Agentes educadores",

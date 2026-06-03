@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { languages } from "@/lib/content";
 import { LanguageProvider, usePortalContent } from "@/components/language-provider";
+import { PlanProvider } from "@/components/plan-provider";
 
 function ShellFrame({ children }: { children: ReactNode }) {
   const { content, language, setLanguage } = usePortalContent();
@@ -52,6 +53,9 @@ function ShellFrame({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="header-actions">
+            <Link className="plan-link" href="/plan">
+              {content.ui.planLabel}
+            </Link>
             <div className="language-toggle" aria-label={content.ui.languageLabel}>
               {languages.map((option) => (
                 <button
@@ -95,6 +99,14 @@ function ShellFrame({ children }: { children: ReactNode }) {
                 </Link>
               );
             })}
+            <Link
+              className={pathname === "/plan" ? "mobile-nav-link active" : "mobile-nav-link"}
+              href="/plan"
+              aria-current={pathname === "/plan" ? "page" : undefined}
+              onClick={() => setMenuOpen(false)}
+            >
+              {content.ui.planLabel}
+            </Link>
           </nav>
         ) : null}
       </header>
@@ -126,7 +138,9 @@ function ShellFrame({ children }: { children: ReactNode }) {
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <LanguageProvider>
-      <ShellFrame>{children}</ShellFrame>
+      <PlanProvider>
+        <ShellFrame>{children}</ShellFrame>
+      </PlanProvider>
     </LanguageProvider>
   );
 }

@@ -132,6 +132,15 @@ button {
   gap: 10px;
 }
 
+.plan-link {
+  border-radius: 999px;
+  background: var(--navy-900);
+  color: var(--white);
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
 .language-toggle {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -317,6 +326,18 @@ button {
 .button.blue {
   background: var(--blue-700);
   color: var(--white);
+}
+
+.button.ghost {
+  border-color: var(--slate-200);
+  background: var(--white);
+  color: var(--navy-900);
+}
+
+.button.danger {
+  border-color: rgba(185, 28, 28, 0.22);
+  background: #fff1f2;
+  color: #991b1b;
 }
 
 .section {
@@ -617,7 +638,7 @@ button {
   gap: 7px;
 }
 
-.field label {
+.field span {
   color: var(--slate-700);
   font-size: 0.84rem;
   font-weight: 900;
@@ -668,6 +689,150 @@ button {
 
 .demo-notes p {
   margin: 0;
+}
+
+.plan-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.check-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.check-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius);
+  background: var(--white);
+  padding: 12px;
+  color: var(--slate-700);
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.check-field input {
+  margin-top: 2px;
+}
+
+.plan-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.plan-sidebar,
+.plan-document {
+  border: 1px solid rgba(23, 32, 51, 0.12);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.plan-sidebar {
+  position: sticky;
+  top: 104px;
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.plan-progress {
+  display: grid;
+  gap: 8px;
+}
+
+.plan-progress-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius);
+  padding: 10px;
+  color: var(--slate-600);
+}
+
+.plan-progress-step span {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--slate-100);
+  color: var(--slate-700);
+  font-weight: 900;
+}
+
+.plan-progress-step.complete {
+  border-color: rgba(30, 86, 216, 0.24);
+  background: rgba(30, 86, 216, 0.06);
+  color: var(--navy-900);
+}
+
+.plan-progress-step.complete span {
+  background: var(--blue-700);
+  color: var(--white);
+}
+
+.plan-sidebar-actions {
+  display: grid;
+}
+
+.plan-sidebar-actions .button {
+  width: 100%;
+}
+
+.copy-status {
+  margin: 0;
+  color: var(--slate-600);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.plan-document {
+  display: grid;
+  gap: 0;
+  padding: 8px 24px;
+}
+
+.plan-section {
+  border-bottom: 1px solid var(--slate-200);
+  padding: 22px 0;
+}
+
+.plan-section:last-child {
+  border-bottom: 0;
+}
+
+.plan-section h2 {
+  margin: 0 0 10px;
+  color: var(--navy-900);
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.plan-section p,
+.plan-section li {
+  color: var(--slate-600);
+  line-height: 1.65;
+}
+
+.plan-section p {
+  margin: 0;
+}
+
+.plan-section ul,
+.plan-section ol {
+  margin: 12px 0 0;
+  padding-left: 22px;
 }
 
 .demo-next-step {
@@ -741,8 +906,13 @@ button {
   .framework-grid,
   .card-grid,
   .two-column,
-  .metric-row {
+  .metric-row,
+  .plan-layout {
     grid-template-columns: 1fr;
+  }
+
+  .plan-sidebar {
+    position: static;
   }
 
   .step-nav-grid {
@@ -795,6 +965,11 @@ button {
   .language-option {
     padding: 6px 7px;
     font-size: 0.7rem;
+  }
+
+  .plan-link {
+    padding: 7px 9px;
+    font-size: 0.72rem;
   }
 
   .hero-content {
@@ -853,5 +1028,9 @@ button {
 
   .form-grid.two {
     grid-template-columns: 1fr;
+  }
+
+  .plan-document {
+    padding: 6px 16px;
   }
 }

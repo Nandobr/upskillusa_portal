@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AI Upgrade Plan Builder - Planning Summary</title>
+    <style>
+      @page {
+        margin: 0.72in;
+        size: letter;
+      }
+
+      :root {
+        --navy: #071326;
+        --blue: #1e56d8;
+        --gold: #f2b84b;
+        --slate: #172033;
+        --muted: #5d6b82;
+        --line: #d9e2ef;
+        --soft: #eef3f8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--slate);
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10.5pt;
+        line-height: 1.48;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        color: var(--navy);
+        font-size: 25pt;
+        line-height: 1.06;
+        margin-bottom: 10px;
+      }
+
+      h2 {
+        border-bottom: 1px solid var(--line);
+        color: var(--navy);
+        font-size: 14pt;
+        margin: 24px 0 10px;
+        padding-bottom: 5px;
+      }
+
+      h3 {
+        color: var(--blue);
+        font-size: 11.5pt;
+        margin: 14px 0 4px;
+      }
+
+      p {
+        margin-bottom: 8px;
+      }
+
+      ul,
+      ol {
+        margin: 7px 0 12px 20px;
+        padding: 0;
+      }
+
+      li {
+        margin-bottom: 5px;
+      }
+
+      table {
+        border-collapse: collapse;
+        margin: 10px 0 14px;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--navy);
+        color: white;
+        font-size: 9pt;
+      }
+
+      td {
+        font-size: 9.6pt;
+      }
+
+      .kicker {
+        color: var(--blue);
+        font-size: 9pt;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+      }
+
+      .subtitle {
+        color: var(--muted);
+        font-size: 12pt;
+        margin-bottom: 16px;
+      }
+
+      .meta {
+        border-left: 4px solid var(--gold);
+        color: var(--muted);
+        font-size: 9.5pt;
+        margin-bottom: 20px;
+        padding-left: 12px;
+      }
+
+      .callout {
+        background: var(--soft);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin: 12px 0 16px;
+        padding: 12px 14px;
+      }
+
+      .callout strong {
+        color: var(--navy);
+      }
+
+      .flow {
+        background: var(--navy);
+        border-radius: 6px;
+        color: white;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 9.5pt;
+        margin: 10px 0 14px;
+        padding: 12px 14px;
+        white-space: pre-wrap;
+      }
+
+      .takeaway {
+        border-left: 3px solid var(--blue);
+        margin: 10px 0;
+        padding-left: 10px;
+      }
+
+      .page-break {
+        break-before: page;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="kicker">UpSkill USA planning memo</div>
+    <h1>AI Upgrade Plan Builder - Summary And Key Takeaways</h1>
+    <p class="subtitle">
+      A concise record of the explore conversation that shaped the progressive four-step
+      AI Upgrade Plan Builder.
+    </p>
+    <p class="meta">
+      Prepared for the UpSkill USA MVP. Based on the product planning conversation around
+      turning Inspire, Learn, Adapt, and Implement from isolated demos into one connected
+      user journey.
+    </p>
+
+    <div class="callout">
+      <strong>Core decision:</strong> the AI Upgrade Plan Builder is not a separate fifth
+      feature. It is the interactive output of the existing four-step framework.
+    </div>
+
+    <h2>1. Why We Planned This Change</h2>
+    <p>
+      The original app had four useful pages, each with its own form or demo. The issue was
+      that the forms were isolated. A user could complete Inspire, Learn, Adapt, and Implement,
+      but the app did not combine those answers into a meaningful final output.
+    </p>
+    <p>
+      The planning conversation reframed the product: the four pages should stay central, but
+      each page should contribute a section to one shared AI Upgrade Plan.
+    </p>
+
+    <div class="flow">/inspire   -> Level 1: Opportunity Seed
+/learn     -> Level 2: Learning Path
+/adapt     -> Level 3: AI Opportunity Draft
+/implement -> Level 4: Complete AI Upgrade Plan
+/plan      -> Plan so far or final plan</div>
+
+    <h2>2. Key Takeaways</h2>
+
+    <div class="takeaway">
+      <strong>The four steps are the product framework.</strong>
+      The plan builder should not replace Inspire, Learn, Adapt, and Implement. It should
+      make those steps actionable.
+    </div>
+
+    <div class="takeaway">
+      <strong>Users may not have every answer upfront.</strong>
+      The product should give value at every level, not only after all four pages are complete.
+    </div>
+
+    <div class="takeaway">
+      <strong>Every plan needs momentum.</strong>
+      Partial plans should include a next 3 days section. Complete plans should include a
+      next 7 days section plus after-7-days options.
+    </div>
+
+    <div class="takeaway">
+      <strong>MVP output should be deterministic.</strong>
+      The first version should use local templates, simple rules, and browser storage. No AI
+      API, no backend, no database, and no real audit.
+    </div>
+
+    <div class="takeaway">
+      <strong>Safety belongs inside the workflow.</strong>
+      A plain-language, NIST-inspired checklist gives the plan a responsible AI backbone
+      without forcing users through a heavy compliance process.
+    </div>
+
+    <h2>3. Minimum Useful User Inputs</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Framework Step</th>
+          <th>Minimum Inputs</th>
+          <th>Plan Output</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Inspire</td>
+          <td>User type, role, organization/context, motivation, desired outcome, human strengths.</td>
+          <td>Opportunity Seed: why AI matters for this person and what human value must be protected.</td>
+        </tr>
+        <tr>
+          <td>Learn</td>
+          <td>User track, AI comfort level, time available, learning preference.</td>
+          <td>Learning Path: practical next learning resource direction matched to readiness.</td>
+        </tr>
+        <tr>
+          <td>Adapt</td>
+          <td>Work category, workflow pain, steps, delay, repetitive work, judgment needs, ownership, future role.</td>
+          <td>AI Opportunity Draft: where AI can assist, what should remain human-led, and what the user will become.</td>
+        </tr>
+        <tr>
+          <td>Implement</td>
+          <td>Pilot workflow, pilot scope, human review gate, safety checklist answers.</td>
+          <td>Complete AI Upgrade Plan: first pilot, risk level, review gate, next 7 days, and after-7-days path.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>4. How The Four Steps Connect</h2>
+    <p>
+      The planning conversation clarified the relationship between the existing pages and the
+      new plan output:
+    </p>
+    <ul>
+      <li><strong>Framework pages:</strong> the curriculum and guided input surfaces.</li>
+      <li><strong>Plan state:</strong> the local workbook that accumulates answers.</li>
+      <li><strong>/plan:</strong> the plan so far, or the final AI Upgrade Plan once all four steps are complete.</li>
+    </ul>
+
+    <div class="flow">Inspire inputs
++ Learn inputs
++ Adapt inputs
++ Implement inputs
+= AI Upgrade Plan</div>
+
+    <h2>5. Framework Choice For MVP</h2>
+    <p>
+      We compared two approaches for the consulting-style backbone.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Summary</th>
+          <th>Decision</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Option 1</td>
+          <td>Original APQC-inspired categories, simple process mapping questions, and NIST-inspired safety checks.</td>
+          <td>Chosen for MVP because it is fastest, simple to explain, and requires no external dataset import.</td>
+        </tr>
+        <tr>
+          <td>Option 2</td>
+          <td>O*NET, Simple Process Mapping, Canada AIA-lite, and EU ALTAI-lite.</td>
+          <td>Better for a later version because it is more rigorous but needs occupation matching, attribution, and more logic.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      The MVP framework is intentionally lightweight:
+    </p>
+    <div class="flow">Classify work area
+-> Map workflow friction
+-> Identify AI assist opportunity
+-> Add human review gate
+-> Generate next 3 days or next 7 days</div>
+
+    <h2>6. Plan Completeness Levels</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Level</th>
+          <th>When It Appears</th>
+          <th>User Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Level 1: Opportunity Seed</td>
+          <td>After Inspire</td>
+          <td>The user sees their role, goal, motivation, and human strengths reflected back.</td>
+        </tr>
+        <tr>
+          <td>Level 2: Learning Path</td>
+          <td>After Learn</td>
+          <td>The user gets a readiness-matched learning direction and next 3 days.</td>
+        </tr>
+        <tr>
+          <td>Level 3: AI Opportunity Draft</td>
+          <td>After Adapt</td>
+          <td>The user gets a workflow adaptation plan based on pain, delay, repetition, and judgment.</td>
+        </tr>
+        <tr>
+          <td>Level 4: Complete AI Upgrade Plan</td>
+          <td>After Implement</td>
+          <td>The user gets a pilot plan, safety/risk level, human review gate, next 7 days, and after-7-days options.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>7. Momentum After The Plan</h2>
+    <p>
+      We decided that the end of the plan must answer "what next?" Every learner needs a
+      concrete next goal after the first sprint.
+    </p>
+    <h3>Partial Plans</h3>
+    <ul>
+      <li>Show next 3 days.</li>
+      <li>Send the user back to the next framework step.</li>
+      <li>Keep the portal journey active instead of ending the experience too early.</li>
+    </ul>
+    <h3>Complete Plans</h3>
+    <ul>
+      <li>Show next 7 days.</li>
+      <li>End with three paths: Learn More, Run A Bigger Pilot, or Get Help Implementing.</li>
+      <li>Make the post-pilot decision explicit: expand, revise, or stop.</li>
+    </ul>
+
+    <h2>8. MVP Boundaries</h2>
+    <ul>
+      <li>No GitHub commit or push was made.</li>
+      <li>No AI API is used for the first version.</li>
+      <li>No backend or database is required.</li>
+      <li>Plan progress is saved only in the user's browser.</li>
+      <li>Dynamic output is local MVP guidance, not a real audit or verified ROI calculation.</li>
+      <li>External frameworks are used as inspiration, not copied as imported data tables.</li>
+    </ul>
+
+    <h2>9. Practical Product Decision</h2>
+    <p>
+      The strongest product decision from the planning process was to keep the four framework
+      pages and make them progressively useful. This preserves the UpSkill USA narrative while
+      giving users a tangible deliverable.
+    </p>
+    <div class="callout">
+      <strong>Final framing:</strong> the four pages are the journey. The AI Upgrade Plan is the
+      completed workbook. The `/plan` page is where the user sees what they have built so far.
+    </div>
+  </body>
+</html>
