@@ -52,6 +52,7 @@ import {
 import type { InspirePlanInput } from "@/lib/plan";
 
 type AssessmentStep = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+const maxComparisonSelections = 3;
 
 const pathwayIcons: Record<PathwayId, LucideIcon> = {
   explorer: GraduationCap,
@@ -317,7 +318,9 @@ export function IkigaiAssessment() {
     const exists = assessment.compareSlugs.includes(occupation.slug);
     const compareSlugs = exists
       ? assessment.compareSlugs.filter((slug) => slug !== occupation.slug)
-      : [...assessment.compareSlugs, occupation.slug].slice(0, 3);
+      : assessment.compareSlugs.length >= maxComparisonSelections
+        ? [...assessment.compareSlugs.slice(1), occupation.slug]
+        : [...assessment.compareSlugs, occupation.slug];
     const best = getBestActionOccupation(compareSlugs, assessment.matches, occupations);
     const recommendations = getRecommendations(best, assessment.pathwayId);
 

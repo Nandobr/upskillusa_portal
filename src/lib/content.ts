@@ -139,7 +139,7 @@ export const portalContent: Record<Language, PortalContent> = {
     ],
     brand: {
       name: "UpSkill USA",
-      lockup: "Upgrade the work. Keep the people.",
+      lockup: "Create more value with AI. Keep the people.",
       tagline: "Inspire -> Learn -> Adapt -> Implement",
       promise: "We don't fire. We upgrade.",
       jfkLine: "Ask not what AI can do for you. Ask what you can do with AI.",
