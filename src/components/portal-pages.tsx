@@ -135,7 +135,7 @@ export function OverviewPage() {
         <div className="section-inner">
           <div className="section-heading overview-heading">
             <div>
-              <div className="pill-label">{content.overview.title}</div>
+              <div className="overview-title-line">{content.overview.title}</div>
               <h2>{content.brand.tagline}</h2>
             </div>
             <p className="overview-promise">{content.brand.promise}</p>

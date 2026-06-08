@@ -147,7 +147,7 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     overview: {
       eyebrow: "AI workforce upgrade portal",
-      title: "Four steps to create value for your Business without leaving employees behind.",
+      title: "Four steps to create value and keep the employees.",
       intro:
         "A practical portal for business leaders to find AI-ready opportunities, prepare teams, and launch human-reviewed workflows that create measurable value.",
       arc: ["Find your gift", "Learn AI for free", "Build a plan", "Implement at business"],
@@ -357,7 +357,7 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     overview: {
       eyebrow: "Portal para actualizar la fuerza laboral con IA",
-      title: "Cuatro pasos para crear valor para tu empresa sin dejar atrás a los empleados.",
+      title: "Cuatro pasos para crear valor sin dejar atrás a los empleados.",
       intro:
         "Un portal práctico para líderes empresariales que necesitan encontrar oportunidades listas para IA, preparar equipos y lanzar flujos revisados por humanos que generen valor medible.",
       arc: ["Encuentra tu don", "Aprende IA gratis", "Crea un plan", "Implementa en la empresa"],
@@ -571,7 +571,7 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     overview: {
       eyebrow: "Portal de atualização da força de trabalho com IA",
-      title: "Quatro passos para criar valor para sua empresa sem deixar os funcionários para trás.",
+      title: "Quatro passos para criar valor sem deixar os funcionários para trás.",
       intro:
         "Um portal prático para líderes empresariais identificarem oportunidades prontas para IA, prepararem equipes e lançarem fluxos revisados por humanos que criam valor mensurável.",
       arc: ["Encontre seu dom", "Aprenda IA de graça", "Crie um plano", "Implemente na empresa"],

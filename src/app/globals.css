@@ -377,6 +377,11 @@ button {
   letter-spacing: 0;
 }
 
+.overview-heading h2 {
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  white-space: nowrap;
+}
+
 .section-heading p {
   max-width: 420px;
   margin: 0;
@@ -388,6 +393,15 @@ button {
   margin-top: 10px;
   max-width: none;
   white-space: nowrap;
+}
+
+.overview-title-line {
+  max-width: 760px;
+  color: var(--blue-700);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.35;
 }
 
 .pill-label {
@@ -464,8 +478,8 @@ button {
 .framework-card {
   display: grid;
   align-content: space-between;
-  min-height: 280px;
-  padding: 20px;
+  min-height: 230px;
+  padding: 16px;
   transition:
     border-color 160ms ease,
     transform 160ms ease,
@@ -483,9 +497,9 @@ button {
   align-items: center;
   justify-content: space-between;
   color: var(--blue-700);
-  font-size: 1.5rem;
+  font-size: 1.08rem;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -498,6 +512,11 @@ button {
   line-height: 1.18;
 }
 
+.framework-card h3 {
+  margin-top: 10px;
+  font-size: 1.12rem;
+}
+
 .framework-card p,
 .card p,
 .demo-panel p,
@@ -507,13 +526,21 @@ button {
 }
 
 .framework-card p {
-  margin: 12px 0;
-  font-size: 0.95rem;
+  margin: 8px 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
 }
 
 .framework-question {
   color: var(--navy-900);
+  font-size: 0.9rem;
   font-weight: 900;
+}
+
+.framework-card .button {
+  min-height: 40px;
+  padding: 9px 14px;
+  font-size: 0.88rem;
 }
 
 .card {
@@ -1584,6 +1611,11 @@ button {
     white-space: normal;
   }
 
+  .overview-heading h2 {
+    font-size: 1.75rem;
+    line-height: 1.12;
+  }
+
   .footer-inner {
     display: grid;
   }
@@ -1640,6 +1672,10 @@ button {
     font-size: 2.25rem;
   }
 
+  .overview-heading h2 {
+    font-size: clamp(1.12rem, 5vw, 1.55rem);
+  }
+
   .hero-actions,
   .button-row {
     display: grid;
@@ -1647,6 +1683,38 @@ button {
 
   .button {
     width: 100%;
+  }
+
+  .framework-card {
+    min-height: auto;
+    padding: 14px;
+  }
+
+  .framework-step {
+    font-size: 0.96rem;
+  }
+
+  .framework-card h3 {
+    margin-top: 8px;
+    font-size: 1.03rem;
+  }
+
+  .framework-card p {
+    margin: 7px 0;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .framework-card .button-row {
+    display: flex;
+    margin-top: 8px;
+  }
+
+  .framework-card .button {
+    width: auto;
+    min-height: 36px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
   }
 
   .assessment-step-actions {
