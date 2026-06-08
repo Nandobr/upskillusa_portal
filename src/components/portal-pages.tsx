@@ -655,8 +655,8 @@ export function FrameworkPage({ keyName }: { keyName: FrameworkKey }) {
       <PageHero keyName={keyName} />
 
       <section className={isInspiration ? "section framework-assessment-section" : "section"}>
-        <div className={isInspiration ? "section-inner framework-flow-inspire" : "section-inner two-column"}>
-          <div className={isInspiration ? "framework-intro" : undefined}>
+        <div className={isInspiration ? "section-inner framework-flow-inspire" : "section-inner framework-flow-page"}>
+          <div className={isInspiration ? "framework-intro" : "framework-intro framework-page-intro"}>
             <div className="pill-label">{framework.title}</div>
             {!isInspiration ? (
               <>

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, PlayCircle, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { languages } from "@/lib/content";
 import { LanguageProvider, usePortalContent } from "@/components/language-provider";
@@ -53,8 +53,13 @@ function ShellFrame({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="header-actions">
-            <Link className="plan-link" href="/plan">
-              {content.ui.planLabel}
+            <Link
+              className={pathname === "/demo" ? "demo-link active" : "demo-link"}
+              href="/demo"
+              aria-current={pathname === "/demo" ? "page" : undefined}
+            >
+              <PlayCircle size={14} aria-hidden />
+              {content.ui.watchDemoLabel}
             </Link>
             <div className="language-toggle" aria-label={content.ui.languageLabel}>
               {languages.map((option) => (
@@ -100,12 +105,12 @@ function ShellFrame({ children }: { children: ReactNode }) {
               );
             })}
             <Link
-              className={pathname === "/plan" ? "mobile-nav-link active" : "mobile-nav-link"}
-              href="/plan"
-              aria-current={pathname === "/plan" ? "page" : undefined}
+              className={pathname === "/demo" ? "mobile-nav-link active" : "mobile-nav-link"}
+              href="/demo"
+              aria-current={pathname === "/demo" ? "page" : undefined}
               onClick={() => setMenuOpen(false)}
             >
-              {content.ui.planLabel}
+              {content.ui.watchDemoLabel}
             </Link>
           </nav>
         ) : null}

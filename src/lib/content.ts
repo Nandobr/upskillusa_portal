@@ -111,6 +111,7 @@ export type PortalContent = {
     openMenuLabel: string;
     closeMenuLabel: string;
     planLabel: string;
+    watchDemoLabel: string;
     viewPlanCta: string;
     agents: { installerTitle: string; educatorTitle: string };
     learnDemo: {
@@ -315,6 +316,7 @@ export const portalContent: Record<Language, PortalContent> = {
       openMenuLabel: "Open menu",
       closeMenuLabel: "Close menu",
       planLabel: "AI Upgrade Plan",
+      watchDemoLabel: "Watch Demo",
       viewPlanCta: "View Your Plan",
       agents: {
         installerTitle: "Installer Agents",
@@ -529,6 +531,7 @@ export const portalContent: Record<Language, PortalContent> = {
       openMenuLabel: "Abrir menú",
       closeMenuLabel: "Cerrar menú",
       planLabel: "Plan de actualización con IA",
+      watchDemoLabel: "Ver demo",
       viewPlanCta: "Ver tu plan",
       agents: {
         installerTitle: "Agentes de instalación",
@@ -743,6 +746,7 @@ export const portalContent: Record<Language, PortalContent> = {
       openMenuLabel: "Abrir menu",
       closeMenuLabel: "Fechar menu",
       planLabel: "Plano de atualização com IA",
+      watchDemoLabel: "Ver demo",
       viewPlanCta: "Ver seu plano",
       agents: {
         installerTitle: "Agentes de instalação",
