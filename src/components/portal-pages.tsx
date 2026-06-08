@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { frameworkOrder, type FrameworkKey } from "@/lib/content";
+import { IkigaiAssessment } from "@/components/ikigai-assessment";
 import { usePortalContent } from "@/components/language-provider";
 import { mergeWithDefaults, usePlanDraft } from "@/components/plan-provider";
 import {
@@ -34,7 +35,6 @@ import {
   type AdaptPlanInput,
   type AiComfort,
   type ImplementPlanInput,
-  type InspirePlanInput,
   type LearnPlanInput,
   type LearningPreference,
   type TimeCommitment,
@@ -84,62 +84,6 @@ function FrameworkCards() {
           </Link>
         );
       })}
-    </div>
-  );
-}
-
-function StepNavCard({ keyName, variant }: { keyName: FrameworkKey; variant: "previous" | "next" }) {
-  const { content } = usePortalContent();
-  const framework = content.frameworks[keyName];
-  const Icon = icons[keyName];
-
-  return (
-    <Link className={`step-nav-card ${variant}`} href={framework.route}>
-      <div>
-        <div className="step-nav-step">
-          <span>{framework.tab}</span>
-          <Icon size={16} aria-hidden />
-        </div>
-        <h3>{framework.title}</h3>
-        <p className="framework-question">{framework.question}</p>
-      </div>
-      <span className="button-row">
-        <span className="button blue">
-          {framework.cta}
-          <ArrowRight size={16} aria-hidden />
-        </span>
-      </span>
-    </Link>
-  );
-}
-
-function StepNavItem({ keyName, variant }: { keyName: FrameworkKey; variant: "previous" | "next" }) {
-  return (
-    <div className={`step-nav-item ${variant}`}>
-      {variant === "previous" ? (
-        <span className="step-nav-arrow" aria-hidden>
-          &lt;-
-        </span>
-      ) : null}
-      <StepNavCard keyName={keyName} variant={variant} />
-      {variant === "next" ? (
-        <span className="step-nav-arrow" aria-hidden>
-          -&gt;
-        </span>
-      ) : null}
-    </div>
-  );
-}
-
-function StepNavigation({ keyName }: { keyName: FrameworkKey }) {
-  const currentIndex = frameworkOrder.indexOf(keyName);
-  const previousKey = frameworkOrder[currentIndex - 1];
-  const nextKey = frameworkOrder[currentIndex + 1];
-
-  return (
-    <div className={`step-nav-grid ${previousKey ? "" : "single-next"}`}>
-      {previousKey ? <StepNavItem keyName={previousKey} variant="previous" /> : null}
-      {nextKey ? <StepNavItem keyName={nextKey} variant="next" /> : null}
     </div>
   );
 }
@@ -308,105 +252,6 @@ function SavePlanActions({
 
 function ClipboardListIcon() {
   return <CheckCircle2 size={16} aria-hidden />;
-}
-
-function IkigaiDemo() {
-  const { content, language } = usePortalContent();
-  const copy = getPlanCopy(language);
-  const demo = content.pages.inspire.demo;
-  const { draft, updateInspire } = usePlanDraft();
-  const values = mergeWithDefaults(draft).inspire;
-  const setValues = (updater: (current: InspirePlanInput) => InspirePlanInput) => {
-    updateInspire(updater(values));
-  };
-
-  const plan = useMemo(
-    () => generateUpgradePlan({ ...draft, inspire: values }, language),
-    [draft, language, values],
-  );
-
-  return (
-    <article className="demo-panel">
-      <span className="demo-label">{demo.label}</span>
-      <h2>{copy.headings.opportunitySeed}</h2>
-      <div className="form-grid two">
-        <label className="field">
-          <span>{copy.fields.userType}</span>
-          <select
-            value={values.userType}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, userType: event.target.value as UserTrack }))
-            }
-          >
-            {userTrackKeys.map((key) => (
-              <option key={key} value={key}>
-                {copy.tracks[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{copy.fields.role}</span>
-          <input
-            value={values.role}
-            onChange={(event) => setValues((current) => ({ ...current, role: event.target.value }))}
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.organization}</span>
-          <input
-            value={values.organization}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, organization: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.desiredOutcome}</span>
-          <input
-            value={values.desiredOutcome}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, desiredOutcome: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.motivation}</span>
-          <textarea
-            value={values.motivation}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, motivation: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.humanStrengths}</span>
-          <textarea
-            value={values.humanStrengths}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, humanStrengths: event.target.value }))
-            }
-          />
-        </label>
-      </div>
-      <div className="result-panel">
-        {values.role.trim() ? (
-          <>
-            <h3>{plan.levelLabel}</h3>
-            <p>{plan.sections[0]?.body}</p>
-          </>
-        ) : (
-          <p className="empty-state">{copy.feedback.addRole}</p>
-        )}
-      </div>
-      <SavePlanActions
-        nextHref="/learn"
-        nextLabel={copy.actions.saveToLearn}
-        onSave={() => updateInspire(values)}
-      />
-      <DemoNotes demo={demo} />
-    </article>
-  );
 }
 
 function LearnDemo() {
@@ -785,7 +630,7 @@ function AgentsPanel() {
 
 function DemoForRoute({ keyName }: { keyName: FrameworkKey }) {
   if (keyName === "inspire") {
-    return <IkigaiDemo />;
+    return <IkigaiAssessment />;
   }
   if (keyName === "learn") {
     return <LearnDemo />;
@@ -802,30 +647,38 @@ export function FrameworkPage({ keyName }: { keyName: FrameworkKey }) {
   const nextIndex = frameworkOrder.indexOf(keyName) + 1;
   const nextKey = frameworkOrder[nextIndex];
   const nextFramework = nextKey ? content.frameworks[nextKey] : null;
+  const isInspiration = keyName === "inspire";
+  const showIntroCta = keyName === "implement";
 
   return (
     <>
       <PageHero keyName={keyName} />
 
-      <section className="section">
-        <div className="section-inner two-column">
-          <div>
+      <section className={isInspiration ? "section framework-assessment-section" : "section"}>
+        <div className={isInspiration ? "section-inner framework-flow-inspire" : "section-inner two-column"}>
+          <div className={isInspiration ? "framework-intro" : undefined}>
             <div className="pill-label">{framework.title}</div>
-            <h2>{framework.audience}</h2>
-            <p>{framework.summary}</p>
-            <div className="button-row">
-              {nextFramework ? (
-                <Link className="button blue" href={nextFramework.route}>
-                  {nextFramework.cta}
-                  <ArrowRight size={16} aria-hidden />
-                </Link>
-              ) : (
-                <Link className="button blue" href="/">
-                  {content.nav[0].label}
-                  <ArrowRight size={16} aria-hidden />
-                </Link>
-              )}
-            </div>
+            {!isInspiration ? (
+              <>
+                <h2>{framework.audience}</h2>
+                <p>{framework.summary}</p>
+              </>
+            ) : null}
+            {showIntroCta ? (
+              <div className="button-row">
+                {nextFramework ? (
+                  <Link className="button blue" href={nextFramework.route}>
+                    {nextFramework.cta}
+                    <ArrowRight size={16} aria-hidden />
+                  </Link>
+                ) : (
+                  <Link className="button blue" href="/">
+                    {content.nav[0].label}
+                    <ArrowRight size={16} aria-hidden />
+                  </Link>
+                )}
+              </div>
+            ) : null}
           </div>
           <DemoForRoute keyName={keyName} />
         </div>
@@ -845,13 +698,7 @@ export function FrameworkPage({ keyName }: { keyName: FrameworkKey }) {
             <AgentsPanel />
           </div>
         </section>
-      ) : (
-        <section className="section step-nav-section">
-          <div className="section-inner">
-            <StepNavigation keyName={keyName} />
-          </div>
-        </section>
-      )}
+      ) : null}
     </>
   );
 }

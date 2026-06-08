@@ -4,9 +4,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import {
@@ -29,16 +28,33 @@ type PlanContextValue = {
 };
 
 const PlanContext = createContext<PlanContextValue | null>(null);
+const emptyDraft: PlanDraft = {};
+const storageSubscribers = new Set<() => void>();
+let cachedRawDraft: string | null | undefined;
+let cachedDraft: PlanDraft = emptyDraft;
 
-function readStoredDraft(): PlanDraft {
+function parseStoredDraft(rawDraft: string | null): PlanDraft {
+  if (!rawDraft) return emptyDraft;
+
+  try {
+    return JSON.parse(rawDraft) as PlanDraft;
+  } catch {
+    return emptyDraft;
+  }
+}
+
+function readStoredDraftSnapshot(): PlanDraft {
   if (typeof window === "undefined") return {};
 
   try {
-    const saved = window.localStorage.getItem(planStorageKey);
-    if (!saved) return {};
-    return JSON.parse(saved) as PlanDraft;
+    const rawDraft = window.localStorage.getItem(planStorageKey);
+    if (rawDraft === cachedRawDraft) return cachedDraft;
+
+    cachedRawDraft = rawDraft;
+    cachedDraft = parseStoredDraft(rawDraft);
+    return cachedDraft;
   } catch {
-    return {};
+    return emptyDraft;
   }
 }
 
@@ -46,44 +62,82 @@ function writeStoredDraft(draft: PlanDraft) {
   if (typeof window === "undefined") return;
 
   try {
-    window.localStorage.setItem(planStorageKey, JSON.stringify(draft));
+    const rawDraft = JSON.stringify(draft);
+    window.localStorage.setItem(planStorageKey, rawDraft);
+    cachedRawDraft = rawDraft;
+    cachedDraft = draft;
   } catch {
     // Browser storage can be unavailable in private or locked-down contexts.
   }
 }
 
-export function PlanProvider({ children }: { children: ReactNode }) {
-  const [draft, setDraft] = useState<PlanDraft>(() => readStoredDraft());
+function removeStoredDraft() {
+  if (typeof window === "undefined") return;
 
-  useEffect(() => {
-    writeStoredDraft(draft);
-  }, [draft]);
+  try {
+    window.localStorage.removeItem(planStorageKey);
+    cachedRawDraft = null;
+    cachedDraft = emptyDraft;
+  } catch {
+    // No-op: clearing UI state is still useful if storage is unavailable.
+  }
+}
+
+function emitStoredDraftChange() {
+  storageSubscribers.forEach((callback) => callback());
+}
+
+function subscribeToStoredDraft(callback: () => void) {
+  storageSubscribers.add(callback);
+
+  if (typeof window !== "undefined") {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === planStorageKey) callback();
+    };
+
+    window.addEventListener("storage", handleStorage);
+
+    return () => {
+      storageSubscribers.delete(callback);
+      window.removeEventListener("storage", handleStorage);
+    };
+  }
+
+  return () => {
+    storageSubscribers.delete(callback);
+  };
+}
+
+export function PlanProvider({ children }: { children: ReactNode }) {
+  const draft = useSyncExternalStore(
+    subscribeToStoredDraft,
+    readStoredDraftSnapshot,
+    () => emptyDraft,
+  );
 
   const updateInspire = useCallback((input: InspirePlanInput) => {
-    setDraft((current) => ({ ...current, inspire: input }));
+    writeStoredDraft({ ...readStoredDraftSnapshot(), inspire: input });
+    emitStoredDraftChange();
   }, []);
 
   const updateLearn = useCallback((input: LearnPlanInput) => {
-    setDraft((current) => ({ ...current, learn: input }));
+    writeStoredDraft({ ...readStoredDraftSnapshot(), learn: input });
+    emitStoredDraftChange();
   }, []);
 
   const updateAdapt = useCallback((input: AdaptPlanInput) => {
-    setDraft((current) => ({ ...current, adapt: input }));
+    writeStoredDraft({ ...readStoredDraftSnapshot(), adapt: input });
+    emitStoredDraftChange();
   }, []);
 
   const updateImplement = useCallback((input: ImplementPlanInput) => {
-    setDraft((current) => ({ ...current, implement: input }));
+    writeStoredDraft({ ...readStoredDraftSnapshot(), implement: input });
+    emitStoredDraftChange();
   }, []);
 
   const clearPlan = useCallback(() => {
-    setDraft({});
-    if (typeof window !== "undefined") {
-      try {
-        window.localStorage.removeItem(planStorageKey);
-      } catch {
-        // No-op: clearing UI state is still useful if storage is unavailable.
-      }
-    }
+    removeStoredDraft();
+    emitStoredDraftChange();
   }, []);
 
   const value = useMemo(
@@ -113,7 +167,14 @@ export function usePlanDraft() {
 
 export function mergeWithDefaults(draft: PlanDraft): Required<PlanDraft> {
   return {
-    inspire: { ...defaultDraft.inspire, ...draft.inspire },
+    inspire: {
+      ...defaultDraft.inspire,
+      ...draft.inspire,
+      assessment: {
+        ...defaultDraft.inspire.assessment,
+        ...draft.inspire?.assessment,
+      },
+    },
     learn: { ...defaultDraft.learn, ...draft.learn },
     adapt: { ...defaultDraft.adapt, ...draft.adapt },
     implement: { ...defaultDraft.implement, ...draft.implement },

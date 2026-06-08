@@ -1,4 +1,19 @@
 import type { FrameworkKey, Language } from "@/lib/content";
+import {
+  assessmentCopy,
+  defaultAssessmentResult,
+  formatCurrency,
+  formatNumber,
+  formatOutlook,
+  getBestActionOccupation,
+  getCategoryLabel,
+  getComparedOccupations,
+  getMatchOccupations,
+  getPathway,
+  getRecommendations,
+  type IkigaiAssessmentResult,
+} from "@/lib/ikigai-assessment";
+import { occupations } from "@/lib/data/occupations";
 
 export type UserTrack = "worker" | "educator" | "employer" | "partner";
 export type AiComfort = "beginner" | "some" | "advanced";
@@ -23,6 +38,7 @@ export type InspirePlanInput = {
   motivation: string;
   desiredOutcome: string;
   humanStrengths: string;
+  assessment: IkigaiAssessmentResult;
 };
 
 export type LearnPlanInput = {
@@ -742,6 +758,7 @@ export const defaultDraft: Required<PlanDraft> = {
     motivation: "",
     desiredOutcome: "",
     humanStrengths: "",
+    assessment: defaultAssessmentResult,
   },
   learn: {
     track: "worker",
@@ -777,6 +794,10 @@ function hasText(value: string | undefined) {
   return Boolean(value?.trim());
 }
 
+function hasAssessmentResult(input: InspirePlanInput | undefined) {
+  return Boolean(input?.assessment?.pathwayId && input.assessment.matches.length > 0);
+}
+
 export function getPlanLevel(draft: PlanDraft): PlanLevel {
   if (draft.implement && hasText(draft.implement.workflowName) && hasText(draft.implement.humanGate)) {
     return 4;
@@ -787,7 +808,7 @@ export function getPlanLevel(draft: PlanDraft): PlanLevel {
   if (draft.learn) {
     return 2;
   }
-  if (draft.inspire && hasText(draft.inspire.role)) {
+  if (draft.inspire && (hasText(draft.inspire.role) || hasAssessmentResult(draft.inspire))) {
     return 1;
   }
   return 0;
@@ -859,6 +880,60 @@ function getNextActions(level: PlanLevel, language: Language): string[] {
   return [...copy.nextActions.level1];
 }
 
+function getAssessmentPlanSection(input: InspirePlanInput): GeneratedPlanSection | undefined {
+  const assessment = input.assessment;
+  const pathway = getPathway(assessment.pathwayId);
+
+  if (!pathway || assessment.matches.length === 0) {
+    return undefined;
+  }
+
+  const rankedMatches = getMatchOccupations(assessment.matches, occupations);
+  const compared = getComparedOccupations(assessment.compareSlugs, occupations);
+  const best = getBestActionOccupation(assessment.compareSlugs, assessment.matches, occupations);
+  const recommendations =
+    getRecommendations(best, assessment.pathwayId).length > 0
+      ? getRecommendations(best, assessment.pathwayId)
+      : assessment.recommendations;
+  const topMatchItems = rankedMatches.map(({ occupation, score }, index) => {
+    const pay = formatCurrency(occupation.pay);
+    const jobs = formatNumber(occupation.jobs);
+    const outlook = formatOutlook(occupation.outlook);
+    return `#${index + 1}: ${occupation.title} (${getCategoryLabel(
+      occupation.category,
+    )}) - score ${score}, vulnerability ${occupation.vulnerability}/10, ${pay}, ${outlook} growth, ${jobs} jobs`;
+  });
+  const comparisonItems = compared.map(
+    (occupation) =>
+      `Compare: ${occupation.title} - exposure ${occupation.exposure}/10, education: ${occupation.education}`,
+  );
+  const recommendationItems = recommendations.map(
+    (recommendation) => `${recommendation.title}: ${recommendation.body}`,
+  );
+
+  return {
+    title: "Conversational IKIGAI Assessment",
+    body: `${
+      assessment.name ? `${assessment.name}, your` : "Your"
+    } pathway is ${pathway.name}. ${
+      best
+        ? `The action plan is anchored on ${best.title}, selected from your ranked local assessment matches.`
+        : "The action plan is based on your ranked local assessment matches."
+    } ${assessmentCopy.sourceNote}`,
+    items: [
+      `Pathway: ${pathway.name} (${pathway.audience})`,
+      `Current situation: ${assessment.currentSituation || "not specified"}`,
+      `Feelings: ${assessment.feelings.join(", ") || "not specified"}`,
+      `Human skills: ${assessment.humanSkills.join(", ") || "not specified"}`,
+      `Interests: ${assessment.interests.join(", ") || "not specified"}`,
+      `Work style: ${assessment.workStyle.join(", ") || "not specified"}`,
+      ...topMatchItems,
+      ...comparisonItems,
+      ...recommendationItems,
+    ],
+  };
+}
+
 export function generateUpgradePlan(draft: PlanDraft, language: Language = "en"): GeneratedPlan {
   const level = getPlanLevel(draft);
   const riskLevel = getRiskLevel(draft.implement);
@@ -868,18 +943,25 @@ export function generateUpgradePlan(draft: PlanDraft, language: Language = "en")
   const sections: GeneratedPlanSection[] = [];
 
   if (draft.inspire) {
-    sections.push({
-      title: copy.plan.opportunityTitle,
-      body: copy.plan.opportunity(
-        draft.inspire.role || copy.defaults.learner,
-        draft.inspire.desiredOutcome || copy.defaults.clearOutcome,
-        draft.inspire.humanStrengths || copy.defaults.strengths,
-      ),
-      items: [
-        copy.plan.context(draft.inspire.organization || copy.defaults.notSpecified),
-        copy.plan.motivation(draft.inspire.motivation || copy.defaults.notSpecifiedYet),
-      ],
-    });
+    const assessmentSection = getAssessmentPlanSection(draft.inspire);
+
+    if (assessmentSection) {
+      sections.push(assessmentSection);
+    } else {
+      sections.push({
+        title: copy.plan.opportunityTitle,
+        body: copy.plan.opportunity(
+          draft.inspire.role || copy.defaults.learner,
+          draft.inspire.desiredOutcome || copy.defaults.clearOutcome,
+          draft.inspire.humanStrengths || copy.defaults.strengths,
+        ),
+        items: [
+          copy.plan.context(draft.inspire.organization || copy.defaults.notSpecified),
+          copy.plan.motivation(draft.inspire.motivation || copy.defaults.notSpecifiedYet),
+          assessmentCopy.incompleteState,
+        ],
+      });
+    }
   }
 
   if (level >= 2) {
