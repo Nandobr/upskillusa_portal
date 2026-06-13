@@ -11,6 +11,8 @@ import {
   Building2,
   CalendarDays,
   CheckCircle2,
+  Clipboard,
+  Download,
   GraduationCap,
   Lightbulb,
   Network,
@@ -24,21 +26,21 @@ import { IkigaiAssessment } from "@/components/ikigai-assessment";
 import { usePortalContent } from "@/components/language-provider";
 import { mergeWithDefaults, usePlanDraft } from "@/components/plan-provider";
 import {
-  comfortOptions,
+  aiStartingPointOptions,
   generateUpgradePlan,
+  generateLearnReport,
+  getLearnToolOptions,
   getPlanCopy,
-  learningPreferenceOptions,
+  learnFormatOptions,
+  learnGoalsByGroup,
+  learnGroupOptions,
+  learnReportToText,
+  learnTimeOptions,
   planToText,
-  timeOptions,
-  trackOptions,
   workCategories,
   type AdaptPlanInput,
-  type AiComfort,
   type ImplementPlanInput,
   type LearnPlanInput,
-  type LearningPreference,
-  type TimeCommitment,
-  type UserTrack,
   type WorkCategoryKey,
 } from "@/lib/plan";
 
@@ -49,10 +51,6 @@ const icons: Record<FrameworkKey, typeof Sparkles> = {
   implement: Workflow,
 };
 
-const userTrackKeys = Object.keys(trackOptions) as UserTrack[];
-const comfortKeys = Object.keys(comfortOptions) as AiComfort[];
-const timeKeys = Object.keys(timeOptions) as TimeCommitment[];
-const learningPreferenceKeys = Object.keys(learningPreferenceOptions) as LearningPreference[];
 const workCategoryKeys = Object.keys(workCategories) as WorkCategoryKey[];
 
 function FrameworkCards() {
@@ -259,102 +257,337 @@ function LearnDemo() {
   const copy = getPlanCopy(language);
   const demo = content.pages.learn.demo;
   const { draft, updateLearn } = usePlanDraft();
-  const values = mergeWithDefaults(draft).learn;
-  const setValues = (updater: (current: LearnPlanInput) => LearnPlanInput) => {
-    updateLearn(updater(values));
-  };
+  const [values, setValues] = useState<Partial<LearnPlanInput>>(() => draft.learn ?? {});
+  const [reportStatus, setReportStatus] = useState("");
+  const [saved, setSaved] = useState(false);
+  const goals = values.group ? learnGoalsByGroup[values.group] : [];
+  const tools = getLearnToolOptions(values.goal);
+  const completeValues =
+    values.group &&
+    values.startingPoint &&
+    values.goal &&
+    values.tool &&
+    values.format &&
+    values.time
+      ? {
+          group: values.group,
+          startingPoint: values.startingPoint,
+          goal: values.goal,
+          tool: values.tool,
+          format: values.format,
+          time: values.time,
+          reportSummary: "",
+          nextAction: "",
+        }
+      : null;
+  const report = completeValues ? generateLearnReport(completeValues) : null;
+  const reportText = report ? learnReportToText(report) : "";
 
-  const plan = useMemo(
-    () => generateUpgradePlan({ ...draft, learn: values }, language),
-    [draft, language, values],
-  );
+  function updatePathway(nextValues: Partial<LearnPlanInput>) {
+    setSaved(false);
+    setReportStatus("");
+    setValues(nextValues);
+  }
+
+  function saveReport() {
+    if (!report || !completeValues) return;
+
+    updateLearn({
+      ...completeValues,
+      reportSummary: report.planSummary,
+      nextAction: report.nextAction,
+    });
+    setSaved(true);
+    setReportStatus("LEARN Report saved to your AI Upgrade Plan.");
+  }
+
+  function copyReport() {
+    if (!reportText) return;
+
+    if (!navigator.clipboard) {
+      setReportStatus(copy.feedback.copyUnavailable);
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(reportText)
+      .then(() => setReportStatus("LEARN Report copied."))
+      .catch(() => setReportStatus(copy.feedback.copyFailed));
+  }
+
+  function downloadReport() {
+    if (!reportText) return;
+
+    const blob = new Blob([reportText], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "upskill-usa-learn-report.md";
+    link.click();
+    URL.revokeObjectURL(url);
+    setReportStatus("LEARN Report downloaded.");
+  }
 
   return (
-    <article className="demo-panel">
+    <article className="demo-panel learn-pathway-panel">
       <span className="demo-label">{demo.label}</span>
       <h2>{copy.headings.learningPath}</h2>
-      <div className="form-grid two">
-        <label className="field">
-          <span>{copy.fields.track}</span>
-          <select
-            value={values.track}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, track: event.target.value as UserTrack }))
-            }
-          >
-            {userTrackKeys.map((key) => (
-              <option key={key} value={key}>
-                {copy.tracks[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{copy.fields.aiComfort}</span>
-          <select
-            value={values.aiComfort}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, aiComfort: event.target.value as AiComfort }))
-            }
-          >
-            {comfortKeys.map((key) => (
-              <option key={key} value={key}>
-                {copy.comfort[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{copy.fields.timeAvailable}</span>
-          <select
-            value={values.timeCommitment}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                timeCommitment: event.target.value as TimeCommitment,
-              }))
-            }
-          >
-            {timeKeys.map((key) => (
-              <option key={key} value={key}>
-                {copy.time[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{copy.fields.learningPreference}</span>
-          <select
-            value={values.learningPreference}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                learningPreference: event.target.value as LearningPreference,
-              }))
-            }
-          >
-            {learningPreferenceKeys.map((key) => (
-              <option key={key} value={key}>
-                {copy.preferences[key]}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="result-panel">
-        <ul>
-          {plan.sections
-            .find((section) => section.title === copy.plan.learningTitle)
-            ?.items?.map((item) => (
-            <li key={item}>{item}</li>
+      <p className="assessment-step-subtitle">
+        Build a downloadable LEARN Report with selectable choices only.
+      </p>
+
+      <section className={`assessment-step-card ${values.group ? "complete" : ""}`}>
+        <div className="assessment-step-heading">
+          <span className="assessment-step-number">1</span>
+          <div>
+            <span className="assessment-step-eyebrow">Who is learning?</span>
+            <h3>Choose your group</h3>
+          </div>
+        </div>
+        <div className="assessment-pathways learn-option-grid four">
+          {learnGroupOptions.map((option) => (
+            <button
+              aria-pressed={values.group === option.id}
+              className={`assessment-pathway-card ${values.group === option.id ? "selected" : ""}`}
+              key={option.id}
+              type="button"
+              onClick={() => updatePathway({ group: option.id })}
+            >
+              <strong>{option.label}</strong>
+              <p>{option.description}</p>
+            </button>
           ))}
-        </ul>
-      </div>
-      <SavePlanActions
-        nextHref="/adapt"
-        nextLabel={copy.actions.saveToAdapt}
-        onSave={() => updateLearn(values)}
-      />
+        </div>
+      </section>
+
+      {values.group ? (
+        <section className={`assessment-step-card ${values.startingPoint ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">2</span>
+            <div>
+              <span className="assessment-step-eyebrow">AI starting point</span>
+              <h3>How familiar are you with AI tools?</h3>
+            </div>
+          </div>
+          <div className="assessment-choice-list">
+            {aiStartingPointOptions.map((option) => (
+              <button
+                aria-pressed={values.startingPoint === option.id}
+                className={`assessment-choice ${values.startingPoint === option.id ? "selected" : ""}`}
+                key={option.id}
+                type="button"
+                onClick={() =>
+                  updatePathway({
+                    group: values.group,
+                    startingPoint: option.id,
+                  })
+                }
+              >
+                <span className="assessment-choice-mark" aria-hidden />
+                <span>
+                  <strong>{option.label}</strong>
+                  <small>{option.description}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {values.group && values.startingPoint ? (
+        <section className={`assessment-step-card ${values.goal ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">3</span>
+            <div>
+              <span className="assessment-step-eyebrow">Practical goal</span>
+              <h3>What do you want AI to help you do?</h3>
+            </div>
+          </div>
+          <div className="assessment-skill-grid learn-option-grid three">
+            {goals.map((option) => (
+              <button
+                aria-pressed={values.goal === option.id}
+                className={`assessment-skill-card ${values.goal === option.id ? "selected" : ""}`}
+                key={option.id}
+                type="button"
+                onClick={() =>
+                  updatePathway({
+                    group: values.group,
+                    startingPoint: values.startingPoint,
+                    goal: option.id,
+                  })
+                }
+              >
+                <strong>{option.label}</strong>
+                <span>{option.description}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {values.group && values.startingPoint && values.goal ? (
+        <section className={`assessment-step-card ${values.tool ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">4</span>
+            <div>
+              <span className="assessment-step-eyebrow">Tool</span>
+              <h3>Choose the AI tool you want to learn</h3>
+            </div>
+          </div>
+          <div className="assessment-skill-grid learn-option-grid four">
+            {tools.map((option) => (
+              <button
+                aria-pressed={values.tool === option.id}
+                className={`assessment-skill-card ${values.tool === option.id ? "selected" : ""}`}
+                key={option.id}
+                type="button"
+                onClick={() =>
+                  updatePathway({
+                    group: values.group,
+                    startingPoint: values.startingPoint,
+                    goal: values.goal,
+                    tool: option.id,
+                  })
+                }
+              >
+                <strong>{option.label}</strong>
+                <span>{option.description}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {values.group && values.startingPoint && values.goal && values.tool ? (
+        <section className={`assessment-step-card ${values.format ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">5</span>
+            <div>
+              <span className="assessment-step-eyebrow">Learning format</span>
+              <h3>How do you want to learn?</h3>
+            </div>
+          </div>
+          <div className="assessment-chip-grid learn-option-grid three">
+            {learnFormatOptions.map((option) => (
+              <button
+                aria-pressed={values.format === option.id}
+                className={`assessment-chip ${values.format === option.id ? "selected" : ""}`}
+                key={option.id}
+                type="button"
+                onClick={() =>
+                  updatePathway({
+                    group: values.group,
+                    startingPoint: values.startingPoint,
+                    goal: values.goal,
+                    tool: values.tool,
+                    format: option.id,
+                  })
+                }
+              >
+                <strong>{option.label}</strong>
+                <span>{option.description}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {values.group && values.startingPoint && values.goal && values.tool && values.format ? (
+        <section className={`assessment-step-card ${values.time ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">6</span>
+            <div>
+              <span className="assessment-step-eyebrow">Time today</span>
+              <h3>How much time do you have?</h3>
+            </div>
+          </div>
+          <div className="assessment-chip-grid learn-option-grid three">
+            {learnTimeOptions.map((option) => (
+              <button
+                aria-pressed={values.time === option.id}
+                className={`assessment-chip ${values.time === option.id ? "selected" : ""}`}
+                key={option.id}
+                type="button"
+                onClick={() =>
+                  updatePathway({
+                    group: values.group,
+                    startingPoint: values.startingPoint,
+                    goal: values.goal,
+                    tool: values.tool,
+                    format: values.format,
+                    time: option.id,
+                  })
+                }
+              >
+                <strong>{option.label}</strong>
+                <span>{option.description}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {report ? (
+        <section className="result-panel learn-report-panel">
+          <span className="demo-label">{report.demoLabel}</span>
+          <h3>{report.title}</h3>
+          <div className="learn-report-grid">
+            <div>
+              <h4>Selected Path</h4>
+              <ul>
+                {report.path.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4>AI Learning Profile</h4>
+              <p>{report.profileSummary}</p>
+            </div>
+            <div>
+              <h4>Recommended Learning Path</h4>
+              <ul>
+                {report.learningPath.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h4>Tool Starter Guide</h4>
+              <ul>
+                {report.toolStarterGuide.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="learn-report-prompt">
+            <h4>Practice Prompt</h4>
+            <p>{report.practicePrompt}</p>
+          </div>
+          <div className="learn-report-next">
+            <h4>Next Action</h4>
+            <p>{report.nextAction}</p>
+          </div>
+          <div className="plan-actions learn-report-actions">
+            <button className="button ghost" type="button" onClick={copyReport}>
+              Copy report
+              <Clipboard size={16} aria-hidden />
+            </button>
+            <button className="button ghost" type="button" onClick={downloadReport}>
+              Download report
+              <Download size={16} aria-hidden />
+            </button>
+            <button className="button blue" type="button" onClick={saveReport}>
+              Save to AI Upgrade Plan
+              <CheckCircle2 size={16} aria-hidden />
+            </button>
+          </div>
+          {reportStatus ? <p className="copy-status">{reportStatus}</p> : null}
+          {saved ? <p className="demo-next-step">Saved. Your LEARN Report is complete; you can continue when ready.</p> : null}
+        </section>
+      ) : null}
       <DemoNotes demo={demo} />
     </article>
   );

@@ -19,6 +19,24 @@ export type UserTrack = "worker" | "educator" | "employer" | "partner";
 export type AiComfort = "beginner" | "some" | "advanced";
 export type TimeCommitment = "30-minutes" | "2-hours" | "saturday";
 export type LearningPreference = "watch" | "read" | "practice" | "seminar";
+export type LearnGroup = "student" | "educator" | "worker" | "entrepreneur";
+export type AiStartingPoint = "new-to-ai" | "tried-ai" | "ready-for-work";
+export type LearnGoal =
+  | "study-faster"
+  | "research-sources"
+  | "prepare-projects"
+  | "create-materials"
+  | "responsible-use"
+  | "planning-feedback"
+  | "communicate-better"
+  | "summarize-docs"
+  | "routine-tasks"
+  | "plan-offer"
+  | "marketing-sales"
+  | "operations-follow-up";
+export type LearnTool = "chatgpt" | "claude" | "gemini" | "copilot" | "notebooklm";
+export type LearnFormat = "watch" | "read" | "practice";
+export type LearnTime = "10-minutes" | "30-minutes" | "1-hour";
 export type WorkCategoryKey =
   | "customer-support"
   | "sales-marketing"
@@ -42,10 +60,14 @@ export type InspirePlanInput = {
 };
 
 export type LearnPlanInput = {
-  track: UserTrack;
-  aiComfort: AiComfort;
-  timeCommitment: TimeCommitment;
-  learningPreference: LearningPreference;
+  group: LearnGroup;
+  startingPoint: AiStartingPoint;
+  goal: LearnGoal;
+  tool: LearnTool;
+  format: LearnFormat;
+  time: LearnTime;
+  reportSummary: string;
+  nextAction: string;
 };
 
 export type AdaptPlanInput = {
@@ -123,6 +145,273 @@ export const learningPreferenceOptions: Record<LearningPreference, string> = {
   practice: "Practice with prompts",
   seminar: "Join a guided seminar",
 };
+
+export type LearnOption<T extends string> = {
+  id: T;
+  label: string;
+  description: string;
+};
+
+export type LearnReport = {
+  title: string;
+  demoLabel: string;
+  path: string[];
+  profileSummary: string;
+  learningPath: string[];
+  toolStarterGuide: string[];
+  practicePrompt: string;
+  nextAction: string;
+  planSummary: string;
+};
+
+export const learnGroupOptions: LearnOption<LearnGroup>[] = [
+  {
+    id: "student",
+    label: "Student",
+    description: "I want to use AI to study, research, and prepare for work.",
+  },
+  {
+    id: "educator",
+    label: "Educator",
+    description: "I want to use AI to teach, guide students, and save time.",
+  },
+  {
+    id: "worker",
+    label: "Worker",
+    description: "I want to use AI to improve daily tasks and stay valuable at work.",
+  },
+  {
+    id: "entrepreneur",
+    label: "Entrepreneur",
+    description: "I want to use AI to plan, market, sell, and operate better.",
+  },
+];
+
+export const aiStartingPointOptions: LearnOption<AiStartingPoint>[] = [
+  {
+    id: "new-to-ai",
+    label: "New to AI",
+    description: "I need the basics before I try tools.",
+  },
+  {
+    id: "tried-ai",
+    label: "Tried AI a Few Times",
+    description: "I have used AI, but I want better results.",
+  },
+  {
+    id: "ready-for-work",
+    label: "Ready to Use AI at Work",
+    description: "I want repeatable workflows I can trust.",
+  },
+];
+
+export const learnGoalsByGroup: Record<LearnGroup, LearnOption<LearnGoal>[]> = {
+  student: [
+    {
+      id: "study-faster",
+      label: "Study and Understand Faster",
+      description: "Turn confusing material into clearer explanations and study steps.",
+    },
+    {
+      id: "research-sources",
+      label: "Research and Summarize Sources",
+      description: "Work with readings, notes, and source material more effectively.",
+    },
+    {
+      id: "prepare-projects",
+      label: "Prepare Resumes, Projects, or Presentations",
+      description: "Draft stronger school and career materials with human review.",
+    },
+  ],
+  educator: [
+    {
+      id: "create-materials",
+      label: "Create Teaching Materials",
+      description: "Draft lessons, examples, quizzes, and activities faster.",
+    },
+    {
+      id: "responsible-use",
+      label: "Guide Students on Responsible AI Use",
+      description: "Set clear boundaries and model ethical use.",
+    },
+    {
+      id: "planning-feedback",
+      label: "Save Time on Planning and Feedback",
+      description: "Use AI for drafts while keeping educator judgment in control.",
+    },
+  ],
+  worker: [
+    {
+      id: "communicate-better",
+      label: "Write and Communicate Better",
+      description: "Draft, revise, and clarify everyday work communication.",
+    },
+    {
+      id: "summarize-docs",
+      label: "Summarize Documents or Meetings",
+      description: "Turn notes and long documents into clear action points.",
+    },
+    {
+      id: "routine-tasks",
+      label: "Save Time on Routine Tasks",
+      description: "Build repeatable prompts for work you do often.",
+    },
+  ],
+  entrepreneur: [
+    {
+      id: "plan-offer",
+      label: "Plan My Business or Offer",
+      description: "Clarify the customer, promise, offer, and first steps.",
+    },
+    {
+      id: "marketing-sales",
+      label: "Create Marketing and Sales Content",
+      description: "Draft messages, posts, pages, and follow-up sequences.",
+    },
+    {
+      id: "operations-follow-up",
+      label: "Organize Operations and Follow-Up",
+      description: "Create simple systems for tasks, customers, and next actions.",
+    },
+  ],
+};
+
+export const learnFormatOptions: LearnOption<LearnFormat>[] = [
+  { id: "watch", label: "Watch", description: "Short lessons and examples." },
+  { id: "read", label: "Read", description: "Quick guides and checklists." },
+  { id: "practice", label: "Practice", description: "Prompts, exercises, and templates." },
+];
+
+export const learnTimeOptions: LearnOption<LearnTime>[] = [
+  { id: "10-minutes", label: "10 Minutes", description: "One quick starting action." },
+  { id: "30-minutes", label: "30 Minutes", description: "A focused mini-path." },
+  { id: "1-hour", label: "1 Hour", description: "A complete starter session." },
+];
+
+export const learnToolOptions: Record<LearnTool, LearnOption<LearnTool>> = {
+  chatgpt: {
+    id: "chatgpt",
+    label: "ChatGPT",
+    description: "A flexible general AI assistant for writing, planning, and practice.",
+  },
+  claude: {
+    id: "claude",
+    label: "Claude",
+    description: "A strong assistant for writing, reasoning, and longer documents.",
+  },
+  gemini: {
+    id: "gemini",
+    label: "Gemini",
+    description: "Google's AI assistant for general help and Google-connected work.",
+  },
+  copilot: {
+    id: "copilot",
+    label: "Microsoft Copilot",
+    description: "AI support for Microsoft documents, meetings, email, and work tasks.",
+  },
+  notebooklm: {
+    id: "notebooklm",
+    label: "NotebookLM",
+    description: "A source-grounded tool for working with notes, documents, and readings.",
+  },
+};
+
+const documentHeavyGoals = new Set<LearnGoal>(["research-sources", "summarize-docs"]);
+const generalToolIds: LearnTool[] = ["chatgpt", "claude", "gemini", "copilot"];
+const documentToolIds: LearnTool[] = ["notebooklm", "chatgpt", "claude", "copilot"];
+
+export function getLearnToolOptions(goal: LearnGoal | undefined): LearnOption<LearnTool>[] {
+  const ids = goal && documentHeavyGoals.has(goal) ? documentToolIds : generalToolIds;
+  return ids.map((id) => learnToolOptions[id]);
+}
+
+function findLearnOption<T extends string>(options: LearnOption<T>[], id: T) {
+  return options.find((option) => option.id === id) ?? options[0];
+}
+
+export function getLearnLabels(input: LearnPlanInput) {
+  const group = findLearnOption(learnGroupOptions, input.group);
+  const startingPoint = findLearnOption(aiStartingPointOptions, input.startingPoint);
+  const goal = findLearnOption(learnGoalsByGroup[input.group], input.goal);
+  const tool = learnToolOptions[input.tool];
+  const format = findLearnOption(learnFormatOptions, input.format);
+  const time = findLearnOption(learnTimeOptions, input.time);
+
+  return { group, startingPoint, goal, tool, format, time };
+}
+
+export function generateLearnReport(input: LearnPlanInput): LearnReport {
+  const labels = getLearnLabels(input);
+  const learningVerb =
+    input.format === "watch" ? "Watch one short demo" : input.format === "read" ? "Read one quick guide" : "Practice with one real prompt";
+  const timeAction =
+    input.time === "10-minutes"
+      ? "Use one low-risk task today and stop after the first useful result."
+      : input.time === "30-minutes"
+        ? "Complete the starter practice, revise once, and save the best prompt."
+        : "Run the practice on a real example, review the output, and write your repeatable next step.";
+  const reviewAction =
+    input.startingPoint === "ready-for-work"
+      ? "Add a human review gate before the output affects a real person, customer, grade, or business decision."
+      : "Review the output like a draft, not a final answer.";
+
+  const profileSummary = `You are a ${labels.group.label.toLowerCase()} who is ${labels.startingPoint.label.toLowerCase()} and wants to ${labels.goal.label.toLowerCase()} with ${labels.tool.label}.`;
+  const practicePrompt = `Act as a practical AI learning coach for a ${labels.group.label.toLowerCase()}. Help me ${labels.goal.label.toLowerCase()} using ${labels.tool.label}. Give me a simple first draft, explain what I should check, and end with three ways I can improve the result.`;
+  const nextAction = `${learningVerb} for ${labels.time.label.toLowerCase()}. ${timeAction}`;
+  const planSummary = `${labels.group.label}: ${labels.startingPoint.label}. Focus on "${labels.goal.label}" with ${labels.tool.label} using a ${labels.format.label.toLowerCase()} path for ${labels.time.label.toLowerCase()}.`;
+
+  return {
+    title: "Your LEARN Report",
+    demoLabel: "Demo content - generated locally",
+    path: [
+      `Group: ${labels.group.label}`,
+      `Starting point: ${labels.startingPoint.label}`,
+      `Goal: ${labels.goal.label}`,
+      `Tool: ${labels.tool.label}`,
+      `Format: ${labels.format.label}`,
+      `Time: ${labels.time.label}`,
+    ],
+    profileSummary,
+    learningPath: [
+      `Start with the smallest useful version of "${labels.goal.label}" before trying advanced workflows.`,
+      `Use ${labels.tool.label} for draft support, explanation, comparison, and practice - not as the final authority.`,
+      reviewAction,
+    ],
+    toolStarterGuide: [
+      `${labels.tool.label} fits this path because it can help turn unclear work into a structured first draft.`,
+      "Begin with context, desired output, constraints, and what a good answer should include.",
+      "Ask for a revision after you review the first output; the second pass is usually where the value appears.",
+    ],
+    practicePrompt,
+    nextAction,
+    planSummary,
+  };
+}
+
+export function learnReportToText(report: LearnReport) {
+  return [
+    report.title,
+    report.demoLabel,
+    "",
+    "Selected Path",
+    ...report.path.map((item) => `- ${item}`),
+    "",
+    "AI Learning Profile",
+    report.profileSummary,
+    "",
+    "Recommended Learning Path",
+    ...report.learningPath.map((item) => `- ${item}`),
+    "",
+    "Tool Starter Guide",
+    ...report.toolStarterGuide.map((item) => `- ${item}`),
+    "",
+    "Practice Prompt",
+    report.practicePrompt,
+    "",
+    "Next Action",
+    report.nextAction,
+  ].join("\n");
+}
 
 export const workCategories: Record<WorkCategoryKey, { label: string; examples: string[] }> = {
   "customer-support": {
@@ -761,10 +1050,14 @@ export const defaultDraft: Required<PlanDraft> = {
     assessment: defaultAssessmentResult,
   },
   learn: {
-    track: "worker",
-    aiComfort: "beginner",
-    timeCommitment: "30-minutes",
-    learningPreference: "practice",
+    group: "worker",
+    startingPoint: "new-to-ai",
+    goal: "communicate-better",
+    tool: "chatgpt",
+    format: "practice",
+    time: "30-minutes",
+    reportSummary: "",
+    nextAction: "",
   },
   adapt: {
     workCategory: "operations",
@@ -848,17 +1141,14 @@ function getLearningPath(input: LearnPlanInput | undefined, language: Language) 
     return [copy.learning.incomplete];
   }
 
-  const base =
-    input.aiComfort === "beginner"
-      ? copy.learning.beginner
-      : input.aiComfort === "some"
-        ? copy.learning.some
-        : copy.learning.advanced;
+  const report = generateLearnReport({
+    ...defaultDraft.learn,
+    ...input,
+  });
 
   return [
-    base,
-    copy.learning.format(copy.time[input.timeCommitment], copy.preferences[input.learningPreference]),
-    copy.learning.track(copy.tracks[input.track]),
+    ...report.path,
+    `Recommended next action: ${input.nextAction || report.nextAction}`,
   ];
 }
 
@@ -965,9 +1255,11 @@ export function generateUpgradePlan(draft: PlanDraft, language: Language = "en")
   }
 
   if (level >= 2) {
+    const learnReport = draft.learn ? generateLearnReport({ ...defaultDraft.learn, ...draft.learn }) : undefined;
+
     sections.push({
       title: copy.plan.learningTitle,
-      body: copy.plan.learningBody,
+      body: draft.learn?.reportSummary || learnReport?.planSummary || copy.plan.learningBody,
       items: getLearningPath(draft.learn, language),
     });
   }

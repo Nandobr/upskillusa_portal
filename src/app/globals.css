@@ -1021,6 +1021,22 @@ button {
   background: radial-gradient(circle, var(--blue-700) 42%, var(--white) 46%);
 }
 
+.assessment-choice strong,
+.assessment-choice small,
+.assessment-chip strong,
+.assessment-chip span {
+  display: block;
+}
+
+.assessment-choice small,
+.assessment-chip span {
+  margin-top: 3px;
+  color: var(--slate-600);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 .assessment-chip-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
@@ -1550,6 +1566,54 @@ button {
   line-height: 1.5;
 }
 
+.learn-pathway-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.learn-option-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.learn-option-grid.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.learn-report-panel {
+  display: grid;
+  gap: 14px;
+}
+
+.learn-report-panel h4 {
+  margin: 0 0 6px;
+  color: var(--navy-900);
+  font-size: 0.9rem;
+}
+
+.learn-report-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.learn-report-grid > div,
+.learn-report-prompt,
+.learn-report-next {
+  border: 1px solid rgba(23, 32, 51, 0.1);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 12px;
+}
+
+.learn-report-prompt p,
+.learn-report-next p {
+  color: var(--slate-900);
+}
+
+.learn-report-actions {
+  justify-content: flex-start;
+}
+
 .plan-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1781,7 +1845,10 @@ button {
   }
 
   .assessment-chip-grid,
-  .assessment-skill-grid {
+  .assessment-skill-grid,
+  .learn-option-grid.three,
+  .learn-option-grid.four,
+  .learn-report-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1924,6 +1991,12 @@ button {
     min-height: 36px;
     padding: 7px 10px;
     font-size: 0.78rem;
+  }
+
+  .learn-option-grid.three,
+  .learn-option-grid.four,
+  .learn-report-grid {
+    grid-template-columns: 1fr;
   }
 
   .framework-card {
