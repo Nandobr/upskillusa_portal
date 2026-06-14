@@ -48,6 +48,12 @@ export type WorkCategoryKey =
   | "leadership-strategy";
 export type RiskLevel = "low" | "medium" | "high";
 export type PlanLevel = 0 | 1 | 2 | 3 | 4;
+export type SeminarTrack = "worker" | "business";
+export type SeminarReadinessKey =
+  | "bringWorkflow"
+  | "knowTimeSpent"
+  | "haveSample"
+  | "canExplainReview";
 
 export type InspirePlanInput = {
   userType: UserTrack;
@@ -70,16 +76,54 @@ export type LearnPlanInput = {
   nextAction: string;
 };
 
-export type AdaptPlanInput = {
+export type SeminarReadinessState = Record<SeminarReadinessKey, boolean>;
+
+export type WorkerSeminarPrep = {
+  weeklyHoursSaved: number;
+  hourlyValue: number;
+  proofPoint: string;
+};
+
+export type BusinessSeminarPrep = {
+  workersAffected: number;
+  weeklyHoursSavedPerWorker: number;
+  blendedHourlyValue: number;
+};
+
+export type SeminarResult = {
+  track: SeminarTrack;
+  title: string;
+  summary: string;
+  annualValue: number;
+  annualValueLabel: string;
+  weeklyHoursSaved: number;
+  multiplier: number;
+  items: string[];
+  text: string;
+  filename: string;
+};
+
+export type LegacyAdaptPlanFields = {
+  workflowPain?: string;
+  mainSteps?: string;
+  delay?: string;
+  repetitiveWork?: string;
+  judgmentNeeds?: string;
+  desiredOutcome?: string;
+  own?: string;
+  become?: string;
+};
+
+export type AdaptPlanInput = LegacyAdaptPlanFields & {
+  track: SeminarTrack;
+  readiness: SeminarReadinessState;
   workCategory: WorkCategoryKey;
-  workflowPain: string;
-  mainSteps: string;
-  delay: string;
-  repetitiveWork: string;
-  judgmentNeeds: string;
-  desiredOutcome: string;
-  own: string;
-  become: string;
+  workflow: string;
+  multiplier: number;
+  worker: WorkerSeminarPrep;
+  business: BusinessSeminarPrep;
+  resultText?: string;
+  savedAt?: string;
 };
 
 export type ImplementPlanInput = {
@@ -448,17 +492,38 @@ export const workCategories: Record<WorkCategoryKey, { label: string; examples: 
   },
 };
 
+export const seminarValueMultiplierDefault = 3.7;
+
+export const seminarTrackOptions: Record<SeminarTrack, string> = {
+  worker: "Worker / Employee",
+  business: "Business Leader / Owner",
+};
+
+export const seminarReadinessDefaults: SeminarReadinessState = {
+  bringWorkflow: false,
+  knowTimeSpent: false,
+  haveSample: false,
+  canExplainReview: false,
+};
+
+export const seminarReadinessItems: { id: SeminarReadinessKey; label: string }[] = [
+  { id: "bringWorkflow", label: "I can name one workflow or task to improve." },
+  { id: "knowTimeSpent", label: "I know roughly how much time it takes each week." },
+  { id: "haveSample", label: "I can bring one safe sample, note, form, or message." },
+  { id: "canExplainReview", label: "I can explain who should review the AI-assisted work." },
+];
+
 export const planCopy = {
   en: {
     headings: {
       opportunitySeed: "Opportunity Seed",
       learningPath: "Learning Path",
       opportunityDraft: "AI Opportunity Draft",
-      completePlan: "Complete AI Upgrade Plan",
-      pageEyebrow: "AI UPGRADE PLAN",
+      completePlan: "Complete AI-Ready Action Plan",
+      pageEyebrow: "AI-READY ACTION PLAN",
       pageTitle: "Your plan so far",
       pageIntro:
-        "This local MVP plan is generated from the four UpSkill USA steps you have completed: Inspire, Learn, Adapt, and Implement.",
+        "This local MVP plan is generated from the four UpSkill USA steps you have completed: Inspire, Learn, Seminar, and Implement.",
       nextThreeDays: "Next 3 Days",
       nextSevenDays: "Next 7 Days",
       afterSevenDays: "After 7 Days",
@@ -467,9 +532,9 @@ export const planCopy = {
       saveAndContinue: "Save and continue",
       viewPlanSoFar: "View plan so far",
       saveToLearn: "Save and continue to Learn",
-      saveToAdapt: "Save and continue to Adapt",
+      saveToAdapt: "Save and continue to Seminar",
       saveToImplement: "Save and continue to Implement",
-      saveAndViewComplete: "Save and view complete plan",
+      saveAndViewComplete: "Save and view AI-Ready Action Plan",
       continueTo: "Continue to",
       reviewImplementation: "Review implementation",
       copyPlan: "Copy plan",
@@ -503,7 +568,7 @@ export const planCopy = {
       copyUnavailable: "Copy is not available in this browser.",
       copied: "Plan copied.",
       copyFailed: "Copy failed. You can select the plan text manually.",
-      clearConfirm: "Clear your locally saved AI Upgrade Plan?",
+      clearConfirm: "Clear your locally saved AI-Ready Action Plan?",
       notAssessed: "not assessed",
     },
     safetyQuestions: {
@@ -551,17 +616,19 @@ export const planCopy = {
       high: "HIGH",
     },
     levels: {
-      0: "Start your AI Upgrade Plan",
+      0: "Start your AI-Ready Action Plan",
       1: "Level 1: Opportunity Seed",
       2: "Level 2: Learning Path",
-      3: "Level 3: AI Opportunity Draft",
-      4: "Level 4: Complete AI Upgrade Plan",
+      3: "Level 3: AI-Ready Seminar Result",
+      4: "Level 4: Complete AI-Ready Action Plan",
     },
     plan: {
-      title: "UpSkill USA AI Upgrade Plan",
+      title: "UpSkill USA AI-Ready Action Plan",
       opportunityTitle: "Your AI Opportunity",
       learningTitle: "Recommended Learning Path",
-      adaptationTitle: "Workflow Adaptation Plan",
+      adaptationTitle: "AI-Ready Seminar Result",
+      workerSeminarTitle: "Manifest of Saved Hours",
+      businessSeminarTitle: "Company AI-Ready Action Plan",
       pilotTitle: "First Workflow Pilot",
       startTitle: "Start With Inspire",
       opportunity: (role: string, outcome: string, strengths: string) =>
@@ -570,13 +637,27 @@ export const planCopy = {
       motivation: (value: string) => `Motivation: ${value}`,
       learningBody: "Use this path to build confidence before changing real workflows.",
       adaptation: (workflow: string, category: string) =>
-        `Focus on ${workflow} in ${category}. AI should assist the repetitive and delayed parts first, while humans keep ownership of judgment-heavy work.`,
+        `Bring ${workflow} in ${category} to the seminar. AI should assist the repetitive and delayed parts first, while humans keep ownership of judgment-heavy work.`,
+      workerSeminarBody: (workflow: string, category: string, annualValue: string) =>
+        `This manifest focuses on ${workflow} in ${category}. The current estimate is ${annualValue} in annual value created when saved hours are upgraded into better work.`,
+      businessSeminarBody: (workflow: string, category: string, annualValue: string) =>
+        `This company plan focuses on ${workflow} in ${category}. The current estimate is ${annualValue} in annual value created across the affected team.`,
       currentSteps: (value: string) => `Current steps: ${value}`,
       delay: (value: string) => `Delay or friction: ${value}`,
       repetitive: (value: string) => `Repetitive work: ${value}`,
       judgment: (value: string) => `Human judgment: ${value}`,
       own: (value: string) => `Own: ${value}`,
       become: (value: string) => `Become: ${value}`,
+      track: (value: string) => `Seminar track: ${value}`,
+      workArea: (value: string) => `Work area: ${value}`,
+      workflow: (value: string) => `Workflow/problem: ${value}`,
+      readiness: (ready: number, total: number) => `Readiness checklist: ${ready}/${total} prepared`,
+      weeklyHours: (value: string) => `Weekly hours saved: ${value}`,
+      hourlyValue: (value: string) => `Hourly value: ${value}`,
+      proofPoint: (value: string) => `Proof point to bring: ${value}`,
+      workersAffected: (value: string) => `Workers affected: ${value}`,
+      multiplier: (value: string) => `Value multiplier: ${value}x`,
+      annualValue: (value: string) => `Estimated annual value created: ${value}`,
       pilot: (workflow: string, scope: string) =>
         `Pilot ${workflow} with a narrow scope: ${scope}.`,
       humanGate: (value: string) => `Human review gate: ${value}`,
@@ -591,7 +672,7 @@ export const planCopy = {
       strengths: "judgment, care, creativity, and domain knowledge",
       notSpecified: "not specified",
       notSpecifiedYet: "not specified yet",
-      painfulWorkflow: "one painful workflow",
+      painfulWorkflow: "one workflow or problem",
       selectedWorkArea: "the selected work area",
       mapBeforePilot: "map these before the pilot",
       humanReview: "the human review and final decision",
@@ -628,7 +709,7 @@ export const planCopy = {
       level2: [
         "Day 1: Complete one short learning resource.",
         "Day 2: Practice three prompts related to your role.",
-        "Day 3: Pick one workflow pain and continue to Adapt.",
+        "Day 3: Pick one workflow or problem and continue to Seminar.",
       ],
       level1: [
         "Day 1: Write your role and three tasks you repeat weekly.",
@@ -639,7 +720,7 @@ export const planCopy = {
     afterSevenDays: {
       complete: [
         "Learn More: return to Learn if confidence or skills still feel thin.",
-        "Run A Bigger Pilot: return to Adapt and map the full team workflow.",
+        "Run A Bigger Pilot: return to Seminar and map the full team workflow.",
         "Get Help Implementing: request a seminar, educator agent, or installer agent when the workflow affects a team or has higher risk.",
       ],
       partial: ["Return to the portal and complete the next framework step to keep building momentum."],
@@ -650,11 +731,11 @@ export const planCopy = {
       opportunitySeed: "Semilla de oportunidad",
       learningPath: "Ruta de aprendizaje",
       opportunityDraft: "Borrador de oportunidad con IA",
-      completePlan: "Plan completo de actualización con IA",
-      pageEyebrow: "PLAN DE ACTUALIZACIÓN CON IA",
+      completePlan: "Plan de acción listo para IA completo",
+      pageEyebrow: "PLAN DE ACCIÓN LISTO PARA IA",
       pageTitle: "Tu plan hasta ahora",
       pageIntro:
-        "Este plan MVP local se genera con los pasos de UpSkill USA que completaste: Inspirar, Aprender, Adaptar e Implementar.",
+        "Este plan MVP local se genera con los pasos de UpSkill USA que completaste: Inspirar, Aprender, Seminario e Implementar.",
       nextThreeDays: "Próximos 3 días",
       nextSevenDays: "Próximos 7 días",
       afterSevenDays: "Después de 7 días",
@@ -663,9 +744,9 @@ export const planCopy = {
       saveAndContinue: "Guardar y continuar",
       viewPlanSoFar: "Ver plan hasta ahora",
       saveToLearn: "Guardar y continuar a Aprender",
-      saveToAdapt: "Guardar y continuar a Adaptar",
+      saveToAdapt: "Guardar y continuar al Seminario",
       saveToImplement: "Guardar y continuar a Implementar",
-      saveAndViewComplete: "Guardar y ver plan completo",
+      saveAndViewComplete: "Guardar y ver Plan de acción listo para IA",
       continueTo: "Continuar a",
       reviewImplementation: "Revisar implementación",
       copyPlan: "Copiar plan",
@@ -699,7 +780,7 @@ export const planCopy = {
       copyUnavailable: "Copiar no está disponible en este navegador.",
       copied: "Plan copiado.",
       copyFailed: "No se pudo copiar. Puedes seleccionar el texto del plan manualmente.",
-      clearConfirm: "¿Borrar tu Plan de actualización con IA guardado localmente?",
+      clearConfirm: "¿Borrar tu Plan de acción listo para IA guardado localmente?",
       notAssessed: "sin evaluar",
     },
     safetyQuestions: {
@@ -747,17 +828,19 @@ export const planCopy = {
       high: "ALTO",
     },
     levels: {
-      0: "Comienza tu Plan de actualización con IA",
+      0: "Comienza tu Plan de acción listo para IA",
       1: "Nivel 1: Semilla de oportunidad",
       2: "Nivel 2: Ruta de aprendizaje",
-      3: "Nivel 3: Borrador de oportunidad con IA",
-      4: "Nivel 4: Plan completo de actualización con IA",
+      3: "Nivel 3: Resultado del seminario listo para IA",
+      4: "Nivel 4: Plan de acción listo para IA completo",
     },
     plan: {
-      title: "Plan de actualización con IA de UpSkill USA",
+      title: "Plan de acción listo para IA de UpSkill USA",
       opportunityTitle: "Tu oportunidad con IA",
       learningTitle: "Ruta de aprendizaje recomendada",
-      adaptationTitle: "Plan de adaptación del flujo de trabajo",
+      adaptationTitle: "Resultado del seminario listo para IA",
+      workerSeminarTitle: "Manifiesto de horas ahorradas",
+      businessSeminarTitle: "Plan de acción empresarial listo para IA",
       pilotTitle: "Primer piloto de flujo de trabajo",
       startTitle: "Empieza con Inspirar",
       opportunity: (role: string, outcome: string, strengths: string) =>
@@ -766,13 +849,27 @@ export const planCopy = {
       motivation: (value: string) => `Motivación: ${value}`,
       learningBody: "Usa esta ruta para ganar confianza antes de cambiar flujos reales.",
       adaptation: (workflow: string, category: string) =>
-        `Enfócate en ${workflow} dentro de ${category}. La IA debe asistir primero las partes repetitivas y demoradas, mientras las personas mantienen la responsabilidad del trabajo que exige juicio.`,
+        `Trae ${workflow} dentro de ${category} al seminario. La IA debe asistir primero las partes repetitivas y demoradas, mientras las personas mantienen la responsabilidad del trabajo que exige juicio.`,
+      workerSeminarBody: (workflow: string, category: string, annualValue: string) =>
+        `Este manifiesto se enfoca en ${workflow} dentro de ${category}. La estimación actual es ${annualValue} en valor anual creado cuando las horas ahorradas se convierten en mejor trabajo.`,
+      businessSeminarBody: (workflow: string, category: string, annualValue: string) =>
+        `Este plan de empresa se enfoca en ${workflow} dentro de ${category}. La estimación actual es ${annualValue} en valor anual creado en el equipo afectado.`,
       currentSteps: (value: string) => `Pasos actuales: ${value}`,
       delay: (value: string) => `Demora o fricción: ${value}`,
       repetitive: (value: string) => `Trabajo repetitivo: ${value}`,
       judgment: (value: string) => `Juicio humano: ${value}`,
       own: (value: string) => `Asumirás: ${value}`,
       become: (value: string) => `Te convertirás en: ${value}`,
+      track: (value: string) => `Ruta del seminario: ${value}`,
+      workArea: (value: string) => `Área de trabajo: ${value}`,
+      workflow: (value: string) => `Flujo/problema: ${value}`,
+      readiness: (ready: number, total: number) => `Lista de preparación: ${ready}/${total} preparado`,
+      weeklyHours: (value: string) => `Horas semanales ahorradas: ${value}`,
+      hourlyValue: (value: string) => `Valor por hora: ${value}`,
+      proofPoint: (value: string) => `Prueba para traer: ${value}`,
+      workersAffected: (value: string) => `Trabajadores afectados: ${value}`,
+      multiplier: (value: string) => `Multiplicador de valor: ${value}x`,
+      annualValue: (value: string) => `Valor anual estimado creado: ${value}`,
       pilot: (workflow: string, scope: string) =>
         `Haz un piloto de ${workflow} con un alcance reducido: ${scope}.`,
       humanGate: (value: string) => `Revisión humana: ${value}`,
@@ -787,7 +884,7 @@ export const planCopy = {
       strengths: "juicio, cuidado, creatividad y conocimiento del dominio",
       notSpecified: "sin especificar",
       notSpecifiedYet: "aún sin especificar",
-      painfulWorkflow: "un flujo de trabajo doloroso",
+      painfulWorkflow: "un flujo de trabajo o problema",
       selectedWorkArea: "el área de trabajo seleccionada",
       mapBeforePilot: "mapea esto antes del piloto",
       humanReview: "la revisión humana y la decisión final",
@@ -824,7 +921,7 @@ export const planCopy = {
       level2: [
         "Día 1: Completa un recurso corto de aprendizaje.",
         "Día 2: Practica tres prompts relacionados con tu rol.",
-        "Día 3: Elige un dolor de flujo de trabajo y continúa a Adaptar.",
+        "Día 3: Elige un flujo de trabajo o problema y continúa al Seminario.",
       ],
       level1: [
         "Día 1: Escribe tu rol y tres tareas que repites cada semana.",
@@ -835,7 +932,7 @@ export const planCopy = {
     afterSevenDays: {
       complete: [
         "Aprender más: vuelve a Aprender si la confianza o las habilidades aún se sienten débiles.",
-        "Ejecutar un piloto más grande: vuelve a Adaptar y mapea el flujo completo del equipo.",
+        "Ejecutar un piloto más grande: vuelve al Seminario y mapea el flujo completo del equipo.",
         "Pedir ayuda para implementar: solicita un seminario, agente educador o agente instalador cuando el flujo afecte a un equipo o tenga mayor riesgo.",
       ],
       partial: ["Vuelve al portal y completa el siguiente paso del marco para mantener el impulso."],
@@ -846,11 +943,11 @@ export const planCopy = {
       opportunitySeed: "Semente de oportunidade",
       learningPath: "Trilha de aprendizagem",
       opportunityDraft: "Rascunho de oportunidade com IA",
-      completePlan: "Plano completo de atualização com IA",
-      pageEyebrow: "PLANO DE ATUALIZAÇÃO COM IA",
+      completePlan: "Plano de ação pronto para IA completo",
+      pageEyebrow: "PLANO DE AÇÃO PRONTO PARA IA",
       pageTitle: "Seu plano até agora",
       pageIntro:
-        "Este plano MVP local é gerado a partir dos passos da UpSkill USA que você completou: Inspirar, Aprender, Adaptar e Implementar.",
+        "Este plano MVP local é gerado a partir dos passos da UpSkill USA que você completou: Inspirar, Aprender, Seminário e Implementar.",
       nextThreeDays: "Próximos 3 dias",
       nextSevenDays: "Próximos 7 dias",
       afterSevenDays: "Depois de 7 dias",
@@ -859,9 +956,9 @@ export const planCopy = {
       saveAndContinue: "Salvar e continuar",
       viewPlanSoFar: "Ver plano até agora",
       saveToLearn: "Salvar e continuar para Aprender",
-      saveToAdapt: "Salvar e continuar para Adaptar",
+      saveToAdapt: "Salvar e continuar para Seminário",
       saveToImplement: "Salvar e continuar para Implementar",
-      saveAndViewComplete: "Salvar e ver plano completo",
+      saveAndViewComplete: "Salvar e ver Plano de ação pronto para IA",
       continueTo: "Continuar para",
       reviewImplementation: "Revisar implementação",
       copyPlan: "Copiar plano",
@@ -895,7 +992,7 @@ export const planCopy = {
       copyUnavailable: "Copiar não está disponível neste navegador.",
       copied: "Plano copiado.",
       copyFailed: "Não foi possível copiar. Você pode selecionar o texto do plano manualmente.",
-      clearConfirm: "Limpar seu Plano de atualização com IA salvo localmente?",
+      clearConfirm: "Limpar seu Plano de ação pronto para IA salvo localmente?",
       notAssessed: "não avaliado",
     },
     safetyQuestions: {
@@ -943,17 +1040,19 @@ export const planCopy = {
       high: "ALTO",
     },
     levels: {
-      0: "Comece seu Plano de atualização com IA",
+      0: "Comece seu Plano de ação pronto para IA",
       1: "Nível 1: Semente de oportunidade",
       2: "Nível 2: Trilha de aprendizagem",
-      3: "Nível 3: Rascunho de oportunidade com IA",
-      4: "Nível 4: Plano completo de atualização com IA",
+      3: "Nível 3: Resultado do seminário pronto para IA",
+      4: "Nível 4: Plano de ação pronto para IA completo",
     },
     plan: {
-      title: "Plano de atualização com IA da UpSkill USA",
+      title: "Plano de ação pronto para IA da UpSkill USA",
       opportunityTitle: "Sua oportunidade com IA",
       learningTitle: "Trilha de aprendizagem recomendada",
-      adaptationTitle: "Plano de adaptação do fluxo de trabalho",
+      adaptationTitle: "Resultado do seminário pronto para IA",
+      workerSeminarTitle: "Manifesto de horas economizadas",
+      businessSeminarTitle: "Plano de ação da empresa pronto para IA",
       pilotTitle: "Primeiro piloto de fluxo de trabalho",
       startTitle: "Comece por Inspirar",
       opportunity: (role: string, outcome: string, strengths: string) =>
@@ -962,13 +1061,27 @@ export const planCopy = {
       motivation: (value: string) => `Motivação: ${value}`,
       learningBody: "Use esta trilha para ganhar confiança antes de mudar fluxos reais.",
       adaptation: (workflow: string, category: string) =>
-        `Concentre-se em ${workflow} em ${category}. A IA deve ajudar primeiro nas partes repetitivas e demoradas, enquanto humanos mantêm a responsabilidade pelo trabalho que exige julgamento.`,
+        `Leve ${workflow} em ${category} para o seminário. A IA deve ajudar primeiro nas partes repetitivas e demoradas, enquanto humanos mantêm a responsabilidade pelo trabalho que exige julgamento.`,
+      workerSeminarBody: (workflow: string, category: string, annualValue: string) =>
+        `Este manifesto foca em ${workflow} em ${category}. A estimativa atual é ${annualValue} em valor anual criado quando horas economizadas viram trabalho melhor.`,
+      businessSeminarBody: (workflow: string, category: string, annualValue: string) =>
+        `Este plano da empresa foca em ${workflow} em ${category}. A estimativa atual é ${annualValue} em valor anual criado na equipe afetada.`,
       currentSteps: (value: string) => `Passos atuais: ${value}`,
       delay: (value: string) => `Demora ou fricção: ${value}`,
       repetitive: (value: string) => `Trabalho repetitivo: ${value}`,
       judgment: (value: string) => `Julgamento humano: ${value}`,
       own: (value: string) => `Você vai assumir: ${value}`,
       become: (value: string) => `Você vai se tornar: ${value}`,
+      track: (value: string) => `Trilha do seminário: ${value}`,
+      workArea: (value: string) => `Área de trabalho: ${value}`,
+      workflow: (value: string) => `Fluxo/problema: ${value}`,
+      readiness: (ready: number, total: number) => `Lista de preparação: ${ready}/${total} pronto`,
+      weeklyHours: (value: string) => `Horas semanais economizadas: ${value}`,
+      hourlyValue: (value: string) => `Valor por hora: ${value}`,
+      proofPoint: (value: string) => `Prova para levar: ${value}`,
+      workersAffected: (value: string) => `Trabalhadores afetados: ${value}`,
+      multiplier: (value: string) => `Multiplicador de valor: ${value}x`,
+      annualValue: (value: string) => `Valor anual estimado criado: ${value}`,
       pilot: (workflow: string, scope: string) =>
         `Faça um piloto de ${workflow} com um escopo reduzido: ${scope}.`,
       humanGate: (value: string) => `Revisão humana: ${value}`,
@@ -983,7 +1096,7 @@ export const planCopy = {
       strengths: "julgamento, cuidado, criatividade e conhecimento do domínio",
       notSpecified: "não especificado",
       notSpecifiedYet: "ainda não especificado",
-      painfulWorkflow: "um fluxo de trabalho doloroso",
+      painfulWorkflow: "um fluxo de trabalho ou problema",
       selectedWorkArea: "a área de trabalho selecionada",
       mapBeforePilot: "mapeie isso antes do piloto",
       humanReview: "a revisão humana e a decisão final",
@@ -1020,7 +1133,7 @@ export const planCopy = {
       level2: [
         "Dia 1: Complete um recurso curto de aprendizagem.",
         "Dia 2: Pratique três prompts relacionados à sua função.",
-        "Dia 3: Escolha uma dor de fluxo de trabalho e continue para Adaptar.",
+        "Dia 3: Escolha um fluxo de trabalho ou problema e continue para Seminário.",
       ],
       level1: [
         "Dia 1: Escreva sua função e três tarefas que você repete semanalmente.",
@@ -1031,7 +1144,7 @@ export const planCopy = {
     afterSevenDays: {
       complete: [
         "Aprender mais: volte para Aprender se a confiança ou as habilidades ainda parecerem frágeis.",
-        "Rodar um piloto maior: volte para Adaptar e mapeie o fluxo completo da equipe.",
+        "Rodar um piloto maior: volte para Seminário e mapeie o fluxo completo da equipe.",
         "Obter ajuda para implementar: solicite um seminário, agente educador ou agente instalador quando o fluxo afetar uma equipe ou tiver maior risco.",
       ],
       partial: ["Volte ao portal e complete o próximo passo do framework para manter o impulso."],
@@ -1060,7 +1173,21 @@ export const defaultDraft: Required<PlanDraft> = {
     nextAction: "",
   },
   adapt: {
+    track: "worker",
+    readiness: seminarReadinessDefaults,
     workCategory: "operations",
+    workflow: "",
+    multiplier: seminarValueMultiplierDefault,
+    worker: {
+      weeklyHoursSaved: 0,
+      hourlyValue: 0,
+      proofPoint: "",
+    },
+    business: {
+      workersAffected: 0,
+      weeklyHoursSavedPerWorker: 0,
+      blendedHourlyValue: 0,
+    },
     workflowPain: "",
     mainSteps: "",
     delay: "",
@@ -1091,11 +1218,177 @@ function hasAssessmentResult(input: InspirePlanInput | undefined) {
   return Boolean(input?.assessment?.pathwayId && input.assessment.matches.length > 0);
 }
 
+function toPositiveNumber(value: unknown) {
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) && numericValue > 0 ? numericValue : 0;
+}
+
+function formatSeminarCurrency(value: number) {
+  return `$${Math.round(value).toLocaleString()}`;
+}
+
+function formatSeminarNumber(value: number) {
+  return Number.isInteger(value) ? value.toLocaleString() : value.toLocaleString(undefined, { maximumFractionDigits: 2 });
+}
+
+function formatMultiplier(value: number) {
+  return Number(value.toFixed(2)).toString();
+}
+
+function isSeminarTrack(value: unknown): value is SeminarTrack {
+  return value === "worker" || value === "business";
+}
+
+export function getSeminarMultiplier(input: Pick<AdaptPlanInput, "multiplier"> | undefined) {
+  const multiplier = toPositiveNumber(input?.multiplier);
+  return multiplier || seminarValueMultiplierDefault;
+}
+
+export function getSeminarReadinessCount(input: Pick<AdaptPlanInput, "readiness"> | undefined) {
+  const readiness = input?.readiness ?? seminarReadinessDefaults;
+  const ready = seminarReadinessItems.filter((item) => readiness[item.id]).length;
+
+  return {
+    ready,
+    total: seminarReadinessItems.length,
+  };
+}
+
+export function calculateSeminarAnnualValue(input: AdaptPlanInput) {
+  const multiplier = getSeminarMultiplier(input);
+
+  if (input.track === "business") {
+    const workersAffected = toPositiveNumber(input.business?.workersAffected);
+    const weeklyHoursSavedPerWorker = toPositiveNumber(input.business?.weeklyHoursSavedPerWorker);
+    const blendedHourlyValue = toPositiveNumber(input.business?.blendedHourlyValue);
+    const weeklyHoursSaved = workersAffected * weeklyHoursSavedPerWorker;
+
+    return {
+      annualValue: weeklyHoursSaved * blendedHourlyValue * 52 * multiplier,
+      weeklyHoursSaved,
+      multiplier,
+      workersAffected,
+      weeklyHoursSavedPerWorker,
+      blendedHourlyValue,
+      hourlyValue: 0,
+    };
+  }
+
+  const weeklyHoursSaved = toPositiveNumber(input.worker?.weeklyHoursSaved);
+  const hourlyValue = toPositiveNumber(input.worker?.hourlyValue);
+
+  return {
+    annualValue: weeklyHoursSaved * hourlyValue * 52 * multiplier,
+    weeklyHoursSaved,
+    multiplier,
+    hourlyValue,
+    workersAffected: 0,
+    weeklyHoursSavedPerWorker: 0,
+    blendedHourlyValue: 0,
+  };
+}
+
+export function isSeminarPrepComplete(input: AdaptPlanInput | undefined) {
+  if (!input || !isSeminarTrack(input.track) || !hasText(input.workflow)) {
+    return false;
+  }
+
+  if (!Object.hasOwn(workCategories, input.workCategory)) {
+    return false;
+  }
+
+  const calculation = calculateSeminarAnnualValue(input);
+
+  if (input.track === "business") {
+    return (
+      calculation.workersAffected > 0 &&
+      calculation.weeklyHoursSavedPerWorker > 0 &&
+      calculation.blendedHourlyValue > 0 &&
+      calculation.multiplier > 0
+    );
+  }
+
+  return (
+    calculation.weeklyHoursSaved > 0 &&
+    calculation.hourlyValue > 0 &&
+    calculation.multiplier > 0 &&
+    hasText(input.worker?.proofPoint)
+  );
+}
+
+export function generateSeminarResult(input: AdaptPlanInput, language: Language = "en"): SeminarResult | undefined {
+  if (!isSeminarPrepComplete(input)) {
+    return undefined;
+  }
+
+  const copy = getPlanCopy(language);
+  const calculation = calculateSeminarAnnualValue(input);
+  const category = copy.workCategories[input.workCategory];
+  const annualValueLabel = formatSeminarCurrency(calculation.annualValue);
+  const multiplierLabel = formatMultiplier(calculation.multiplier);
+  const readiness = getSeminarReadinessCount(input);
+  const trackLabel = seminarTrackOptions[input.track];
+  const title = input.track === "business" ? copy.plan.businessSeminarTitle : copy.plan.workerSeminarTitle;
+  const summary =
+    input.track === "business"
+      ? copy.plan.businessSeminarBody(input.workflow, category, annualValueLabel)
+      : copy.plan.workerSeminarBody(input.workflow, category, annualValueLabel);
+  const items =
+    input.track === "business"
+      ? [
+          copy.plan.track(trackLabel),
+          copy.plan.workArea(category),
+          copy.plan.workflow(input.workflow),
+          copy.plan.readiness(readiness.ready, readiness.total),
+          copy.plan.workersAffected(formatSeminarNumber(calculation.workersAffected)),
+          copy.plan.weeklyHours(formatSeminarNumber(calculation.weeklyHoursSaved)),
+          copy.plan.hourlyValue(formatSeminarCurrency(calculation.blendedHourlyValue)),
+          copy.plan.multiplier(multiplierLabel),
+          copy.plan.annualValue(annualValueLabel),
+        ]
+      : [
+          copy.plan.track(trackLabel),
+          copy.plan.workArea(category),
+          copy.plan.workflow(input.workflow),
+          copy.plan.readiness(readiness.ready, readiness.total),
+          copy.plan.weeklyHours(formatSeminarNumber(calculation.weeklyHoursSaved)),
+          copy.plan.hourlyValue(formatSeminarCurrency(calculation.hourlyValue)),
+          copy.plan.proofPoint(input.worker.proofPoint),
+          copy.plan.multiplier(multiplierLabel),
+          copy.plan.annualValue(annualValueLabel),
+        ];
+  const text = [title, summary, "", "Seminar Prep", ...items.map((item) => `- ${item}`)].join("\n");
+
+  return {
+    track: input.track,
+    title,
+    summary,
+    annualValue: calculation.annualValue,
+    annualValueLabel,
+    weeklyHoursSaved: calculation.weeklyHoursSaved,
+    multiplier: calculation.multiplier,
+    items,
+    text: input.resultText?.trim() || text,
+    filename: input.track === "business" ? "company-ai-ready-action-plan.md" : "manifest-of-saved-hours.md",
+  };
+}
+
+function hasSavedSeminarResult(input: AdaptPlanInput | undefined) {
+  return isSeminarPrepComplete(input) && hasText(input?.savedAt);
+}
+
 export function getPlanLevel(draft: PlanDraft): PlanLevel {
-  if (draft.implement && hasText(draft.implement.workflowName) && hasText(draft.implement.humanGate)) {
+  const hasSeminarResult = hasSavedSeminarResult(draft.adapt);
+
+  if (
+    hasSeminarResult &&
+    draft.implement &&
+    hasText(draft.implement.workflowName) &&
+    hasText(draft.implement.humanGate)
+  ) {
     return 4;
   }
-  if (draft.adapt && hasText(draft.adapt.workflowPain)) {
+  if (hasSeminarResult) {
     return 3;
   }
   if (draft.learn) {
@@ -1228,7 +1521,8 @@ export function generateUpgradePlan(draft: PlanDraft, language: Language = "en")
   const level = getPlanLevel(draft);
   const riskLevel = getRiskLevel(draft.implement);
   const copy = getPlanCopy(language);
-  const category = draft.adapt ? copy.workCategories[draft.adapt.workCategory] : undefined;
+  const savedAdapt = hasSavedSeminarResult(draft.adapt) ? draft.adapt : undefined;
+  const seminarResult = savedAdapt ? generateSeminarResult(savedAdapt, language) : undefined;
   const nextStep = getNextPlanStep(level);
   const sections: GeneratedPlanSection[] = [];
 
@@ -1264,21 +1558,11 @@ export function generateUpgradePlan(draft: PlanDraft, language: Language = "en")
     });
   }
 
-  if (draft.adapt) {
+  if (seminarResult) {
     sections.push({
-      title: copy.plan.adaptationTitle,
-      body: copy.plan.adaptation(
-        draft.adapt.workflowPain || copy.defaults.painfulWorkflow,
-        category || copy.defaults.selectedWorkArea,
-      ),
-      items: [
-        copy.plan.currentSteps(draft.adapt.mainSteps || copy.defaults.mapBeforePilot),
-        copy.plan.delay(draft.adapt.delay || copy.defaults.notSpecified),
-        copy.plan.repetitive(draft.adapt.repetitiveWork || copy.defaults.notSpecified),
-        copy.plan.judgment(draft.adapt.judgmentNeeds || copy.defaults.notSpecified),
-        copy.plan.own(draft.adapt.own || copy.defaults.humanReview),
-        copy.plan.become(draft.adapt.become || copy.defaults.workflowDesigner),
-      ],
+      title: seminarResult.title,
+      body: seminarResult.summary,
+      items: seminarResult.items,
     });
   }
 

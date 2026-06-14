@@ -5,7 +5,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 export const metadata: Metadata = {
   title: "Product Demo — UpSkill USA",
   description:
-    "Watch the UpSkill USA demo: Inspiration, Education, Adaptation, and Implementation in action.",
+    "Watch the UpSkill USA demo: Inspiration, Education, Seminar, and Implementation in action.",
   openGraph: {
     title: "Product Demo — UpSkill USA",
     description:
@@ -24,7 +24,7 @@ export default function DemoPage() {
             <div className="demo-page-label">Guided Demo</div>
             <h1>See UpSkill USA in action.</h1>
             <p>
-              A walkthrough of the four steps: Inspiration, Education, Adaptation, and
+              A walkthrough of the four steps: Inspiration, Education, Seminar, and
               Implementation.
             </p>
           </div>

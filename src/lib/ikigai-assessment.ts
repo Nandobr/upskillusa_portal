@@ -87,7 +87,7 @@ export const assessmentCopy = {
   sourceNote:
     "Matches are generated locally from a copied occupation dataset and deterministic scoring rules. Use them as conversation starters, not employment guarantees.",
   storageNote:
-    "Your assessment progress is saved only in this browser as part of the local AI Upgrade Plan draft.",
+    "Your assessment progress is saved only in this browser as part of the local AI-Ready Action Plan draft.",
   ikigaiTitle: "The IKIGAI Process",
   ikigaiBody:
     'IKIGAI (生き甲斐) — The Japanese concept of "reason for being." The intersection of what you love, what you\'re good at, what the world needs, and what you can be paid for.',

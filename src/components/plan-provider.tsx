@@ -24,6 +24,8 @@ type PlanContextValue = {
   updateLearn: (input: LearnPlanInput) => void;
   updateAdapt: (input: AdaptPlanInput) => void;
   updateImplement: (input: ImplementPlanInput) => void;
+  clearLearn: () => void;
+  clearAdapt: () => void;
   clearPlan: () => void;
 };
 
@@ -125,8 +127,22 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     emitStoredDraftChange();
   }, []);
 
+  const clearLearn = useCallback(() => {
+    const nextDraft = { ...readStoredDraftSnapshot() };
+    delete nextDraft.learn;
+    writeStoredDraft(nextDraft);
+    emitStoredDraftChange();
+  }, []);
+
   const updateAdapt = useCallback((input: AdaptPlanInput) => {
     writeStoredDraft({ ...readStoredDraftSnapshot(), adapt: input });
+    emitStoredDraftChange();
+  }, []);
+
+  const clearAdapt = useCallback(() => {
+    const nextDraft = { ...readStoredDraftSnapshot() };
+    delete nextDraft.adapt;
+    writeStoredDraft(nextDraft);
     emitStoredDraftChange();
   }, []);
 
@@ -147,9 +163,20 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       updateLearn,
       updateAdapt,
       updateImplement,
+      clearLearn,
+      clearAdapt,
       clearPlan,
     }),
-    [clearPlan, draft, updateAdapt, updateImplement, updateInspire, updateLearn],
+    [
+      clearAdapt,
+      clearLearn,
+      clearPlan,
+      draft,
+      updateAdapt,
+      updateImplement,
+      updateInspire,
+      updateLearn,
+    ],
   );
 
   return <PlanContext.Provider value={value}>{children}</PlanContext.Provider>;

@@ -303,6 +303,7 @@ button {
 
 .page-step-label {
   font-size: 1.5rem;
+  text-transform: none;
 }
 
 .hero-actions,
@@ -1614,6 +1615,45 @@ button {
   justify-content: flex-start;
 }
 
+.seminar-value-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.seminar-value-card {
+  border: 1px solid rgba(23, 32, 51, 0.1);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.78);
+  padding: 11px;
+}
+
+.seminar-value-card span,
+.seminar-readiness-status {
+  display: block;
+  color: var(--slate-600);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.seminar-value-card strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--navy-900);
+  font-size: 1.12rem;
+  line-height: 1.2;
+}
+
+.seminar-readiness-status {
+  border-left: 3px solid var(--gold-500);
+  padding-left: 10px;
+  line-height: 1.45;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .plan-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1848,7 +1888,8 @@ button {
   .assessment-skill-grid,
   .learn-option-grid.three,
   .learn-option-grid.four,
-  .learn-report-grid {
+  .learn-report-grid,
+  .seminar-value-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -1995,7 +2036,8 @@ button {
 
   .learn-option-grid.three,
   .learn-option-grid.four,
-  .learn-report-grid {
+  .learn-report-grid,
+  .seminar-value-grid {
     grid-template-columns: 1fr;
   }
 

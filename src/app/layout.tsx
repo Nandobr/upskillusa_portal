@@ -5,7 +5,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "UpSkill USA | One Portal. Four Frameworks.",
   description:
-    "A public MVP portal for the UpSkill USA four-framework journey: Inspire, Learn, Adapt, and Implement.",
+    "A public MVP portal for the UpSkill USA four-framework journey: Inspire, Learn, Seminar, and Implement.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

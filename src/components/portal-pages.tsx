@@ -21,14 +21,17 @@ import {
   Workflow,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { frameworkOrder, type FrameworkKey } from "@/lib/content";
+import { frameworkOrder, type FrameworkKey, type Language } from "@/lib/content";
 import { IkigaiAssessment } from "@/components/ikigai-assessment";
 import { usePortalContent } from "@/components/language-provider";
 import { mergeWithDefaults, usePlanDraft } from "@/components/plan-provider";
 import {
   aiStartingPointOptions,
+  defaultDraft,
+  generateSeminarResult,
   generateUpgradePlan,
   generateLearnReport,
+  getSeminarReadinessCount,
   getLearnToolOptions,
   getPlanCopy,
   learnFormatOptions,
@@ -37,10 +40,12 @@ import {
   learnReportToText,
   learnTimeOptions,
   planToText,
+  seminarReadinessItems,
   workCategories,
   type AdaptPlanInput,
   type ImplementPlanInput,
   type LearnPlanInput,
+  type SeminarTrack,
   type WorkCategoryKey,
 } from "@/lib/plan";
 
@@ -52,6 +57,333 @@ const icons: Record<FrameworkKey, typeof Sparkles> = {
 };
 
 const workCategoryKeys = Object.keys(workCategories) as WorkCategoryKey[];
+
+type SeminarChoice<T extends string | number> = {
+  value: T;
+  label: string;
+  description: string;
+};
+
+const workerWeeklyHourOptions: SeminarChoice<number>[] = [
+  { value: 2, label: "2 hours", description: "A small weekly task or handoff." },
+  { value: 5, label: "5 hours", description: "A repeated task across several days." },
+  { value: 10, label: "10 hours", description: "A heavy workflow worth redesigning." },
+];
+
+const workerHourlyValueOptions: SeminarChoice<number>[] = [
+  { value: 20, label: "$20/hr", description: "Entry or support role estimate." },
+  { value: 30, label: "$30/hr", description: "Skilled operations estimate." },
+  { value: 50, label: "$50/hr", description: "Specialized or supervisory estimate." },
+];
+
+const businessWorkersAffectedOptions: SeminarChoice<number>[] = [
+  { value: 5, label: "5 workers", description: "One team or shift." },
+  { value: 12, label: "12 workers", description: "A department-sized pilot." },
+  { value: 25, label: "25 workers", description: "A larger operating group." },
+];
+
+const businessWeeklyHourOptions: SeminarChoice<number>[] = [
+  { value: 1, label: "1 hour each", description: "Light improvement across the team." },
+  { value: 3, label: "3 hours each", description: "Meaningful repeated work." },
+  { value: 5, label: "5 hours each", description: "A workflow with clear leverage." },
+];
+
+const businessHourlyValueOptions: SeminarChoice<number>[] = [
+  { value: 25, label: "$25/hr", description: "Blended frontline value." },
+  { value: 35, label: "$35/hr", description: "Blended skilled team value." },
+  { value: 55, label: "$55/hr", description: "Blended specialist value." },
+];
+
+const seminarMultiplierOptions: SeminarChoice<number>[] = [
+  { value: 2, label: "2x", description: "Conservative estimate." },
+  { value: 3.7, label: "3.7x", description: "Seminar working figure." },
+  { value: 5, label: "5x", description: "Stretch estimate." },
+];
+
+const proofPointOptions: Record<Language, SeminarChoice<string>[]> = {
+  en: [
+    {
+      value: "Compare time logs before and after a six-week pilot.",
+      label: "Time logs",
+      description: "Compare time before and after a six-week pilot.",
+    },
+    {
+      value: "Show before-and-after samples with human review notes.",
+      label: "Work samples",
+      description: "Use safe samples and review notes.",
+    },
+    {
+      value: "Track fewer handoffs, rework loops, or delayed replies.",
+      label: "Handoff count",
+      description: "Measure fewer delays or repeated loops.",
+    },
+  ],
+  es: [
+    {
+      value: "Comparar registros de tiempo antes y despues de un piloto de seis semanas.",
+      label: "Registros de tiempo",
+      description: "Compara tiempo antes y despues del piloto.",
+    },
+    {
+      value: "Mostrar muestras de antes y despues con notas de revision humana.",
+      label: "Muestras de trabajo",
+      description: "Usa muestras seguras y notas de revision.",
+    },
+    {
+      value: "Medir menos traspasos, retrabajo o respuestas demoradas.",
+      label: "Conteo de traspasos",
+      description: "Mide menos demoras o ciclos repetidos.",
+    },
+  ],
+  pt: [
+    {
+      value: "Comparar registros de tempo antes e depois de um piloto de seis semanas.",
+      label: "Registros de tempo",
+      description: "Compare tempo antes e depois do piloto.",
+    },
+    {
+      value: "Mostrar amostras de antes e depois com notas de revisao humana.",
+      label: "Amostras de trabalho",
+      description: "Use amostras seguras e notas de revisao.",
+    },
+    {
+      value: "Medir menos repasses, retrabalho ou respostas atrasadas.",
+      label: "Contagem de repasses",
+      description: "Meça menos atrasos ou ciclos repetidos.",
+    },
+  ],
+};
+
+const readinessChoiceOptions: Record<
+  Language,
+  (SeminarChoice<string> & { readiness: AdaptPlanInput["readiness"] })[]
+> = {
+  en: [
+    {
+      value: "ready",
+      label: "Ready now",
+      description: "I can bring the workflow, time estimate, sample, and review owner.",
+      readiness: {
+        bringWorkflow: true,
+        knowTimeSpent: true,
+        haveSample: true,
+        canExplainReview: true,
+      },
+    },
+    {
+      value: "partial",
+      label: "Partly ready",
+      description: "I know the workflow and time spent, but need help with evidence.",
+      readiness: {
+        bringWorkflow: true,
+        knowTimeSpent: true,
+        haveSample: false,
+        canExplainReview: false,
+      },
+    },
+    {
+      value: "guided",
+      label: "Need seminar help",
+      description: "I want the seminar to help me choose and prove the workflow.",
+      readiness: {
+        bringWorkflow: false,
+        knowTimeSpent: false,
+        haveSample: false,
+        canExplainReview: false,
+      },
+    },
+  ],
+  es: [
+    {
+      value: "ready",
+      label: "Listo ahora",
+      description: "Puedo llevar el flujo, tiempo estimado, muestra y responsable de revision.",
+      readiness: {
+        bringWorkflow: true,
+        knowTimeSpent: true,
+        haveSample: true,
+        canExplainReview: true,
+      },
+    },
+    {
+      value: "partial",
+      label: "Parcialmente listo",
+      description: "Conozco el flujo y el tiempo, pero necesito ayuda con evidencia.",
+      readiness: {
+        bringWorkflow: true,
+        knowTimeSpent: true,
+        haveSample: false,
+        canExplainReview: false,
+      },
+    },
+    {
+      value: "guided",
+      label: "Necesito ayuda",
+      description: "Quiero que el seminario me ayude a elegir y probar el flujo.",
+      readiness: {
+        bringWorkflow: false,
+        knowTimeSpent: false,
+        haveSample: false,
+        canExplainReview: false,
+      },
+    },
+  ],
+  pt: [
+    {
+      value: "ready",
+      label: "Pronto agora",
+      description: "Posso levar o fluxo, estimativa de tempo, amostra e responsavel por revisao.",
+      readiness: {
+        bringWorkflow: true,
+        knowTimeSpent: true,
+        haveSample: true,
+        canExplainReview: true,
+      },
+    },
+    {
+      value: "partial",
+      label: "Parcialmente pronto",
+      description: "Conheco o fluxo e o tempo, mas preciso de ajuda com evidencia.",
+      readiness: {
+        bringWorkflow: true,
+        knowTimeSpent: true,
+        haveSample: false,
+        canExplainReview: false,
+      },
+    },
+    {
+      value: "guided",
+      label: "Preciso de ajuda",
+      description: "Quero que o seminario me ajude a escolher e provar o fluxo.",
+      readiness: {
+        bringWorkflow: false,
+        knowTimeSpent: false,
+        haveSample: false,
+        canExplainReview: false,
+      },
+    },
+  ],
+};
+
+const seminarBuilderCopy = {
+  en: {
+    subtitle: "Build a local seminar prep artifact. Nothing is registered or sent.",
+    trackEyebrow: "Seminar track",
+    trackTitle: "Choose your seminar track",
+    workerLabel: "Worker / Employee",
+    workerDescription: "Estimate saved hours and prepare a Manifest of Saved Hours.",
+    businessLabel: "Business Leader / Owner",
+    businessDescription: "Map team productivity into a Company AI-Ready Action Plan.",
+    readinessEyebrow: "Readiness",
+    readinessTitle: "Check your seminar readiness",
+    readinessPartial: (ready: number, total: number) => `${ready}/${total} ready. You can start now and bring the rest to the seminar.`,
+    readinessComplete: "You are ready to turn learning into an AI-Ready Action Plan.",
+    areaEyebrow: "Work area",
+    areaTitle: "Choose the work area",
+    workflowEyebrow: "Workflow",
+    workflowTitle: "Choose one workflow or problem",
+    workflowLabel: "Workflow or problem",
+    workflowPlaceholder: "Example: weekly customer follow-up emails",
+    valueEyebrow: "Value estimate",
+    valueTitle: "Estimate the value created",
+    weeklyHoursSaved: "Weekly hours saved",
+    hourlyValue: "Hourly value",
+    workersAffected: "Workers affected",
+    weeklyHoursSavedPerWorker: "Weekly hours saved per worker",
+    blendedHourlyValue: "Blended hourly value",
+    multiplier: "Value multiplier",
+    proofPoint: "How will you prove the saved hours?",
+    proofPlaceholder: "Example: compare time logs before and after a six-week pilot",
+    empty: "Complete the seminar prep fields to generate your draft.",
+    annualValue: "Estimated annual value",
+    weeklyValue: "Weekly hours saved",
+    multiplierLabel: "Multiplier",
+    copyResult: "Copy result",
+    downloadResult: "Download result",
+    saveResult: "Save to AI-Ready Action Plan",
+    copied: "Seminar prep copied.",
+    downloaded: "Seminar prep downloaded.",
+    saved: "Saved to your AI-Ready Action Plan.",
+  },
+  es: {
+    subtitle: "Crea un artefacto local de preparación. No se registra ni se envía nada.",
+    trackEyebrow: "Ruta del seminario",
+    trackTitle: "Elige tu ruta del seminario",
+    workerLabel: "Trabajador / empleado",
+    workerDescription: "Estima horas ahorradas y prepara un Manifiesto de horas ahorradas.",
+    businessLabel: "Líder / dueño de negocio",
+    businessDescription: "Convierte la productividad del equipo en un plan de acción empresarial listo para IA.",
+    readinessEyebrow: "Preparación",
+    readinessTitle: "Revisa tu preparación para el seminario",
+    readinessPartial: (ready: number, total: number) => `${ready}/${total} listo. Puedes empezar ahora y llevar lo demás al seminario.`,
+    readinessComplete: "Estás listo para convertir el aprendizaje en un plan de acción listo para IA.",
+    areaEyebrow: "Área de trabajo",
+    areaTitle: "Elige el área de trabajo",
+    workflowEyebrow: "Flujo",
+    workflowTitle: "Elige un flujo o problema",
+    workflowLabel: "Flujo o problema",
+    workflowPlaceholder: "Ejemplo: correos semanales de seguimiento a clientes",
+    valueEyebrow: "Estimación de valor",
+    valueTitle: "Estima el valor creado",
+    weeklyHoursSaved: "Horas ahorradas por semana",
+    hourlyValue: "Valor por hora",
+    workersAffected: "Trabajadores afectados",
+    weeklyHoursSavedPerWorker: "Horas ahorradas por trabajador por semana",
+    blendedHourlyValue: "Valor horario combinado",
+    multiplier: "Multiplicador de valor",
+    proofPoint: "¿Cómo probarás las horas ahorradas?",
+    proofPlaceholder: "Ejemplo: comparar registros de tiempo antes y después de un piloto de seis semanas",
+    empty: "Completa los campos de preparación para generar tu borrador.",
+    annualValue: "Valor anual estimado",
+    weeklyValue: "Horas semanales ahorradas",
+    multiplierLabel: "Multiplicador",
+    copyResult: "Copiar resultado",
+    downloadResult: "Descargar resultado",
+    saveResult: "Guardar en el plan de acción listo para IA",
+    copied: "Preparación del seminario copiada.",
+    downloaded: "Preparación del seminario descargada.",
+    saved: "Guardado en tu plan de acción listo para IA.",
+  },
+  pt: {
+    subtitle: "Crie um artefato local de preparação. Nada é registrado ou enviado.",
+    trackEyebrow: "Trilha do seminário",
+    trackTitle: "Escolha sua trilha do seminário",
+    workerLabel: "Trabalhador / funcionário",
+    workerDescription: "Estime horas economizadas e prepare um Manifesto de horas economizadas.",
+    businessLabel: "Líder / dono de negócio",
+    businessDescription: "Transforme a produtividade da equipe em um plano de ação da empresa pronto para IA.",
+    readinessEyebrow: "Preparação",
+    readinessTitle: "Confira sua preparação para o seminário",
+    readinessPartial: (ready: number, total: number) => `${ready}/${total} pronto. Você pode começar agora e levar o restante ao seminário.`,
+    readinessComplete: "Você está pronto para transformar aprendizagem em um plano de ação pronto para IA.",
+    areaEyebrow: "Área de trabalho",
+    areaTitle: "Escolha a área de trabalho",
+    workflowEyebrow: "Fluxo",
+    workflowTitle: "Escolha um fluxo ou problema",
+    workflowLabel: "Fluxo ou problema",
+    workflowPlaceholder: "Exemplo: e-mails semanais de acompanhamento de clientes",
+    valueEyebrow: "Estimativa de valor",
+    valueTitle: "Estime o valor criado",
+    weeklyHoursSaved: "Horas economizadas por semana",
+    hourlyValue: "Valor por hora",
+    workersAffected: "Trabalhadores afetados",
+    weeklyHoursSavedPerWorker: "Horas economizadas por trabalhador por semana",
+    blendedHourlyValue: "Valor horário combinado",
+    multiplier: "Multiplicador de valor",
+    proofPoint: "Como você vai comprovar as horas economizadas?",
+    proofPlaceholder: "Exemplo: comparar registros de tempo antes e depois de um piloto de seis semanas",
+    empty: "Complete os campos de preparação para gerar seu rascunho.",
+    annualValue: "Valor anual estimado",
+    weeklyValue: "Horas semanais economizadas",
+    multiplierLabel: "Multiplicador",
+    copyResult: "Copiar resultado",
+    downloadResult: "Baixar resultado",
+    saveResult: "Salvar no plano de ação pronto para IA",
+    copied: "Preparação do seminário copiada.",
+    downloaded: "Preparação do seminário baixada.",
+    saved: "Salvo no seu plano de ação pronto para IA.",
+  },
+} as const;
 
 function FrameworkCards() {
   const { content } = usePortalContent();
@@ -149,7 +481,10 @@ function PageHero({ keyName }: { keyName: FrameworkKey }) {
   const { content } = usePortalContent();
   const framework = content.frameworks[keyName];
   const Icon = icons[keyName];
-  const heroLabel = `${framework.tab} : ${framework.title}`.toUpperCase();
+  const heroLabel =
+    keyName === "adapt"
+      ? `${framework.tab} · ${framework.title}`
+      : `${framework.tab} : ${framework.title}`.toUpperCase();
 
   return (
     <section className="page-hero">
@@ -256,10 +591,11 @@ function LearnDemo() {
   const { content, language } = usePortalContent();
   const copy = getPlanCopy(language);
   const demo = content.pages.learn.demo;
-  const { draft, updateLearn } = usePlanDraft();
+  const { draft, updateLearn, clearLearn } = usePlanDraft();
   const [values, setValues] = useState<Partial<LearnPlanInput>>(() => draft.learn ?? {});
   const [reportStatus, setReportStatus] = useState("");
   const [saved, setSaved] = useState(false);
+  const hasLearnProgress = Object.values(values).some(Boolean) || Boolean(draft.learn);
   const goals = values.group ? learnGoalsByGroup[values.group] : [];
   const tools = getLearnToolOptions(values.goal);
   const completeValues =
@@ -289,6 +625,19 @@ function LearnDemo() {
     setValues(nextValues);
   }
 
+  function resetLearnPathway() {
+    setValues({});
+    setSaved(false);
+    setReportStatus("");
+    clearLearn();
+  }
+
+  function confirmResetLearnPathway() {
+    if (window.confirm("Start the LEARN pathway over? This will clear your current LEARN selections and saved report.")) {
+      resetLearnPathway();
+    }
+  }
+
   function saveReport() {
     if (!report || !completeValues) return;
 
@@ -298,7 +647,7 @@ function LearnDemo() {
       nextAction: report.nextAction,
     });
     setSaved(true);
-    setReportStatus("LEARN Report saved to your AI Upgrade Plan.");
+    setReportStatus("LEARN Report saved to your AI-Ready Action Plan.");
   }
 
   function copyReport() {
@@ -330,7 +679,18 @@ function LearnDemo() {
 
   return (
     <article className="demo-panel learn-pathway-panel">
-      <span className="demo-label">{demo.label}</span>
+      <div className="assessment-intro-top">
+        <span className="demo-label">{demo.label}</span>
+        {hasLearnProgress ? (
+          <button
+            className="assessment-reset-button"
+            type="button"
+            onClick={confirmResetLearnPathway}
+          >
+            Start over
+          </button>
+        ) : null}
+      </div>
       <h2>{copy.headings.learningPath}</h2>
       <p className="assessment-step-subtitle">
         Build a downloadable LEARN Report with selectable choices only.
@@ -580,7 +940,7 @@ function LearnDemo() {
               <Download size={16} aria-hidden />
             </button>
             <button className="button blue" type="button" onClick={saveReport}>
-              Save to AI Upgrade Plan
+              Save to AI-Ready Action Plan
               <CheckCircle2 size={16} aria-hidden />
             </button>
           </div>
@@ -596,143 +956,578 @@ function LearnDemo() {
 function AdaptDemo() {
   const { content, language } = usePortalContent();
   const copy = getPlanCopy(language);
-  const seminar = content.forms.seminar;
+  const builderCopy = seminarBuilderCopy[language] ?? seminarBuilderCopy.en;
   const demo = content.pages.adapt.demo;
-  const { draft, updateAdapt } = usePlanDraft();
-  const [interest, setInterest] = useState({ name: "", organization: "", role: "", city: "" });
-  const values = mergeWithDefaults(draft).adapt;
-  const setValues = (updater: (current: AdaptPlanInput) => AdaptPlanInput) => {
-    updateAdapt(updater(values));
+  const router = useRouter();
+  const { draft, updateAdapt, clearAdapt } = usePlanDraft();
+  const [builderValues, setBuilderValues] = useState<Partial<AdaptPlanInput>>(
+    () => draft.adapt ?? {},
+  );
+  const values: AdaptPlanInput = {
+    ...defaultDraft.adapt,
+    ...builderValues,
+    readiness: {
+      ...defaultDraft.adapt.readiness,
+      ...builderValues.readiness,
+    },
+    worker: {
+      ...defaultDraft.adapt.worker,
+      ...builderValues.worker,
+    },
+    business: {
+      ...defaultDraft.adapt.business,
+      ...builderValues.business,
+    },
+  };
+  const [resultStatus, setResultStatus] = useState("");
+  const saved = Boolean(values.savedAt);
+  const readinessCount = getSeminarReadinessCount(values);
+  const hasTrack = Boolean(builderValues.track);
+  const hasReadinessDecision = Boolean(builderValues.readiness);
+  const hasWorkCategory = Boolean(builderValues.workCategory);
+  const hasWorkflow = Boolean(builderValues.workflow?.trim());
+  const hasWorkerWeeklyHours = Boolean(builderValues.worker?.weeklyHoursSaved);
+  const hasWorkerHourlyValue = Boolean(builderValues.worker?.hourlyValue);
+  const hasWorkerProofPoint = Boolean(builderValues.worker?.proofPoint?.trim());
+  const hasBusinessWorkersAffected = Boolean(builderValues.business?.workersAffected);
+  const hasBusinessWeeklyHours = Boolean(builderValues.business?.weeklyHoursSavedPerWorker);
+  const hasBusinessHourlyValue = Boolean(builderValues.business?.blendedHourlyValue);
+  const hasMultiplier = Boolean(builderValues.multiplier);
+  const showAreaStep = hasTrack && hasReadinessDecision;
+  const showWorkflowStep = showAreaStep && hasWorkCategory;
+  const showFirstValueStep = showWorkflowStep && hasWorkflow;
+  const showSecondValueStep =
+    showFirstValueStep &&
+    (values.track === "business" ? hasBusinessWorkersAffected : hasWorkerWeeklyHours);
+  const showThirdValueStep =
+    showSecondValueStep &&
+    (values.track === "business" ? hasBusinessWeeklyHours : hasWorkerHourlyValue);
+  const showMultiplierStep =
+    showThirdValueStep &&
+    (values.track === "business" ? hasBusinessHourlyValue : hasWorkerProofPoint);
+  const showResult = showMultiplierStep && hasMultiplier;
+  const result = showResult ? generateSeminarResult(values, language) : undefined;
+  const workflowOptions = builderValues.workCategory
+    ? workCategories[builderValues.workCategory].examples
+    : [];
+  const proofOptions = proofPointOptions[language] ?? proofPointOptions.en;
+  const readinessOptions = readinessChoiceOptions[language] ?? readinessChoiceOptions.en;
+  const hasSeminarProgress = Boolean(draft.adapt) || Object.keys(builderValues).length > 0;
+
+  function replacePathway(nextValues: Partial<AdaptPlanInput>) {
+    setResultStatus("");
+    setBuilderValues({
+      ...nextValues,
+      resultText: undefined,
+      savedAt: undefined,
+    });
+  }
+
+  function resetSeminarPathway() {
+    setBuilderValues({});
+    setResultStatus("");
+    clearAdapt();
+  }
+
+  function confirmResetSeminarPathway() {
+    if (
+      window.confirm(
+        "Start the AI-Ready Seminar builder over? This will clear your current Step 3 selections and saved result.",
+      )
+    ) {
+      resetSeminarPathway();
+    }
+  }
+
+  function chooseReadiness(readiness: AdaptPlanInput["readiness"]) {
+    setResultStatus("");
+    replacePathway({
+      track: values.track,
+      readiness,
+    });
+  }
+
+  function isReadinessSelected(readiness: AdaptPlanInput["readiness"]) {
+    return seminarReadinessItems.every((item) => values.readiness[item.id] === readiness[item.id]);
+  }
+
+  function pathBase() {
+    return {
+      track: values.track,
+      readiness: values.readiness,
+      workCategory: values.workCategory,
+      workflow: values.workflow,
+    };
+  }
+
+  function copyResult() {
+    if (!result) return;
+
+    if (!navigator.clipboard) {
+      setResultStatus(copy.feedback.copyUnavailable);
+      return;
+    }
+
+    navigator.clipboard
+      .writeText(result.text)
+      .then(() => setResultStatus(builderCopy.copied))
+      .catch(() => setResultStatus(copy.feedback.copyFailed));
+  }
+
+  function downloadResult() {
+    if (!result) return;
+
+    const blob = new Blob([result.text], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = result.filename;
+    link.click();
+    URL.revokeObjectURL(url);
+    setResultStatus(builderCopy.downloaded);
+  }
+
+  function saveResult() {
+    if (!result) return;
+
+    const savedValues = {
+      ...values,
+      resultText: result.text,
+      savedAt: new Date().toISOString(),
+    };
+    setBuilderValues(savedValues);
+    updateAdapt(savedValues);
+    setResultStatus(builderCopy.saved);
+  }
+
+  function saveAndContinue() {
+    saveResult();
+    router.push("/implement");
   };
 
-  const plan = useMemo(
-    () => generateUpgradePlan({ ...draft, adapt: values }, language),
-    [draft, language, values],
-  );
-  const hasInterest = Object.values(interest).some((value) => value.trim().length > 0);
-
   return (
-    <article className="demo-panel">
-      <span className="demo-label">{demo.label}</span>
-      <h2>{copy.headings.opportunityDraft}</h2>
-      <div className="form-grid two">
-        {Object.entries(seminar)
-          .filter(([key]) => key !== "confirmation")
-          .map(([key, label]) => (
-            <label className="field" key={key}>
-              <span>{label}</span>
-              <input
-                value={interest[key as keyof typeof interest]}
-                onChange={(event) =>
-                  setInterest((current) => ({ ...current, [key]: event.target.value }))
-                }
-              />
-            </label>
-          ))}
-      </div>
-      {hasInterest ? <p className="result-panel">{seminar.confirmation}</p> : null}
-      <div className="form-grid two">
-        <label className="field">
-          <span>{copy.fields.workArea}</span>
-          <select
-            value={values.workCategory}
-            onChange={(event) =>
-              setValues((current) => ({
-                ...current,
-                workCategory: event.target.value as WorkCategoryKey,
-              }))
-            }
+    <article className="demo-panel learn-pathway-panel">
+      <div className="assessment-intro-top">
+        <span className="demo-label">{demo.label}</span>
+        {hasSeminarProgress ? (
+          <button
+            className="assessment-reset-button"
+            type="button"
+            onClick={confirmResetSeminarPathway}
           >
+            Start over
+          </button>
+        ) : null}
+      </div>
+      <h2>{content.frameworks.adapt.question}</h2>
+      <p className="assessment-step-subtitle">{builderCopy.subtitle}</p>
+
+      <section className={`assessment-step-card ${hasTrack ? "complete" : ""}`}>
+        <div className="assessment-step-heading">
+          <span className="assessment-step-number">1</span>
+          <div>
+            <span className="assessment-step-eyebrow">{builderCopy.trackEyebrow}</span>
+            <h3>{builderCopy.trackTitle}</h3>
+          </div>
+        </div>
+        <div className="assessment-pathways learn-option-grid two">
+          {(["worker", "business"] as SeminarTrack[]).map((track) => (
+            <button
+              aria-pressed={builderValues.track === track}
+              className={`assessment-pathway-card ${builderValues.track === track ? "selected" : ""}`}
+              key={track}
+              type="button"
+              onClick={() =>
+                replacePathway({
+                  track,
+                })
+              }
+            >
+              <strong>{track === "business" ? builderCopy.businessLabel : builderCopy.workerLabel}</strong>
+              <p>{track === "business" ? builderCopy.businessDescription : builderCopy.workerDescription}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {hasTrack ? (
+        <section className="assessment-step-card">
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">2</span>
+            <div>
+              <span className="assessment-step-eyebrow">{builderCopy.readinessEyebrow}</span>
+              <h3>{builderCopy.readinessTitle}</h3>
+            </div>
+          </div>
+          <div className="assessment-choice-list">
+            {readinessOptions.map((option) => {
+              const selected = hasReadinessDecision && isReadinessSelected(option.readiness);
+
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={`assessment-choice ${selected ? "selected" : ""}`}
+                  key={option.value}
+                  type="button"
+                  onClick={() => chooseReadiness(option.readiness)}
+                >
+                  <span className="assessment-choice-mark" aria-hidden />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {hasReadinessDecision ? (
+            <p className="seminar-readiness-status">
+              {readinessCount.ready === readinessCount.total
+                ? builderCopy.readinessComplete
+                : builderCopy.readinessPartial(readinessCount.ready, readinessCount.total)}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
+
+      {showAreaStep ? (
+        <section className={`assessment-step-card ${hasWorkCategory ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">3</span>
+            <div>
+              <span className="assessment-step-eyebrow">{builderCopy.areaEyebrow}</span>
+              <h3>{builderCopy.areaTitle}</h3>
+            </div>
+          </div>
+          <div className="assessment-skill-grid learn-option-grid four">
             {workCategoryKeys.map((key) => (
-              <option key={key} value={key}>
-                {copy.workCategories[key]}
-              </option>
+              <button
+                aria-pressed={builderValues.workCategory === key}
+                className={`assessment-skill-card ${builderValues.workCategory === key ? "selected" : ""}`}
+                key={key}
+                type="button"
+                onClick={() =>
+                  replacePathway({
+                    track: values.track,
+                    readiness: values.readiness,
+                    workCategory: key,
+                  })
+                }
+              >
+                <strong>{copy.workCategories[key]}</strong>
+                <span>{workCategories[key].examples.join(", ")}</span>
+              </button>
             ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{copy.fields.workflowPain}</span>
-          <input
-            value={values.workflowPain}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, workflowPain: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.mainSteps}</span>
-          <textarea
-            value={values.mainSteps}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, mainSteps: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.delay}</span>
-          <textarea
-            value={values.delay}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, delay: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.repetitiveWork}</span>
-          <textarea
-            value={values.repetitiveWork}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, repetitiveWork: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.judgmentNeeds}</span>
-          <textarea
-            value={values.judgmentNeeds}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, judgmentNeeds: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.desiredOutcome}</span>
-          <input
-            value={values.desiredOutcome}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, desiredOutcome: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.own}</span>
-          <input
-            value={values.own}
-            onChange={(event) => setValues((current) => ({ ...current, own: event.target.value }))}
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.become}</span>
-          <input
-            value={values.become}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, become: event.target.value }))
-            }
-          />
-        </label>
-      </div>
-      <div className="result-panel">
-        <h3>{plan.levelLabel}</h3>
-        <p>
-          {plan.sections.find((section) => section.title === copy.plan.adaptationTitle)?.body ??
-            copy.feedback.mapWorkflow}
-        </p>
-      </div>
-      <SavePlanActions
-        nextHref="/implement"
-        nextLabel={copy.actions.saveToImplement}
-        onSave={() => updateAdapt(values)}
-      />
+          </div>
+        </section>
+      ) : null}
+
+      {showWorkflowStep ? (
+        <section className={`assessment-step-card ${hasWorkflow ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">4</span>
+            <div>
+              <span className="assessment-step-eyebrow">{builderCopy.workflowEyebrow}</span>
+              <h3>{builderCopy.workflowTitle}</h3>
+            </div>
+          </div>
+          <div className="assessment-choice-list">
+            {workflowOptions.map((workflow) => {
+              return (
+                <button
+                  aria-pressed={builderValues.workflow === workflow}
+                  className={`assessment-choice ${builderValues.workflow === workflow ? "selected" : ""}`}
+                  key={workflow}
+                  type="button"
+                  onClick={() =>
+                    replacePathway({
+                      track: values.track,
+                      readiness: values.readiness,
+                      workCategory: values.workCategory,
+                      workflow,
+                    })
+                  }
+                >
+                  <span className="assessment-choice-mark" aria-hidden />
+                  <span>
+                    <strong>{workflow}</strong>
+                    <small>{copy.workCategories[values.workCategory]}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {showFirstValueStep ? (
+        <section
+          className={`assessment-step-card ${
+            values.track === "business" ? (hasBusinessWorkersAffected ? "complete" : "") : hasWorkerWeeklyHours ? "complete" : ""
+          }`}
+        >
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">5</span>
+            <div>
+              <span className="assessment-step-eyebrow">{builderCopy.valueEyebrow}</span>
+              <h3>{values.track === "business" ? builderCopy.workersAffected : builderCopy.weeklyHoursSaved}</h3>
+            </div>
+          </div>
+          <div className="assessment-choice-list">
+            {(values.track === "business" ? businessWorkersAffectedOptions : workerWeeklyHourOptions).map((option) => {
+              const selected =
+                values.track === "business"
+                  ? builderValues.business?.workersAffected === option.value
+                  : builderValues.worker?.weeklyHoursSaved === option.value;
+
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={`assessment-choice ${selected ? "selected" : ""}`}
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    values.track === "business"
+                      ? replacePathway({
+                          ...pathBase(),
+                          business: {
+                            ...defaultDraft.adapt.business,
+                            workersAffected: option.value,
+                          },
+                          worker: defaultDraft.adapt.worker,
+                        })
+                      : replacePathway({
+                          ...pathBase(),
+                          worker: {
+                            ...defaultDraft.adapt.worker,
+                            weeklyHoursSaved: option.value,
+                          },
+                          business: defaultDraft.adapt.business,
+                        })
+                  }
+                >
+                  <span className="assessment-choice-mark" aria-hidden />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {showSecondValueStep ? (
+        <section
+          className={`assessment-step-card ${
+            values.track === "business" ? (hasBusinessWeeklyHours ? "complete" : "") : hasWorkerHourlyValue ? "complete" : ""
+          }`}
+        >
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">6</span>
+            <div>
+              <span className="assessment-step-eyebrow">{builderCopy.valueEyebrow}</span>
+              <h3>{values.track === "business" ? builderCopy.weeklyHoursSavedPerWorker : builderCopy.hourlyValue}</h3>
+            </div>
+          </div>
+          <div className="assessment-choice-list">
+            {(values.track === "business" ? businessWeeklyHourOptions : workerHourlyValueOptions).map((option) => {
+              const selected =
+                values.track === "business"
+                  ? builderValues.business?.weeklyHoursSavedPerWorker === option.value
+                  : builderValues.worker?.hourlyValue === option.value;
+
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={`assessment-choice ${selected ? "selected" : ""}`}
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    values.track === "business"
+                      ? replacePathway({
+                          ...pathBase(),
+                          business: {
+                            ...defaultDraft.adapt.business,
+                            workersAffected: values.business.workersAffected,
+                            weeklyHoursSavedPerWorker: option.value,
+                          },
+                          worker: defaultDraft.adapt.worker,
+                        })
+                      : replacePathway({
+                          ...pathBase(),
+                          worker: {
+                            ...defaultDraft.adapt.worker,
+                            weeklyHoursSaved: values.worker.weeklyHoursSaved,
+                            hourlyValue: option.value,
+                          },
+                          business: defaultDraft.adapt.business,
+                        })
+                  }
+                >
+                  <span className="assessment-choice-mark" aria-hidden />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {showThirdValueStep ? (
+        <section
+          className={`assessment-step-card ${
+            values.track === "business" ? (hasBusinessHourlyValue ? "complete" : "") : hasWorkerProofPoint ? "complete" : ""
+          }`}
+        >
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">7</span>
+            <div>
+              <span className="assessment-step-eyebrow">{builderCopy.valueEyebrow}</span>
+              <h3>{values.track === "business" ? builderCopy.blendedHourlyValue : builderCopy.proofPoint}</h3>
+            </div>
+          </div>
+          <div className="assessment-choice-list">
+            {(values.track === "business" ? businessHourlyValueOptions : proofOptions).map((option) => {
+              const selected =
+                values.track === "business"
+                  ? builderValues.business?.blendedHourlyValue === option.value
+                  : builderValues.worker?.proofPoint === option.value;
+
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={`assessment-choice ${selected ? "selected" : ""}`}
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    values.track === "business"
+                      ? replacePathway({
+                          ...pathBase(),
+                          business: {
+                            ...defaultDraft.adapt.business,
+                            workersAffected: values.business.workersAffected,
+                            weeklyHoursSavedPerWorker: values.business.weeklyHoursSavedPerWorker,
+                            blendedHourlyValue: option.value as number,
+                          },
+                          worker: defaultDraft.adapt.worker,
+                        })
+                      : replacePathway({
+                          ...pathBase(),
+                          worker: {
+                            ...defaultDraft.adapt.worker,
+                            weeklyHoursSaved: values.worker.weeklyHoursSaved,
+                            hourlyValue: values.worker.hourlyValue,
+                            proofPoint: option.value as string,
+                          },
+                          business: defaultDraft.adapt.business,
+                        })
+                  }
+                >
+                  <span className="assessment-choice-mark" aria-hidden />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {showMultiplierStep ? (
+        <section className={`assessment-step-card ${hasMultiplier ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">8</span>
+            <div>
+              <span className="assessment-step-eyebrow">{builderCopy.valueEyebrow}</span>
+              <h3>{builderCopy.multiplier}</h3>
+            </div>
+          </div>
+          <div className="assessment-choice-list">
+            {seminarMultiplierOptions.map((option) => {
+              const selected = builderValues.multiplier === option.value;
+
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={`assessment-choice ${selected ? "selected" : ""}`}
+                  key={option.value}
+                  type="button"
+                  onClick={() =>
+                    replacePathway({
+                      ...pathBase(),
+                      worker: values.worker,
+                      business: values.business,
+                      multiplier: option.value,
+                    })
+                  }
+                >
+                  <span className="assessment-choice-mark" aria-hidden />
+                  <span>
+                    <strong>{option.label}</strong>
+                    <small>{option.description}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {showResult && result ? (
+        <section className="result-panel learn-report-panel">
+          <span className="demo-label">{content.ui.demoContentTitle}</span>
+          <h3>{result.title}</h3>
+          <p>{result.summary}</p>
+          <div className="seminar-value-grid">
+            <div className="seminar-value-card">
+              <span>{builderCopy.annualValue}</span>
+              <strong>{result.annualValueLabel}</strong>
+            </div>
+            <div className="seminar-value-card">
+              <span>{builderCopy.weeklyValue}</span>
+              <strong>{result.weeklyHoursSaved.toLocaleString()}</strong>
+            </div>
+            <div className="seminar-value-card">
+              <span>{builderCopy.multiplierLabel}</span>
+              <strong>{result.multiplier}x</strong>
+            </div>
+          </div>
+          <ul>
+            {result.items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <div className="plan-actions learn-report-actions">
+            <button className="button ghost" type="button" onClick={copyResult}>
+              {builderCopy.copyResult}
+              <Clipboard size={16} aria-hidden />
+            </button>
+            <button className="button ghost" type="button" onClick={downloadResult}>
+              {builderCopy.downloadResult}
+              <Download size={16} aria-hidden />
+            </button>
+            <button className="button blue" type="button" onClick={saveResult}>
+              {builderCopy.saveResult}
+              <CheckCircle2 size={16} aria-hidden />
+            </button>
+            <button className="button ghost" type="button" onClick={saveAndContinue}>
+              {copy.actions.saveToImplement}
+              <ArrowRight size={16} aria-hidden />
+            </button>
+          </div>
+          {resultStatus ? <p className="copy-status">{resultStatus}</p> : null}
+          {saved ? <p className="demo-next-step">{demo.nextStep}</p> : null}
+        </section>
+      ) : showMultiplierStep ? (
+        <p className="empty-state">{builderCopy.empty}</p>
+      ) : null}
       <DemoNotes demo={demo} />
     </article>
   );
