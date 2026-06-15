@@ -134,11 +134,11 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "English",
     nav: [
       { key: "overview", label: "Overview", href: sharedRoutes.overview },
-      { key: "opportunity", label: "Opportunity", href: sharedRoutes.opportunity },
       { key: "inspire", label: "Inspire", href: sharedRoutes.inspire },
       { key: "learn", label: "Learn", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminar", href: sharedRoutes.adapt },
       { key: "implement", label: "Implement", href: sharedRoutes.implement },
+      { key: "opportunity", label: "Opportunity", href: sharedRoutes.opportunity },
     ],
     brand: {
       name: "UpSkill USA",
@@ -367,11 +367,11 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "Español",
     nav: [
       { key: "overview", label: "Resumen", href: sharedRoutes.overview },
-      { key: "opportunity", label: "Oportunidad", href: sharedRoutes.opportunity },
       { key: "inspire", label: "Inspirar", href: sharedRoutes.inspire },
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminario", href: sharedRoutes.adapt },
       { key: "implement", label: "Implementar", href: sharedRoutes.implement },
+      { key: "opportunity", label: "Oportunidad", href: sharedRoutes.opportunity },
     ],
     brand: {
       name: "UpSkill USA",
@@ -604,11 +604,11 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "Português",
     nav: [
       { key: "overview", label: "Visão geral", href: sharedRoutes.overview },
-      { key: "opportunity", label: "Oportunidade", href: sharedRoutes.opportunity },
       { key: "inspire", label: "Inspirar", href: sharedRoutes.inspire },
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminário", href: sharedRoutes.adapt },
       { key: "implement", label: "Implementar", href: sharedRoutes.implement },
+      { key: "opportunity", label: "Oportunidade", href: sharedRoutes.opportunity },
     ],
     brand: {
       name: "UpSkill USA",

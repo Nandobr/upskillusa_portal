@@ -524,16 +524,14 @@ function PageHero({ keyName }: { keyName: FrameworkKey }) {
   const { content } = usePortalContent();
   const framework = content.frameworks[keyName];
   const Icon = icons[keyName];
-  const heroLabel =
-    keyName === "adapt"
-      ? `${framework.tab} · ${framework.title}`
-      : `${framework.tab} : ${framework.title}`.toUpperCase();
+  const formattedTab = framework.tab.toLowerCase().replace(/^\w/, (letter) => letter.toUpperCase());
+  const heroLabel = `${formattedTab}: ${framework.title}`;
 
   return (
-    <section className="page-hero">
+    <section className="page-hero framework-hero">
       <div className="section-inner">
         <span className="eyebrow page-step-label">
-          <Icon size={15} aria-hidden />
+          <Icon size={13} aria-hidden />
           {heroLabel}
         </span>
         <h1>{framework.question}</h1>
