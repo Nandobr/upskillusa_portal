@@ -1,5 +1,14 @@
 import type { FrameworkKey, Language } from "@/lib/content";
 import {
+  formatLabNumber,
+  formatShortUsd,
+  type BusinessOpportunityReport,
+  ImplementAudience,
+  ImplementPilot,
+  ImplementReport,
+  ImplementWorkAreaKey,
+} from "@/lib/implementation-lab";
+import {
   assessmentCopy,
   defaultAssessmentResult,
   formatCurrency,
@@ -128,9 +137,17 @@ export type AdaptPlanInput = LegacyAdaptPlanFields & {
 
 export type ImplementPlanInput = {
   companyUrl: string;
+  email: string;
   workflowName: string;
   pilotScope: string;
   humanGate: string;
+  audience?: ImplementAudience;
+  workArea?: ImplementWorkAreaKey;
+  selectedTasks: string[];
+  customTasks: string[];
+  report?: ImplementReport;
+  selectedPilot?: ImplementPilot;
+  savedAt?: string;
   impactsPeople: boolean;
   usesSensitiveData: boolean;
   harmIfWrong: boolean;
@@ -1199,9 +1216,17 @@ export const defaultDraft: Required<PlanDraft> = {
   },
   implement: {
     companyUrl: "",
+    email: "",
     workflowName: "",
     pilotScope: "",
     humanGate: "",
+    audience: undefined,
+    workArea: undefined,
+    selectedTasks: [],
+    customTasks: [],
+    report: undefined,
+    selectedPilot: undefined,
+    savedAt: undefined,
     impactsPeople: false,
     usesSensitiveData: false,
     harmIfWrong: false,
@@ -1377,15 +1402,14 @@ function hasSavedSeminarResult(input: AdaptPlanInput | undefined) {
   return isSeminarPrepComplete(input) && hasText(input?.savedAt);
 }
 
+function hasSavedImplementation(input: ImplementPlanInput | undefined) {
+  return Boolean(input?.report && input.selectedPilot && hasText(input.savedAt));
+}
+
 export function getPlanLevel(draft: PlanDraft): PlanLevel {
   const hasSeminarResult = hasSavedSeminarResult(draft.adapt);
 
-  if (
-    hasSeminarResult &&
-    draft.implement &&
-    hasText(draft.implement.workflowName) &&
-    hasText(draft.implement.humanGate)
-  ) {
+  if (hasSavedImplementation(draft.implement)) {
     return 4;
   }
   if (hasSeminarResult) {
@@ -1517,6 +1541,68 @@ function getAssessmentPlanSection(input: InspirePlanInput): GeneratedPlanSection
   };
 }
 
+function getImplementationPlanSection(input: ImplementPlanInput, language: Language): GeneratedPlanSection {
+  const copy = getPlanCopy(language);
+  const pilot = input.selectedPilot;
+
+  if (input.report?.kind === "business") {
+    const report = input.report as BusinessOpportunityReport;
+
+    return {
+      title: "AI Opportunity Report",
+      body: `${report.companyName} has a Step 4 opportunity score of ${Math.round(
+        report.opportunityScore,
+      )}/100. The selected first pilot is ${pilot?.label || copy.defaults.smallTest}.`,
+      items: [
+        `Report type: Business Leader`,
+        `Annual value opportunity: ${formatShortUsd(report.annualValueAtRisk)}`,
+        `Recoverable work: ${formatLabNumber(report.weeklyHoursReclaimable)} hours/week (${report.fteEquivalent.toFixed(
+          1,
+        )} FTE equivalent/year)`,
+        `Selected pilot: ${pilot?.label || copy.defaults.smallTest}`,
+        `AI does: ${pilot?.aiAction || "not specified"}`,
+        `Human review: ${pilot?.humanReview || input.humanGate || copy.defaults.approver}`,
+        copy.plan.riskLevel(copy.risk[getRiskLevel(input) ?? "low"]),
+      ],
+    };
+  }
+
+  if (input.report?.kind === "employee") {
+    const report = input.report;
+
+    return {
+      title: "Task Transformation Report",
+      body: `${report.workArea} work was analyzed across ${report.skillsAnalyzed} selected task areas. The selected first pilot is ${
+        pilot?.label || copy.defaults.smallTest
+      }.`,
+      items: [
+        `Report type: Employee`,
+        `Monthly hours saved estimate: ${report.summary.estimated_monthly_hours_saved.toFixed(1)}`,
+        `FTE equivalent: ${report.summary.estimated_fte_equivalent_saved.toFixed(2)}`,
+        `Buckets: ${report.summary.automate_count} automate, ${report.summary.augment_count} augment, ${report.summary.own_count} own`,
+        `Selected pilot: ${pilot?.label || copy.defaults.smallTest}`,
+        `AI does: ${pilot?.aiAction || "not specified"}`,
+        `Human ownership: ${pilot?.humanReview || input.humanGate || copy.defaults.approver}`,
+        `Suggested tools: ${report.tools.join(", ") || "not specified"}`,
+        copy.plan.riskLevel(copy.risk[getRiskLevel(input) ?? "low"]),
+      ],
+    };
+  }
+
+  return {
+    title: copy.plan.pilotTitle,
+    body: copy.plan.pilot(
+      input.workflowName || copy.defaults.oneWorkflow,
+      input.pilotScope || copy.defaults.smallTest,
+    ),
+    items: [
+      copy.plan.humanGate(input.humanGate || copy.defaults.approver),
+      copy.plan.riskLevel(copy.risk[getRiskLevel(input) ?? "low"]),
+      copy.plan.companyUrl(input.companyUrl || copy.defaults.noCompanyUrl),
+    ],
+  };
+}
+
 export function generateUpgradePlan(draft: PlanDraft, language: Language = "en"): GeneratedPlan {
   const level = getPlanLevel(draft);
   const riskLevel = getRiskLevel(draft.implement);
@@ -1567,18 +1653,7 @@ export function generateUpgradePlan(draft: PlanDraft, language: Language = "en")
   }
 
   if (draft.implement) {
-    sections.push({
-      title: copy.plan.pilotTitle,
-      body: copy.plan.pilot(
-        draft.implement.workflowName || copy.defaults.oneWorkflow,
-        draft.implement.pilotScope || copy.defaults.smallTest,
-      ),
-      items: [
-        copy.plan.humanGate(draft.implement.humanGate || copy.defaults.approver),
-        copy.plan.riskLevel(riskLevel ? copy.risk[riskLevel] : copy.feedback.notAssessed),
-        copy.plan.companyUrl(draft.implement.companyUrl || copy.defaults.noCompanyUrl),
-      ],
-    });
+    sections.push(getImplementationPlanSection(draft.implement, language));
   }
 
   if (level === 0) {

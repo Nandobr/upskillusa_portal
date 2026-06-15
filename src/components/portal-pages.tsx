@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
+  AlertCircle,
   BadgeCheck,
   Bot,
   Brain,
@@ -11,16 +12,28 @@ import {
   Building2,
   CalendarDays,
   CheckCircle2,
+  Clock,
+  Code2,
   Clipboard,
+  Crown,
   Download,
+  DollarSign,
   GraduationCap,
   Lightbulb,
+  Megaphone,
   Network,
   PlayCircle,
+  RotateCw,
+  Scale,
+  Settings,
   Sparkles,
+  TrendingUp,
+  Users,
+  Wrench,
   Workflow,
+  X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { frameworkOrder, type FrameworkKey, type Language } from "@/lib/content";
 import { IkigaiAssessment } from "@/components/ikigai-assessment";
 import { usePortalContent } from "@/components/language-provider";
@@ -48,6 +61,20 @@ import {
   type SeminarTrack,
   type WorkCategoryKey,
 } from "@/lib/plan";
+import {
+  formatLabNumber,
+  formatShortUsd,
+  getWorkArea,
+  pilotFromBusinessOpportunity,
+  pilotFromEmployeeTask,
+  workAreaOptions,
+  type BusinessOpportunity,
+  type BusinessOpportunityReport,
+  type EmployeeTransformationReport,
+  type ImplementPilot,
+  type ImplementationTask,
+  type ImplementWorkAreaKey,
+} from "@/lib/implementation-lab";
 
 const icons: Record<FrameworkKey, typeof Sparkles> = {
   inspire: Sparkles,
@@ -57,6 +84,18 @@ const icons: Record<FrameworkKey, typeof Sparkles> = {
 };
 
 const workCategoryKeys = Object.keys(workCategories) as WorkCategoryKey[];
+
+const workAreaIcons: Record<ImplementWorkAreaKey, typeof Crown> = {
+  "Executive Leadership": Crown,
+  Operations: Settings,
+  "Finance and Accounting": DollarSign,
+  Sales: TrendingUp,
+  Marketing: Megaphone,
+  "Engineering and IT": Code2,
+  "Data and AI": Brain,
+  "HR and People Operations": Users,
+  "Legal and Compliance": Scale,
+};
 
 type SeminarChoice<T extends string | number> = {
   value: T;
@@ -538,53 +577,6 @@ function DemoNotes({ demo }: { demo: { commentsLabel?: string; notes?: string[];
       {demo.nextStep ? <p className="demo-next-step">{demo.nextStep}</p> : null}
     </div>
   );
-}
-
-function SavePlanActions({
-  onSave,
-  nextHref,
-  nextLabel,
-}: {
-  onSave: () => void;
-  nextHref?: string;
-  nextLabel?: string;
-}) {
-  const router = useRouter();
-  const { language } = usePortalContent();
-  const copy = getPlanCopy(language);
-
-  return (
-    <div className="plan-actions">
-      {nextHref ? (
-        <button
-          className="button blue"
-          type="button"
-          onClick={() => {
-            onSave();
-            router.push(nextHref);
-          }}
-        >
-          {nextLabel ?? copy.actions.saveAndContinue}
-          <ArrowRight size={16} aria-hidden />
-        </button>
-      ) : null}
-      <button
-        className="button ghost"
-        type="button"
-        onClick={() => {
-          onSave();
-          router.push("/plan");
-        }}
-      >
-        {copy.actions.viewPlanSoFar}
-        <ClipboardListIcon />
-      </button>
-    </div>
-  );
-}
-
-function ClipboardListIcon() {
-  return <CheckCircle2 size={16} aria-hidden />;
 }
 
 function LearnDemo() {
@@ -1536,61 +1528,873 @@ function AdaptDemo() {
 function ImplementDemo() {
   const { content, language } = usePortalContent();
   const copy = getPlanCopy(language);
-  const audit = content.forms.audit;
   const demo = content.pages.implement.demo;
-  const { draft, updateImplement } = usePlanDraft();
-  const values = mergeWithDefaults(draft).implement;
-  const setValues = (updater: (current: ImplementPlanInput) => ImplementPlanInput) => {
-    updateImplement(updater(values));
-  };
-
-  const plan = useMemo(
-    () => generateUpgradePlan({ ...draft, implement: values }, language),
-    [draft, language, values],
+  const { draft, updateImplement, clearImplement } = usePlanDraft();
+  const [values, setValues] = useState<ImplementPlanInput>(
+    () => mergeWithDefaults(draft).implement,
   );
-  const pilot = plan.sections.find((section) => section.title === copy.plan.pilotTitle);
+  const [customTaskDraft, setCustomTaskDraft] = useState("");
+  const [loadingPath, setLoadingPath] = useState<ImplementPlanInput["audience"] | null>(null);
+  const [error, setError] = useState("");
+  const [saveStatus, setSaveStatus] = useState("");
+
+  const hasProgress = Boolean(
+    values.audience ||
+      values.companyUrl ||
+      values.email ||
+      values.workArea ||
+      values.report ||
+      values.selectedPilot,
+  );
+  const taskCount = values.selectedTasks.length + values.customTasks.length;
+  const employeeReport = values.report?.kind === "employee" ? values.report : undefined;
+  const businessReport = values.report?.kind === "business" ? values.report : undefined;
+  const storedImplementKey = JSON.stringify(draft.implement ?? null);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setValues(mergeWithDefaults(draft).implement);
+      setCustomTaskDraft("");
+      setError("");
+      setSaveStatus("");
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [draft, storedImplementKey]);
+
+  function updateValues(patch: Partial<ImplementPlanInput>) {
+    setError("");
+    setSaveStatus("");
+    setValues((current) => ({ ...current, ...patch, savedAt: undefined }));
+  }
+
+  function resetImplementationLab() {
+    const nextValues = { ...defaultDraft.implement };
+    setValues(nextValues);
+    setCustomTaskDraft("");
+    setError("");
+    setSaveStatus("");
+    clearImplement();
+  }
+
+  function confirmResetImplementationLab() {
+    if (
+      window.confirm(
+        "Start the AI Implementation Lab over? This will clear your current Step 4 selections and saved report.",
+      )
+    ) {
+      resetImplementationLab();
+    }
+  }
+
+  function chooseAudience(audience: NonNullable<ImplementPlanInput["audience"]>) {
+    updateValues({
+      ...defaultDraft.implement,
+      audience,
+    });
+  }
+
+  function chooseWorkArea(workArea: ImplementWorkAreaKey) {
+    const area = getWorkArea(workArea);
+    updateValues({
+      audience: "employee",
+      workArea,
+      selectedTasks: area.topSkills,
+      customTasks: [],
+      report: undefined,
+      selectedPilot: undefined,
+    });
+  }
+
+  function toggleTask(task: string) {
+    updateValues({
+      selectedTasks: values.selectedTasks.includes(task)
+        ? values.selectedTasks.filter((item) => item !== task)
+        : [...values.selectedTasks, task],
+      report: undefined,
+      selectedPilot: undefined,
+    });
+  }
+
+  function addCustomTask() {
+    const task = customTaskDraft.trim();
+    if (!task || values.customTasks.includes(task) || values.selectedTasks.includes(task)) {
+      setCustomTaskDraft("");
+      return;
+    }
+
+    updateValues({
+      customTasks: [...values.customTasks, task],
+      report: undefined,
+      selectedPilot: undefined,
+    });
+    setCustomTaskDraft("");
+  }
+
+  function removeCustomTask(task: string) {
+    updateValues({
+      customTasks: values.customTasks.filter((item) => item !== task),
+      report: undefined,
+      selectedPilot: undefined,
+    });
+  }
+
+  async function analyzeBusiness() {
+    setLoadingPath("business");
+    setError("");
+    setSaveStatus("");
+
+    try {
+      const response = await fetch("/api/analyze-business-opportunity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ website: values.companyUrl, email: values.email }),
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        report?: BusinessOpportunityReport;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.report) {
+        throw new Error(payload.error || "Could not generate the AI Opportunity Report.");
+      }
+
+      updateValues({
+        audience: "business",
+        report: payload.report,
+        selectedPilot: undefined,
+      });
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Could not generate report.");
+    } finally {
+      setLoadingPath(null);
+    }
+  }
+
+  async function analyzeEmployee() {
+    if (!values.workArea) return;
+
+    setLoadingPath("employee");
+    setError("");
+    setSaveStatus("");
+
+    try {
+      const response = await fetch("/api/analyze-employee-tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          workArea: values.workArea,
+          tasks: values.selectedTasks,
+          customTasks: values.customTasks,
+        }),
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        report?: EmployeeTransformationReport;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.report) {
+        throw new Error(payload.error || "Could not generate the Task Transformation Report.");
+      }
+
+      updateValues({
+        audience: "employee",
+        report: payload.report,
+        selectedPilot: undefined,
+      });
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Could not generate report.");
+    } finally {
+      setLoadingPath(null);
+    }
+  }
+
+  function selectBusinessPilot(opportunity: BusinessOpportunity) {
+    updateValues({
+      selectedPilot: pilotFromBusinessOpportunity(opportunity),
+      workflowName: opportunity.pilotLabel,
+      pilotScope: opportunity.symptom,
+      humanGate: opportunity.humanReview,
+    });
+  }
+
+  function selectEmployeePilot(task: ImplementationTask) {
+    const pilot = pilotFromEmployeeTask(task);
+    updateValues({
+      selectedPilot: pilot,
+      workflowName: task.task_name,
+      pilotScope: task.description,
+      humanGate: task.human_ownership,
+    });
+  }
+
+  function saveImplementation() {
+    if (!values.report || !values.selectedPilot) {
+      setError("Choose a first pilot before saving Step 4.");
+      return;
+    }
+
+    const savedValues: ImplementPlanInput = {
+      ...values,
+      workflowName: values.selectedPilot.label,
+      pilotScope: values.selectedPilot.workflow,
+      humanGate: values.selectedPilot.humanReview,
+      savedAt: new Date().toISOString(),
+    };
+    setValues(savedValues);
+    updateImplement(savedValues);
+    setSaveStatus("Saved to your AI-Ready Action Plan.");
+  }
+
+  const selectedArea = values.workArea ? getWorkArea(values.workArea) : undefined;
+  const canAnalyzeBusiness = values.companyUrl.trim().includes(".") && values.email.trim().includes("@");
+  const canAnalyzeEmployee = Boolean(values.workArea && taskCount >= 3);
 
   return (
-    <article className="demo-panel">
-      <span className="demo-label">{demo.label}</span>
-      <h2>{copy.headings.completePlan}</h2>
-      <div className="form-grid two">
-        <label className="field">
-          <span>{audit.companyUrl}</span>
-          <input
-            value={values.companyUrl}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, companyUrl: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{audit.workflowName}</span>
-          <input
-            value={values.workflowName}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, workflowName: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{copy.fields.pilotScope}</span>
-          <input
-            value={values.pilotScope}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, pilotScope: event.target.value }))
-            }
-          />
-        </label>
-        <label className="field">
-          <span>{audit.humanGate}</span>
-          <input
-            value={values.humanGate}
-            onChange={(event) =>
-              setValues((current) => ({ ...current, humanGate: event.target.value }))
-            }
-          />
-        </label>
+    <article className="demo-panel learn-pathway-panel implementation-lab-panel">
+      <div className="assessment-intro-top">
+        <span className="demo-label">{demo.label}</span>
+        {hasProgress ? (
+          <button
+            className="assessment-reset-button"
+            type="button"
+            onClick={confirmResetImplementationLab}
+          >
+            Start over
+          </button>
+        ) : null}
+      </div>
+      <h2>Build My First AI Pilot</h2>
+      <p className="assessment-step-subtitle">
+        Choose the path that fits you. Leaders see opportunity value; employees see how daily tasks transform.
+      </p>
+
+      <section className={`assessment-step-card ${values.audience ? "complete" : ""}`}>
+        <div className="assessment-step-heading">
+          <span className="assessment-step-number">1</span>
+          <div>
+            <span className="assessment-step-eyebrow">Audience</span>
+            <h3>Who are you exploring AI for?</h3>
+          </div>
+        </div>
+        <div className="assessment-pathways learn-option-grid two">
+          <button
+            aria-pressed={values.audience === "business"}
+            className={`assessment-pathway-card ${values.audience === "business" ? "selected" : ""}`}
+            type="button"
+            onClick={() => chooseAudience("business")}
+          >
+            <strong>Business Leader</strong>
+            <p>Find where AI can create measurable value across company workflows.</p>
+          </button>
+          <button
+            aria-pressed={values.audience === "employee"}
+            className={`assessment-pathway-card ${values.audience === "employee" ? "selected" : ""}`}
+            type="button"
+            onClick={() => chooseAudience("employee")}
+          >
+            <strong>Employee / Worker</strong>
+            <p>See which daily tasks AI can automate, augment, or leave human-owned.</p>
+          </button>
+        </div>
+      </section>
+
+      {values.audience === "business" ? (
+        <section className={`assessment-step-card ${businessReport ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">2</span>
+            <div>
+              <span className="assessment-step-eyebrow">AI Opportunity Report</span>
+              <h3>Enter the company to audit</h3>
+            </div>
+          </div>
+          <div className="form-grid two">
+            <label className="field">
+              <span>Company URL</span>
+              <input
+                value={values.companyUrl}
+                placeholder="yourcompany.com"
+                onChange={(event) =>
+                  updateValues({
+                    companyUrl: event.target.value,
+                    report: undefined,
+                    selectedPilot: undefined,
+                  })
+                }
+              />
+            </label>
+            <label className="field">
+              <span>Report contact email</span>
+              <input
+                type="email"
+                value={values.email}
+                placeholder="you@company.com"
+                onChange={(event) =>
+                  updateValues({
+                    email: event.target.value,
+                    report: undefined,
+                    selectedPilot: undefined,
+                  })
+                }
+              />
+            </label>
+          </div>
+          <div className="assessment-step-actions">
+            <button
+              className="button blue"
+              type="button"
+              disabled={!canAnalyzeBusiness || loadingPath === "business"}
+              onClick={analyzeBusiness}
+            >
+              {loadingPath === "business" ? "Analyzing..." : "Generate AI Opportunity Report"}
+              <ArrowRight size={16} aria-hidden />
+            </button>
+          </div>
+        </section>
+      ) : null}
+
+      {values.audience === "employee" ? (
+        <>
+          <section className={`assessment-step-card ${values.workArea ? "complete" : ""}`}>
+            <div className="assessment-step-heading">
+              <span className="assessment-step-number">2</span>
+              <div>
+                <span className="assessment-step-eyebrow">Work area</span>
+                <h3>Choose where your work sits</h3>
+              </div>
+            </div>
+            <div className="assessment-skill-grid learn-option-grid three">
+              {workAreaOptions.map((area) => {
+                const AreaIcon = workAreaIcons[area.category];
+
+                return (
+                  <button
+                    aria-pressed={values.workArea === area.category}
+                    className={`assessment-skill-card implementation-work-area-card ${
+                      values.workArea === area.category ? "selected" : ""
+                    }`}
+                    key={area.category}
+                    type="button"
+                    onClick={() => chooseWorkArea(area.category)}
+                  >
+                    <AreaIcon size={15} strokeWidth={2.4} aria-hidden />
+                    <strong>{area.category}</strong>
+                    <span>{area.focus}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+
+          {selectedArea ? (
+            <section className={`assessment-step-card ${taskCount >= 3 ? "complete" : ""}`}>
+              <div className="assessment-step-heading implementation-task-selector-heading">
+                <span className="assessment-step-number">3</span>
+                <div>
+                  <span className="assessment-step-eyebrow">
+                    {selectedArea.category} · {selectedArea.skills.length} skills
+                  </span>
+                  <h3>Select what fills your calendar</h3>
+                </div>
+                <span className="implementation-selected-count">
+                  <span aria-hidden />
+                  {taskCount} tasks selected
+                </span>
+              </div>
+              <div className="implementation-chip-grid">
+                {selectedArea.skills.map((task) => {
+                  const selected = values.selectedTasks.includes(task);
+                  return (
+                    <button
+                      aria-pressed={selected}
+                      className={`implementation-chip ${selected ? "selected" : ""}`}
+                      key={task}
+                      type="button"
+                      onClick={() => toggleTask(task)}
+                    >
+                      {task}
+                    </button>
+                  );
+                })}
+                {values.customTasks.map((task) => (
+                  <span className="implementation-chip selected removable" key={task}>
+                    {task}
+                    <button
+                      aria-label={`Remove ${task}`}
+                      type="button"
+                      onClick={() => removeCustomTask(task)}
+                    >
+                      <X size={12} aria-hidden />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="implementation-custom-task">
+                <label className="field">
+                  <span>Add a task you do not see</span>
+                  <input
+                    value={customTaskDraft}
+                    placeholder="Type a task and press Add"
+                    onChange={(event) => setCustomTaskDraft(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        addCustomTask();
+                      }
+                    }}
+                  />
+                </label>
+                <button
+                  className="button ghost"
+                  type="button"
+                  disabled={!customTaskDraft.trim()}
+                  onClick={addCustomTask}
+                >
+                  Add
+                </button>
+              </div>
+              <div className="assessment-step-actions">
+                <button
+                  className="button blue"
+                  type="button"
+                  disabled={!canAnalyzeEmployee || loadingPath === "employee"}
+                  onClick={analyzeEmployee}
+                >
+                  {loadingPath === "employee" ? "Analyzing..." : "Generate Task Transformation Report"}
+                  <ArrowRight size={16} aria-hidden />
+                </button>
+              </div>
+            </section>
+          ) : null}
+        </>
+      ) : null}
+
+      {loadingPath ? <ImplementationLoading audience={loadingPath} /> : null}
+      {error ? <ImplementationError message={error} /> : null}
+
+      {businessReport ? (
+        <BusinessOpportunityReportView
+          report={businessReport}
+          selectedPilot={values.selectedPilot}
+          onSelect={selectBusinessPilot}
+        />
+      ) : null}
+
+      {employeeReport ? (
+        <EmployeeTransformationReportView
+          report={employeeReport}
+          selectedPilot={values.selectedPilot}
+          onSelect={selectEmployeePilot}
+          onRegenerate={analyzeEmployee}
+        />
+      ) : null}
+
+      {values.selectedPilot ? (
+        <ImplementationGuardrails
+          copy={copy}
+          values={values}
+          saveStatus={saveStatus}
+          onChange={updateValues}
+          onSave={saveImplementation}
+        />
+      ) : null}
+
+      <DemoNotes demo={demo} />
+    </article>
+  );
+}
+
+function ImplementationLoading({ audience }: { audience: ImplementPlanInput["audience"] }) {
+  const items =
+    audience === "business"
+      ? [
+          "Scanning company context...",
+          "Mapping workflow opportunity areas...",
+          "Estimating recoverable hours...",
+          "Preparing first pilot options...",
+        ]
+      : [
+          "Mapping selected work tasks...",
+          "Classifying Automate / Augment / Own...",
+          "Calculating monthly hours saved...",
+          "Preparing first pilot options...",
+        ];
+
+  return (
+    <section className="implementation-loading">
+      <Clock size={28} aria-hidden />
+      <h3>{audience === "business" ? "Building your AI Opportunity Report..." : "Building your Task Transformation Report..."}</h3>
+      <ul>
+        {items.map((item, index) => (
+          <li key={item}>
+            <CheckCircle2 size={16} aria-hidden />
+            <span>{index + 1}. {item}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+function ImplementationError({ message }: { message: string }) {
+  return (
+    <section className="implementation-error">
+      <AlertCircle size={20} aria-hidden />
+      <p>{message}</p>
+    </section>
+  );
+}
+
+function BusinessOpportunityReportView({
+  report,
+  selectedPilot,
+  onSelect,
+}: {
+  report: BusinessOpportunityReport;
+  selectedPilot?: ImplementPilot;
+  onSelect: (opportunity: BusinessOpportunity) => void;
+}) {
+  return (
+    <section className="implementation-report">
+      <div className="implementation-report-header">
+        <div>
+          <span className="demo-label">{report.isDemo ? "Demo AI Opportunity Report" : "AI Opportunity Report"}</span>
+          <h3>{report.companyName}</h3>
+          <p>{report.website} · {report.industry} · {report.sizeEstimate}</p>
+        </div>
+        <button className="implementation-small-action" type="button" onClick={() => window.print()}>
+          Print / Save PDF
+        </button>
+      </div>
+      {report.demoReason ? <p className="implementation-demo-note">{report.demoReason}</p> : null}
+      <div className="implementation-kpi-band">
+        <ImplementationStat
+          icon={TrendingUp}
+          label="Annual value opportunity"
+          value={formatShortUsd(report.annualValueAtRisk)}
+          sub="Directional estimate"
+        />
+        <ImplementationStat
+          icon={Clock}
+          label="Recoverable / week"
+          value={`${formatLabNumber(report.weeklyHoursReclaimable)} hrs`}
+          sub={`${report.fteEquivalent.toFixed(1)} FTE equivalent`}
+        />
+        <ImplementationStat
+          icon={Sparkles}
+          label="Opportunity score"
+          value={`${Math.round(report.opportunityScore)}/100`}
+          sub="Workflow readiness"
+        />
+      </div>
+      <div className="implementation-report-body">
+        <div>
+          <h4>Executive Summary</h4>
+          <p>{report.executiveSummary}</p>
+          <p className="implementation-muted">{report.scoreRationale}</p>
+        </div>
+        <div>
+          <h4>Choose a first opportunity</h4>
+          <div className="implementation-opportunity-list">
+            {report.opportunities.map((opportunity) => {
+              const selected = selectedPilot?.id === opportunity.id;
+              return (
+                <button
+                  aria-pressed={selected}
+                  className={`implementation-opportunity ${selected ? "selected" : ""}`}
+                  key={opportunity.id}
+                  type="button"
+                  onClick={() => onSelect(opportunity)}
+                >
+                  <span>{opportunity.department}</span>
+                  <strong>{opportunity.pilotLabel}</strong>
+                  <small>{opportunity.symptom}</small>
+                  <em>~{formatLabNumber(opportunity.estimatedAnnualHours)} hrs/year</em>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function EmployeeTransformationReportView({
+  report,
+  selectedPilot,
+  onSelect,
+  onRegenerate,
+}: {
+  report: EmployeeTransformationReport;
+  selectedPilot?: ImplementPilot;
+  onSelect: (task: ImplementationTask) => void;
+  onRegenerate: () => void;
+}) {
+  const sortedTasks = [...report.tasks].sort((a, b) => {
+    const order: Record<ImplementationTask["bucket"], number> = {
+      AUTOMATE: 0,
+      AUGMENT: 1,
+      OWN: 2,
+    };
+    return order[a.bucket] - order[b.bucket] || b.monthly_hours_saved - a.monthly_hours_saved;
+  });
+  const automatableTasks = sortedTasks.filter((task) => task.bucket === "AUTOMATE");
+  const firstPilotTask = automatableTasks[0] ?? sortedTasks.find((task) => task.bucket === "AUGMENT");
+  const moreAutomateCount = Math.max(0, report.summary.automate_count - 1);
+  const automationPotential = Math.round((report.summary.automate_count / Math.max(1, report.tasks.length)) * 100);
+  const readinessBand = report.tasks.length >= 12 ? "Developing" : "Emerging";
+
+  return (
+    <section className="implementation-report">
+      <div className="implementation-report-header implementation-report-header-spacious">
+        <div>
+          <span className="implementation-report-eyebrow">Your AI Opportunity Report</span>
+          <h3>{report.workArea}</h3>
+          <p>
+            {report.skillsAnalyzed} skills analyzed · {report.tasks.length} tasks generated · readiness band:{" "}
+            <b>{readinessBand}</b>
+          </p>
+        </div>
+        <button className="implementation-small-action" type="button" onClick={onRegenerate}>
+          <RotateCw size={14} aria-hidden />
+          Regenerate
+        </button>
+      </div>
+      {report.demoReason ? <p className="implementation-demo-note">{report.demoReason}</p> : null}
+      <div className="implementation-kpi-band">
+        <ImplementationStat
+          icon={Clock}
+          label="Hours saved / month"
+          value={report.summary.estimated_monthly_hours_saved.toFixed(0)}
+          sub="From AI deployment"
+        />
+        <ImplementationStat
+          icon={Users}
+          label="FTE equivalent"
+          value={report.summary.estimated_fte_equivalent_saved.toFixed(2)}
+          sub="Per month"
+        />
+        <ImplementationStat
+          icon={Sparkles}
+          label="Automation potential"
+          value={`${automationPotential}%`}
+          sub={`${report.summary.automate_count} of ${report.tasks.length} tasks`}
+        />
+      </div>
+      <div className="implementation-bucket-row">
+        <BucketCount label="Augment" count={report.summary.augment_count} bucket="AUGMENT" />
+        <BucketCount label="OWN" count={report.summary.own_count} bucket="OWN" />
+        <BucketCount label="Automate" count={report.summary.automate_count} bucket="AUTOMATE" />
+      </div>
+      <div className="implementation-report-body">
+        <div>
+          <h4>Task-by-task breakdown</h4>
+          <p className="implementation-muted">Hours per month, before vs. after AI deployment.</p>
+          <div className="implementation-task-list">
+            {sortedTasks.map((task) => (
+              <ImplementationTaskRow
+                key={task.task_id}
+                task={task}
+                selected={selectedPilot?.id === `task-${task.task_id}`}
+                onSelect={onSelect}
+              />
+            ))}
+          </div>
+        </div>
+        <div>
+          <h4>Recommended AI tools</h4>
+          <div className="implementation-tool-list">
+            {report.tools.map((tool) => (
+              <span key={tool}>
+                <Wrench size={14} aria-hidden />
+                {tool}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="implementation-workflow-cta">
+        <span className="implementation-workflow-cta-label">Your skill roadmap is ready</span>
+        <h4>Turn this into your daily AI workflow.</h4>
+        <ul>
+          {firstPilotTask ? (
+            <li>
+              <CheckCircle2 size={16} aria-hidden />
+              <span>
+                Customize <b>{firstPilotTask.task_name}</b>
+                {moreAutomateCount > 0 ? (
+                  <>
+                    {" "}(and <b>{moreAutomateCount}</b> more)
+                  </>
+                ) : null}{" "}
+                inside your first AI pilot
+              </span>
+            </li>
+          ) : null}
+          <li>
+            <CheckCircle2 size={16} aria-hidden />
+            <span>
+              Reclaim <b>{report.summary.estimated_monthly_hours_saved.toFixed(0)}h/month</b> - that is{" "}
+              <b>{report.summary.estimated_fte_equivalent_saved.toFixed(2)} FTE</b> of your week back
+            </span>
+          </li>
+          {report.summary.own_count > 0 ? (
+            <li>
+              <CheckCircle2 size={16} aria-hidden />
+              <span>
+                Keep owning the <b>{report.summary.own_count}</b> tasks only you can do
+              </span>
+            </li>
+          ) : null}
+        </ul>
+        {firstPilotTask ? (
+          <button className="button primary" type="button" onClick={() => onSelect(firstPilotTask)}>
+            Use this as my first pilot
+            <ArrowRight size={16} aria-hidden />
+          </button>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+function ImplementationStat({
+  icon: Icon,
+  label,
+  value,
+  sub,
+}: {
+  icon: typeof Clock;
+  label: string;
+  value: string;
+  sub: string;
+}) {
+  return (
+    <div className="implementation-stat">
+      <span>
+        <Icon size={14} aria-hidden />
+        {label}
+      </span>
+      <strong>{value}</strong>
+      <small>{sub}</small>
+    </div>
+  );
+}
+
+function BucketCount({
+  label,
+  count,
+  bucket,
+}: {
+  label: string;
+  count: number;
+  bucket: ImplementationTask["bucket"];
+}) {
+  return (
+    <div className={`implementation-bucket ${bucket.toLowerCase()}`}>
+      <span>{label}</span>
+      <strong>{count}</strong>
+    </div>
+  );
+}
+
+function ImplementationTaskRow({
+  task,
+  selected,
+  onSelect,
+}: {
+  task: ImplementationTask;
+  selected: boolean;
+  onSelect: (task: ImplementationTask) => void;
+}) {
+  const beforeHours = (task.avg_minutes_per_instance * task.instances_per_month) / 60;
+  const afterHours = Math.max(0, beforeHours - task.monthly_hours_saved);
+  const progressPct = Math.max(3, Math.min(100, beforeHours > 0 ? (afterHours / beforeHours) * 100 : 0));
+  const canPilot = task.bucket !== "OWN";
+
+  return (
+    <button
+      aria-pressed={selected}
+      className={`implementation-task-row ${selected ? "selected" : ""}`}
+      type="button"
+      disabled={!canPilot}
+      onClick={() => onSelect(task)}
+    >
+      <div className="implementation-task-row-header">
+        <div>
+          <BucketBadge bucket={task.bucket} />
+          <strong>{task.task_name}</strong>
+        </div>
+        <span className="implementation-task-hours">
+          {beforeHours.toFixed(1)}h {"->"} {afterHours.toFixed(1)}h
+        </span>
+      </div>
+      <span className="implementation-task-progress" aria-hidden>
+        <span style={{ width: `${progressPct}%` }} />
+      </span>
+      <p>
+        <b>AI does:</b> {task.ai_action}
+      </p>
+    </button>
+  );
+}
+
+function BucketBadge({ bucket }: { bucket: ImplementationTask["bucket"] }) {
+  return <span className={`implementation-badge ${bucket.toLowerCase()}`}>{bucket}</span>;
+}
+
+function ImplementationGuardrails({
+  copy,
+  values,
+  saveStatus,
+  onChange,
+  onSave,
+}: {
+  copy: ReturnType<typeof getPlanCopy>;
+  values: ImplementPlanInput;
+  saveStatus: string;
+  onChange: (patch: Partial<ImplementPlanInput>) => void;
+  onSave: () => void;
+}) {
+  const pilot = values.selectedPilot;
+  if (!pilot) return null;
+
+  return (
+    <section className="assessment-step-card implementation-guardrails complete">
+      <div className="assessment-step-heading">
+        <span className="assessment-step-number">4</span>
+        <div>
+          <span className="assessment-step-eyebrow">First pilot</span>
+          <h3>Add guardrails and save</h3>
+        </div>
+      </div>
+      <div className="implementation-pilot-card">
+        <div>
+          <span className="demo-label">Selected pilot</span>
+          <h4>{pilot.label}</h4>
+          <p>{pilot.workflow} · {pilot.hoursPerWeek} hrs/week estimate · threshold {pilot.confidenceThreshold}%</p>
+        </div>
+        <div className="implementation-scope-grid">
+          <div>
+            <h5>In scope</h5>
+            <ul>
+              {pilot.inScope.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h5>Out of scope</h5>
+            <ul>
+              {pilot.outOfScope.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
       </div>
       <div className="check-grid">
         {[
@@ -1604,31 +2408,24 @@ function ImplementDemo() {
             <input
               type="checkbox"
               checked={values[key as keyof ImplementPlanInput] as boolean}
-              onChange={(event) =>
-                setValues((current) => ({ ...current, [key]: event.target.checked }))
-              }
+              onChange={(event) => onChange({ [key]: event.target.checked })}
             />
             <span>{label}</span>
           </label>
         ))}
       </div>
-      <div className="result-panel">
-        <h3>{content.ui.demoContentTitle}</h3>
-        <p>{audit.mockFinding}</p>
-        <p>{pilot?.body}</p>
-        <p>
-          {copy.plan.riskLevel(
-            plan.riskLevel ? copy.risk[plan.riskLevel] : copy.feedback.notAssessed,
-          )}
-        </p>
+      <div className="plan-actions learn-report-actions">
+        <button className="button blue" type="button" onClick={onSave}>
+          {copy.actions.saveAndViewComplete}
+          <CheckCircle2 size={16} aria-hidden />
+        </button>
+        <Link className="button ghost" href="/plan">
+          View AI-Ready Action Plan
+          <ArrowRight size={16} aria-hidden />
+        </Link>
       </div>
-      <SavePlanActions
-        nextHref="/plan"
-        nextLabel={copy.actions.saveAndViewComplete}
-        onSave={() => updateImplement(values)}
-      />
-      <DemoNotes demo={demo} />
-    </article>
+      {saveStatus ? <p className="copy-status">{saveStatus}</p> : null}
+    </section>
   );
 }
 

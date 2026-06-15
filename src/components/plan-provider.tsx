@@ -26,6 +26,7 @@ type PlanContextValue = {
   updateImplement: (input: ImplementPlanInput) => void;
   clearLearn: () => void;
   clearAdapt: () => void;
+  clearImplement: () => void;
   clearPlan: () => void;
 };
 
@@ -151,6 +152,13 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     emitStoredDraftChange();
   }, []);
 
+  const clearImplement = useCallback(() => {
+    const nextDraft = { ...readStoredDraftSnapshot() };
+    delete nextDraft.implement;
+    writeStoredDraft(nextDraft);
+    emitStoredDraftChange();
+  }, []);
+
   const clearPlan = useCallback(() => {
     removeStoredDraft();
     emitStoredDraftChange();
@@ -165,10 +173,12 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       updateImplement,
       clearLearn,
       clearAdapt,
+      clearImplement,
       clearPlan,
     }),
     [
       clearAdapt,
+      clearImplement,
       clearLearn,
       clearPlan,
       draft,
