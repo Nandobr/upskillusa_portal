@@ -18,7 +18,9 @@ import {
   Crown,
   Download,
   DollarSign,
+  EyeOff,
   GraduationCap,
+  Globe,
   Lightbulb,
   Megaphone,
   Network,
@@ -28,12 +30,13 @@ import {
   Settings,
   Sparkles,
   TrendingUp,
+  Unplug,
   Users,
   Wrench,
   Workflow,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { frameworkOrder, type FrameworkKey, type Language } from "@/lib/content";
 import { IkigaiAssessment } from "@/components/ikigai-assessment";
 import { usePortalContent } from "@/components/language-provider";
@@ -71,6 +74,7 @@ import {
   type BusinessOpportunity,
   type BusinessOpportunityReport,
   type EmployeeTransformationReport,
+  type ImplementAudience,
   type ImplementPilot,
   type ImplementationTask,
   type ImplementWorkAreaKey,
@@ -1548,7 +1552,6 @@ function ImplementDemo() {
   );
   const taskCount = values.selectedTasks.length + values.customTasks.length;
   const employeeReport = values.report?.kind === "employee" ? values.report : undefined;
-  const businessReport = values.report?.kind === "business" ? values.report : undefined;
   const storedImplementKey = JSON.stringify(draft.implement ?? null);
 
   useEffect(() => {
@@ -1597,7 +1600,7 @@ function ImplementDemo() {
   function chooseWorkArea(workArea: ImplementWorkAreaKey) {
     const area = getWorkArea(workArea);
     updateValues({
-      audience: "employee",
+      audience: values.audience,
       workArea,
       selectedTasks: area.topSkills,
       customTasks: [],
@@ -1639,43 +1642,10 @@ function ImplementDemo() {
     });
   }
 
-  async function analyzeBusiness() {
-    setLoadingPath("business");
-    setError("");
-    setSaveStatus("");
-
-    try {
-      const response = await fetch("/api/analyze-business-opportunity", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ website: values.companyUrl, email: values.email }),
-      });
-      const payload = (await response.json()) as {
-        ok: boolean;
-        report?: BusinessOpportunityReport;
-        error?: string;
-      };
-
-      if (!response.ok || !payload.ok || !payload.report) {
-        throw new Error(payload.error || "Could not generate the AI Opportunity Report.");
-      }
-
-      updateValues({
-        audience: "business",
-        report: payload.report,
-        selectedPilot: undefined,
-      });
-    } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Could not generate report.");
-    } finally {
-      setLoadingPath(null);
-    }
-  }
-
   async function analyzeEmployee() {
-    if (!values.workArea) return;
+    if (!values.workArea || !values.audience) return;
 
-    setLoadingPath("employee");
+    setLoadingPath(values.audience);
     setError("");
     setSaveStatus("");
 
@@ -1684,6 +1654,7 @@ function ImplementDemo() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          audience: values.audience,
           workArea: values.workArea,
           tasks: values.selectedTasks,
           customTasks: values.customTasks,
@@ -1700,8 +1671,14 @@ function ImplementDemo() {
       }
 
       updateValues({
-        audience: "employee",
-        report: payload.report,
+        audience: values.audience,
+        report: {
+          ...payload.report,
+          title:
+            values.audience === "business"
+              ? "Personal AI Readiness Report"
+              : payload.report.title || "Task Transformation Report",
+        },
         selectedPilot: undefined,
       });
     } catch (caughtError) {
@@ -1711,17 +1688,8 @@ function ImplementDemo() {
     }
   }
 
-  function selectBusinessPilot(opportunity: BusinessOpportunity) {
-    updateValues({
-      selectedPilot: pilotFromBusinessOpportunity(opportunity),
-      workflowName: opportunity.pilotLabel,
-      pilotScope: opportunity.symptom,
-      humanGate: opportunity.humanReview,
-    });
-  }
-
   function selectEmployeePilot(task: ImplementationTask) {
-    const pilot = pilotFromEmployeeTask(task);
+    const pilot = pilotFromEmployeeTask(task, values.audience ?? "employee");
     updateValues({
       selectedPilot: pilot,
       workflowName: task.task_name,
@@ -1749,8 +1717,8 @@ function ImplementDemo() {
   }
 
   const selectedArea = values.workArea ? getWorkArea(values.workArea) : undefined;
-  const canAnalyzeBusiness = values.companyUrl.trim().includes(".") && values.email.trim().includes("@");
-  const canAnalyzeEmployee = Boolean(values.workArea && taskCount >= 3);
+  const canAnalyzeEmployee = Boolean(values.audience && values.workArea && taskCount >= 3);
+  const isLeaderPath = values.audience === "business";
 
   return (
     <article className="demo-panel learn-pathway-panel implementation-lab-panel">
@@ -1768,7 +1736,7 @@ function ImplementDemo() {
       </div>
       <h2>Build My First AI Pilot</h2>
       <p className="assessment-step-subtitle">
-        Choose the path that fits you. Leaders see opportunity value; employees see how daily tasks transform.
+        Choose the path that fits you. Leaders see personal AI readiness; employees see how daily tasks transform.
       </p>
 
       <section className={`assessment-step-card ${values.audience ? "complete" : ""}`}>
@@ -1787,7 +1755,7 @@ function ImplementDemo() {
             onClick={() => chooseAudience("business")}
           >
             <strong>Business Leader</strong>
-            <p>Find where AI can create measurable value across company workflows.</p>
+            <p>See how your responsibilities and decision workflows can become AI-ready.</p>
           </button>
           <button
             aria-pressed={values.audience === "employee"}
@@ -1801,68 +1769,14 @@ function ImplementDemo() {
         </div>
       </section>
 
-      {values.audience === "business" ? (
-        <section className={`assessment-step-card ${businessReport ? "complete" : ""}`}>
-          <div className="assessment-step-heading">
-            <span className="assessment-step-number">2</span>
-            <div>
-              <span className="assessment-step-eyebrow">AI Opportunity Report</span>
-              <h3>Enter the company to audit</h3>
-            </div>
-          </div>
-          <div className="form-grid two">
-            <label className="field">
-              <span>Company URL</span>
-              <input
-                value={values.companyUrl}
-                placeholder="yourcompany.com"
-                onChange={(event) =>
-                  updateValues({
-                    companyUrl: event.target.value,
-                    report: undefined,
-                    selectedPilot: undefined,
-                  })
-                }
-              />
-            </label>
-            <label className="field">
-              <span>Report contact email</span>
-              <input
-                type="email"
-                value={values.email}
-                placeholder="you@company.com"
-                onChange={(event) =>
-                  updateValues({
-                    email: event.target.value,
-                    report: undefined,
-                    selectedPilot: undefined,
-                  })
-                }
-              />
-            </label>
-          </div>
-          <div className="assessment-step-actions">
-            <button
-              className="button blue"
-              type="button"
-              disabled={!canAnalyzeBusiness || loadingPath === "business"}
-              onClick={analyzeBusiness}
-            >
-              {loadingPath === "business" ? "Analyzing..." : "Generate AI Opportunity Report"}
-              <ArrowRight size={16} aria-hidden />
-            </button>
-          </div>
-        </section>
-      ) : null}
-
-      {values.audience === "employee" ? (
+      {values.audience ? (
         <>
           <section className={`assessment-step-card ${values.workArea ? "complete" : ""}`}>
             <div className="assessment-step-heading">
               <span className="assessment-step-number">2</span>
               <div>
                 <span className="assessment-step-eyebrow">Work area</span>
-                <h3>Choose where your work sits</h3>
+                <h3>{isLeaderPath ? "Choose where you lead" : "Choose where your work sits"}</h3>
               </div>
             </div>
             <div className="assessment-skill-grid learn-option-grid three">
@@ -1896,11 +1810,11 @@ function ImplementDemo() {
                   <span className="assessment-step-eyebrow">
                     {selectedArea.category} · {selectedArea.skills.length} skills
                   </span>
-                  <h3>Select what fills your calendar</h3>
+                  <h3>{isLeaderPath ? "Select your responsibilities" : "Select what fills your calendar"}</h3>
                 </div>
                 <span className="implementation-selected-count">
                   <span aria-hidden />
-                  {taskCount} tasks selected
+                  {taskCount} {isLeaderPath ? "responsibilities" : "tasks"} selected
                 </span>
               </div>
               <div className="implementation-chip-grid">
@@ -1933,10 +1847,10 @@ function ImplementDemo() {
               </div>
               <div className="implementation-custom-task">
                 <label className="field">
-                  <span>Add a task you do not see</span>
+                  <span>{isLeaderPath ? "Add a responsibility you do not see" : "Add a task you do not see"}</span>
                   <input
                     value={customTaskDraft}
-                    placeholder="Type a task and press Add"
+                    placeholder={isLeaderPath ? "Type a responsibility and press Add" : "Type a task and press Add"}
                     onChange={(event) => setCustomTaskDraft(event.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
@@ -1962,7 +1876,11 @@ function ImplementDemo() {
                   disabled={!canAnalyzeEmployee || loadingPath === "employee"}
                   onClick={analyzeEmployee}
                 >
-                  {loadingPath === "employee" ? "Analyzing..." : "Generate Task Transformation Report"}
+                  {loadingPath
+                    ? "Analyzing..."
+                    : isLeaderPath
+                      ? "Generate Personal AI Readiness Report"
+                      : "Generate Task Transformation Report"}
                   <ArrowRight size={16} aria-hidden />
                 </button>
               </div>
@@ -1974,17 +1892,10 @@ function ImplementDemo() {
       {loadingPath ? <ImplementationLoading audience={loadingPath} /> : null}
       {error ? <ImplementationError message={error} /> : null}
 
-      {businessReport ? (
-        <BusinessOpportunityReportView
-          report={businessReport}
-          selectedPilot={values.selectedPilot}
-          onSelect={selectBusinessPilot}
-        />
-      ) : null}
-
       {employeeReport ? (
         <EmployeeTransformationReportView
           report={employeeReport}
+          audience={values.audience ?? "employee"}
           selectedPilot={values.selectedPilot}
           onSelect={selectEmployeePilot}
           onRegenerate={analyzeEmployee}
@@ -2010,9 +1921,9 @@ function ImplementationLoading({ audience }: { audience: ImplementPlanInput["aud
   const items =
     audience === "business"
       ? [
-          "Scanning company context...",
-          "Mapping workflow opportunity areas...",
-          "Estimating recoverable hours...",
+          "Mapping selected responsibilities...",
+          "Classifying Automate / Augment / Own...",
+          "Estimating personal AI readiness...",
           "Preparing first pilot options...",
         ]
       : [
@@ -2025,7 +1936,7 @@ function ImplementationLoading({ audience }: { audience: ImplementPlanInput["aud
   return (
     <section className="implementation-loading">
       <Clock size={28} aria-hidden />
-      <h3>{audience === "business" ? "Building your AI Opportunity Report..." : "Building your Task Transformation Report..."}</h3>
+      <h3>{audience === "business" ? "Building your Personal AI Readiness Report..." : "Building your Task Transformation Report..."}</h3>
       <ul>
         {items.map((item, index) => (
           <li key={item}>
@@ -2043,6 +1954,30 @@ function ImplementationError({ message }: { message: string }) {
     <section className="implementation-error">
       <AlertCircle size={20} aria-hidden />
       <p>{message}</p>
+    </section>
+  );
+}
+
+function OpportunityLoading() {
+  const items = [
+    "Scanning your website...",
+    "Enriching company context...",
+    "Calculating addressable workforce...",
+    "Modeling first opportunity areas...",
+  ];
+
+  return (
+    <section className="implementation-loading">
+      <Clock size={28} aria-hidden />
+      <h3>Building your Company Opportunity Audit...</h3>
+      <ul>
+        {items.map((item, index) => (
+          <li key={item}>
+            <CheckCircle2 size={16} aria-hidden />
+            <span>{index + 1}. {item}</span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -2124,15 +2059,18 @@ function BusinessOpportunityReportView({
 
 function EmployeeTransformationReportView({
   report,
+  audience,
   selectedPilot,
   onSelect,
   onRegenerate,
 }: {
   report: EmployeeTransformationReport;
+  audience: ImplementAudience;
   selectedPilot?: ImplementPilot;
   onSelect: (task: ImplementationTask) => void;
   onRegenerate: () => void;
 }) {
+  const isLeader = audience === "business";
   const sortedTasks = [...report.tasks].sort((a, b) => {
     const order: Record<ImplementationTask["bucket"], number> = {
       AUTOMATE: 0,
@@ -2151,10 +2089,13 @@ function EmployeeTransformationReportView({
     <section className="implementation-report">
       <div className="implementation-report-header implementation-report-header-spacious">
         <div>
-          <span className="implementation-report-eyebrow">Your AI Opportunity Report</span>
+          <span className="implementation-report-eyebrow">
+            {isLeader ? "Personal AI Readiness Report" : "Task Transformation Report"}
+          </span>
           <h3>{report.workArea}</h3>
           <p>
-            {report.skillsAnalyzed} skills analyzed · {report.tasks.length} tasks generated · readiness band:{" "}
+            {report.skillsAnalyzed} skills analyzed · {report.tasks.length}{" "}
+            {isLeader ? "responsibilities generated" : "tasks generated"} · readiness band:{" "}
             <b>{readinessBand}</b>
           </p>
         </div>
@@ -2192,7 +2133,11 @@ function EmployeeTransformationReportView({
       <div className="implementation-report-body">
         <div>
           <h4>Task-by-task breakdown</h4>
-          <p className="implementation-muted">Hours per month, before vs. after AI deployment.</p>
+          <p className="implementation-muted">
+            {isLeader
+              ? "Hours per month across leadership work, before vs. after AI deployment."
+              : "Hours per month, before vs. after AI deployment."}
+          </p>
           <div className="implementation-task-list">
             {sortedTasks.map((task) => (
               <ImplementationTaskRow
@@ -2218,7 +2163,7 @@ function EmployeeTransformationReportView({
       </div>
       <div className="implementation-workflow-cta">
         <span className="implementation-workflow-cta-label">Your skill roadmap is ready</span>
-        <h4>Turn this into your daily AI workflow.</h4>
+        <h4>{isLeader ? "Turn this into your leadership AI workflow." : "Turn this into your daily AI workflow."}</h4>
         <ul>
           {firstPilotTask ? (
             <li>
@@ -2245,7 +2190,8 @@ function EmployeeTransformationReportView({
             <li>
               <CheckCircle2 size={16} aria-hidden />
               <span>
-                Keep owning the <b>{report.summary.own_count}</b> tasks only you can do
+                Keep owning the <b>{report.summary.own_count}</b>{" "}
+                {isLeader ? "responsibilities only you can lead" : "tasks only you can do"}
               </span>
             </li>
           ) : null}
@@ -2450,6 +2396,378 @@ function AgentsPanel() {
         <p>{content.brand.promise}</p>
       </article>
     </div>
+  );
+}
+
+const opportunityCopy: Record<
+  Language,
+  {
+    eyebrow: string;
+    title: string;
+    titleHighlight: string;
+    intro: string;
+    urlLabel: string;
+    urlPlaceholder: string;
+    urlButton: string;
+    emailEyebrow: string;
+    emailTitle: string;
+    emailIntro: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    emailButton: string;
+    change: string;
+    restart: string;
+    trust: string[];
+    whyEyebrow: string;
+    whyTitle: string;
+    whyAside: string;
+    whyCards: Array<{ title: string; description: string }>;
+  }
+> = {
+  en: {
+    eyebrow: "Enterprise AI Readiness Audit",
+    title: "Identify where AI can transform operations across your company.",
+    titleHighlight: "transform operations",
+    intro:
+      "Enter your company URL to generate a real-time audit of AI-ready workflows, operational gaps, and automation opportunities across your organization.",
+    urlLabel: "Company URL",
+    urlPlaceholder: "yourcompany.com",
+    urlButton: "Get Your AI Readiness Audit",
+    emailEyebrow: "Company selected",
+    emailTitle: "Where should we prepare the report?",
+    emailIntro: "The audit appears on this page. Email is used as the report contact for this MVP.",
+    emailLabel: "Report contact email",
+    emailPlaceholder: "you@company.com",
+    emailButton: "Generate report",
+    change: "Change company",
+    restart: "Start another audit",
+    trust: ["30-second audit", "No credit card required", "Enterprise-grade security"],
+    whyEyebrow: "Why now",
+    whyTitle: "Why AI automation is failing today",
+    whyAside: "UpSkill USA fixes all three.",
+    whyCards: [
+      {
+        title: "Emulators stuck in proof-of-concept",
+        description: "82% of enterprise AI pilots never reach production. Reliability gaps kill momentum.",
+      },
+      {
+        title: "No visibility into task-level impact",
+        description: "Leaders can't measure ROI when automation lives inside opaque emulator loops.",
+      },
+      {
+        title: "No bridge between automation and workforce",
+        description: "Workers fear replacement. There's no path from displacement risk to upgraded work.",
+      },
+    ],
+  },
+  es: {
+    eyebrow: "Auditoría de preparación empresarial para IA",
+    title: "Identifica dónde la IA puede transformar operaciones en tu empresa.",
+    titleHighlight: "transformar operaciones",
+    intro:
+      "Ingresa la URL de tu empresa para generar una auditoría en tiempo real de flujos preparados para IA, brechas operativas y oportunidades de automatización.",
+    urlLabel: "URL de empresa",
+    urlPlaceholder: "tuempresa.com",
+    urlButton: "Obtener auditoría de preparación",
+    emailEyebrow: "Empresa seleccionada",
+    emailTitle: "¿Dónde preparamos el reporte?",
+    emailIntro: "La auditoría aparece en esta página. El email se usa como contacto del reporte para este MVP.",
+    emailLabel: "Email de contacto",
+    emailPlaceholder: "tu@empresa.com",
+    emailButton: "Generar reporte",
+    change: "Cambiar empresa",
+    restart: "Iniciar otra auditoría",
+    trust: ["Auditoría en 30 segundos", "Sin tarjeta de crédito", "Seguridad empresarial"],
+    whyEyebrow: "Por qué ahora",
+    whyTitle: "Por qué falla la automatización con IA hoy",
+    whyAside: "UpSkill USA corrige los tres puntos.",
+    whyCards: [
+      {
+        title: "Emuladores atascados en prueba de concepto",
+        description: "Muchos pilotos de IA empresarial no llegan a producción. Las brechas de confiabilidad frenan el avance.",
+      },
+      {
+        title: "Sin visibilidad del impacto por tarea",
+        description: "Los líderes no pueden medir ROI cuando la automatización vive en ciclos opacos.",
+      },
+      {
+        title: "Sin puente entre automatización y fuerza laboral",
+        description: "Los trabajadores temen ser reemplazados. Falta un camino hacia trabajo mejorado.",
+      },
+    ],
+  },
+  pt: {
+    eyebrow: "Auditoria de prontidão empresarial para IA",
+    title: "Identifique onde a IA pode transformar operações na sua empresa.",
+    titleHighlight: "transformar operações",
+    intro:
+      "Insira a URL da sua empresa para gerar uma auditoria em tempo real de fluxos preparados para IA, gargalos operacionais e oportunidades de automação.",
+    urlLabel: "URL da empresa",
+    urlPlaceholder: "suaempresa.com",
+    urlButton: "Obter auditoria de prontidão",
+    emailEyebrow: "Empresa selecionada",
+    emailTitle: "Onde devemos preparar o relatório?",
+    emailIntro: "A auditoria aparece nesta página. O email é usado como contato do relatório neste MVP.",
+    emailLabel: "Email de contato",
+    emailPlaceholder: "voce@empresa.com",
+    emailButton: "Gerar relatório",
+    change: "Trocar empresa",
+    restart: "Iniciar outra auditoria",
+    trust: ["Auditoria em 30 segundos", "Sem cartão de crédito", "Segurança empresarial"],
+    whyEyebrow: "Por que agora",
+    whyTitle: "Por que a automação com IA falha hoje",
+    whyAside: "A UpSkill USA corrige os três pontos.",
+    whyCards: [
+      {
+        title: "Emuladores presos na prova de conceito",
+        description: "Muitos pilotos empresariais de IA não chegam à produção. Lacunas de confiabilidade travam o avanço.",
+      },
+      {
+        title: "Sem visibilidade do impacto por tarefa",
+        description: "Líderes não conseguem medir ROI quando a automação vive em ciclos opacos.",
+      },
+      {
+        title: "Sem ponte entre automação e força de trabalho",
+        description: "Trabalhadores temem substituição. Falta um caminho para trabalho aprimorado.",
+      },
+    ],
+  },
+};
+
+function HighlightedOpportunityTitle({ title, highlight }: { title: string; highlight: string }) {
+  const [before, after] = title.split(highlight);
+  if (after === undefined) {
+    return <>{title}</>;
+  }
+  return (
+    <>
+      {before}
+      <span>{highlight}</span>
+      {after}
+    </>
+  );
+}
+
+const opportunityWhyIcons = [AlertCircle, EyeOff, Unplug];
+
+export function OpportunityPage() {
+  const { language } = usePortalContent();
+  const copy = opportunityCopy[language];
+  const [step, setStep] = useState<"website" | "email" | "loading" | "report">("website");
+  const [website, setWebsite] = useState("");
+  const [email, setEmail] = useState("");
+  const [report, setReport] = useState<BusinessOpportunityReport | null>(null);
+  const [selectedPilot, setSelectedPilot] = useState<ImplementPilot | undefined>();
+  const [error, setError] = useState("");
+
+  const normalizedWebsite = website.trim();
+  const canSubmitWebsite = normalizedWebsite.includes(".");
+  const canSubmitEmail = email.trim().includes("@") && email.trim().includes(".");
+
+  function resetAudit() {
+    setStep("website");
+    setWebsite("");
+    setEmail("");
+    setReport(null);
+    setSelectedPilot(undefined);
+    setError("");
+  }
+
+  function submitWebsite(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canSubmitWebsite) {
+      setError("Enter a valid company URL.");
+      return;
+    }
+    setError("");
+    setStep("email");
+  }
+
+  async function submitEmail(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!canSubmitEmail) {
+      setError("Enter a valid email.");
+      return;
+    }
+
+    setStep("loading");
+    setError("");
+    setSelectedPilot(undefined);
+
+    try {
+      const response = await fetch("/api/analyze-business-opportunity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ website: normalizedWebsite, email }),
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        report?: BusinessOpportunityReport;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.report) {
+        throw new Error(payload.error || "Could not generate the opportunity audit.");
+      }
+
+      setReport(payload.report);
+      setStep("report");
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Could not generate audit.");
+      setStep("email");
+    }
+  }
+
+  function selectOpportunity(opportunity: BusinessOpportunity) {
+    setSelectedPilot(pilotFromBusinessOpportunity(opportunity));
+  }
+
+  return (
+    <>
+      <section className="page-hero opportunity-hero" id="opportunity-audit">
+        <div className="section-inner">
+          <span className="eyebrow page-step-label">
+            <Sparkles size={15} aria-hidden />
+            {copy.eyebrow}
+          </span>
+          <h1>
+            <HighlightedOpportunityTitle title={copy.title} highlight={copy.titleHighlight} />
+          </h1>
+          <p>{copy.intro}</p>
+
+          {step === "website" ? (
+            <form className="opportunity-form" onSubmit={submitWebsite}>
+              <label className="field">
+                <span>{copy.urlLabel}</span>
+                <span className="opportunity-input-shell">
+                  <Globe size={28} strokeWidth={1.9} aria-hidden />
+                  <input
+                    autoComplete="url"
+                    inputMode="url"
+                    value={website}
+                    placeholder={copy.urlPlaceholder}
+                    onChange={(event) => {
+                      setWebsite(event.target.value);
+                      if (error) {
+                        setError("");
+                      }
+                    }}
+                  />
+                </span>
+              </label>
+              <button className="button primary" type="submit">
+                {copy.urlButton}
+                <ArrowRight size={16} aria-hidden />
+              </button>
+            </form>
+          ) : null}
+          {step === "website" && error ? (
+            <div className="opportunity-inline-error" role="alert">
+              <AlertCircle size={16} aria-hidden />
+              <p>{error}</p>
+            </div>
+          ) : null}
+          {step === "website" ? (
+            <>
+              <div className="opportunity-trust-pills">
+                {copy.trust.map((item) => (
+                  <span key={item}>
+                    <CheckCircle2 size={16} aria-hidden />
+                    {item}
+                  </span>
+                ))}
+              </div>
+              <Link className="button primary opportunity-demo-button" href="/demo">
+                <PlayCircle size={16} aria-hidden />
+                Watch Demo
+              </Link>
+            </>
+          ) : null}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="section-inner framework-flow-page">
+          {step === "email" ? (
+            <article className="demo-panel opportunity-panel">
+              <div className="assessment-intro-top">
+                <span className="demo-label">{copy.emailEyebrow}</span>
+                <button className="assessment-reset-button" type="button" onClick={() => setStep("website")}>
+                  {copy.change}
+                </button>
+              </div>
+              <h2>{copy.emailTitle}</h2>
+              <p className="assessment-step-subtitle">
+                {normalizedWebsite} · {copy.emailIntro}
+              </p>
+              <form className="implementation-custom-task" onSubmit={submitEmail}>
+                <label className="field">
+                  <span>{copy.emailLabel}</span>
+                  <input
+                    autoComplete="email"
+                    type="email"
+                    value={email}
+                    placeholder={copy.emailPlaceholder}
+                    onChange={(event) => setEmail(event.target.value)}
+                  />
+                </label>
+                <button className="button blue" type="submit" disabled={!canSubmitEmail}>
+                  {copy.emailButton}
+                  <ArrowRight size={16} aria-hidden />
+                </button>
+              </form>
+            </article>
+          ) : null}
+
+          {step === "loading" ? <OpportunityLoading /> : null}
+          {step !== "website" && error ? <ImplementationError message={error} /> : null}
+
+          {step === "report" && report ? (
+            <div className="opportunity-report-wrap">
+              <div className="assessment-intro-top">
+                <span className="demo-label">Company Opportunity Audit</span>
+                <button className="assessment-reset-button" type="button" onClick={resetAudit}>
+                  {copy.restart}
+                </button>
+              </div>
+              <BusinessOpportunityReportView
+                report={report}
+                selectedPilot={selectedPilot}
+                onSelect={selectOpportunity}
+              />
+            </div>
+          ) : null}
+
+          {step === "website" ? (
+            <section className="opportunity-why-section">
+              <div className="section-heading">
+                <div>
+                  <span className="demo-page-label">{copy.whyEyebrow}</span>
+                  <h2>{copy.whyTitle}</h2>
+                </div>
+                <p>{copy.whyAside}</p>
+              </div>
+              <div className="opportunity-why-grid">
+                {copy.whyCards.map((card, index) => {
+                  const Icon = opportunityWhyIcons[index] ?? AlertCircle;
+                  return (
+                  <article className="opportunity-why-card" key={card.title}>
+                    <Icon size={18} aria-hidden />
+                    <h3>{card.title}</h3>
+                    <p>{card.description}</p>
+                    <a href="#opportunity-audit">
+                      We solve this
+                      <ArrowRight size={13} aria-hidden />
+                    </a>
+                  </article>
+                  );
+                })}
+              </div>
+            </section>
+          ) : null}
+        </div>
+      </section>
+    </>
   );
 }
 

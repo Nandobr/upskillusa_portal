@@ -1569,14 +1569,17 @@ function getImplementationPlanSection(input: ImplementPlanInput, language: Langu
 
   if (input.report?.kind === "employee") {
     const report = input.report;
+    const isLeader = input.audience === "business";
 
     return {
-      title: "Task Transformation Report",
-      body: `${report.workArea} work was analyzed across ${report.skillsAnalyzed} selected task areas. The selected first pilot is ${
+      title: isLeader ? "Personal AI Readiness Report" : "Task Transformation Report",
+      body: `${report.workArea} ${isLeader ? "responsibilities were" : "work was"} analyzed across ${report.skillsAnalyzed} selected ${
+        isLeader ? "responsibility" : "task"
+      } areas. The selected first pilot is ${
         pilot?.label || copy.defaults.smallTest
       }.`,
       items: [
-        `Report type: Employee`,
+        `Report type: ${isLeader ? "Business Leader personal readiness" : "Employee task transformation"}`,
         `Monthly hours saved estimate: ${report.summary.estimated_monthly_hours_saved.toFixed(1)}`,
         `FTE equivalent: ${report.summary.estimated_fte_equivalent_saved.toFixed(2)}`,
         `Buckets: ${report.summary.automate_count} automate, ${report.summary.augment_count} augment, ${report.summary.own_count} own`,

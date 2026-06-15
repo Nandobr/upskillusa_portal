@@ -5,6 +5,7 @@ import {
   normalizeEmployeeReport,
   workAreaKeys,
   type EmployeeTransformationReport,
+  type ImplementAudience,
   type ImplementWorkAreaKey,
 } from "@/lib/implementation-lab";
 
@@ -32,18 +33,29 @@ function parseJsonObject(text: string) {
   return JSON.parse(source.slice(start, end + 1));
 }
 
-function buildPrompt(workArea: ImplementWorkAreaKey, tasks: string[]) {
+function isAudience(value: unknown): value is ImplementAudience {
+  return value === "business" || value === "employee";
+}
+
+function buildPrompt(workArea: ImplementWorkAreaKey, tasks: string[], audience: ImplementAudience) {
   const area = getWorkArea(workArea);
+  const isLeader = audience === "business";
+  const reportTitle = isLeader ? "Personal AI Readiness Report" : "Task Transformation Report";
+  const audienceContext = isLeader
+    ? "a business leader's personal responsibilities, leadership work, and decision workflows"
+    : "an employee's work tasks and daily responsibilities";
 
   return `You are an UpSkill USA AI implementation analyst.
 
-Analyze this employee work area: ${area.category}
+Analyze ${audienceContext}.
+
+Work area: ${area.category}
 Focus: ${area.focus}
 
 Selected tasks/responsibilities:
 ${tasks.map((task) => `- ${task}`).join("\n")}
 
-Generate a practical AI Opportunity Report for a worker and their manager.
+Generate a practical ${reportTitle}.
 
 Classify each task into exactly one bucket:
 - AUTOMATE: repetitive/rules-based; AI can handle most work with exception review.
@@ -53,7 +65,7 @@ Classify each task into exactly one bucket:
 Return ONLY valid JSON with this exact shape:
 {
   "kind": "employee",
-  "title": "AI Opportunity Report",
+  "title": "${reportTitle}",
   "workArea": "${area.category}",
   "skillsAnalyzed": ${tasks.length},
   "summary": {
@@ -92,10 +104,19 @@ Tool guidance:
 Generate exactly 15 tasks when possible. Keep all estimates conservative. Monthly hours saved must be mathematically plausible. Prefer a mix close to 3 AUTOMATE tasks, 8 AUGMENT tasks, and 4 OWN tasks unless the selected responsibilities clearly require a different split.`;
 }
 
-function employeeFallbackResponse(workArea: ImplementWorkAreaKey, tasks: string[], source = "demo") {
+function employeeFallbackResponse(
+  workArea: ImplementWorkAreaKey,
+  tasks: string[],
+  audience: ImplementAudience,
+  source = "demo",
+) {
+  const report = buildEmployeeFallbackReport(workArea, tasks);
   return NextResponse.json({
     ok: true,
-    report: buildEmployeeFallbackReport(workArea, tasks),
+    report: {
+      ...report,
+      title: audience === "business" ? "Personal AI Readiness Report" : "Task Transformation Report",
+    },
     source,
   });
 }
@@ -106,8 +127,10 @@ export async function POST(request: Request) {
       workArea?: unknown;
       tasks?: unknown;
       customTasks?: unknown;
+      audience?: unknown;
     };
     const workArea = isWorkArea(body.workArea) ? body.workArea : undefined;
+    const audience = isAudience(body.audience) ? body.audience : "employee";
     const selectedTasks = Array.isArray(body.tasks)
       ? body.tasks.filter((task): task is string => typeof task === "string" && task.trim().length > 0)
       : [];
@@ -125,7 +148,7 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return employeeFallbackResponse(workArea, tasks);
+      return employeeFallbackResponse(workArea, tasks, audience);
     }
 
     const response = await fetch(
@@ -134,7 +157,7 @@ export async function POST(request: Request) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: buildPrompt(workArea, tasks) }] }],
+          contents: [{ role: "user", parts: [{ text: buildPrompt(workArea, tasks, audience) }] }],
           generationConfig: {
             temperature: 0.2,
             responseMimeType: "application/json",
@@ -144,7 +167,7 @@ export async function POST(request: Request) {
     );
 
     if (!response.ok) {
-      return employeeFallbackResponse(workArea, tasks, "fallback");
+      return employeeFallbackResponse(workArea, tasks, audience, "fallback");
     }
 
     let report: EmployeeTransformationReport;
@@ -155,12 +178,12 @@ export async function POST(request: Request) {
       report = normalizeEmployeeReport({
         ...parsed,
         kind: "employee",
-        title: parsed.title || "AI Opportunity Report",
+        title: audience === "business" ? "Personal AI Readiness Report" : parsed.title || "Task Transformation Report",
         workArea,
         skillsAnalyzed: tasks.length,
       });
     } catch {
-      return employeeFallbackResponse(workArea, tasks, "fallback");
+      return employeeFallbackResponse(workArea, tasks, audience, "fallback");
     }
 
     return NextResponse.json({ ok: true, report, source: "gemini" });

@@ -4,10 +4,10 @@ export type Language = (typeof languages)[number];
 
 export type FrameworkKey = "inspire" | "learn" | "adapt" | "implement";
 
-export type RoutePath = "/" | "/inspire" | "/learn" | "/adapt" | "/implement";
+export type RoutePath = "/" | "/opportunity" | "/inspire" | "/learn" | "/adapt" | "/implement";
 
 export type NavItem = {
-  key: "overview" | FrameworkKey;
+  key: "overview" | "opportunity" | FrameworkKey;
   label: string;
   href: RoutePath;
 };
@@ -122,6 +122,7 @@ export type PortalContent = {
 
 const sharedRoutes = {
   overview: "/",
+  opportunity: "/opportunity",
   inspire: "/inspire",
   learn: "/learn",
   adapt: "/adapt",
@@ -133,6 +134,7 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "English",
     nav: [
       { key: "overview", label: "Overview", href: sharedRoutes.overview },
+      { key: "opportunity", label: "Opportunity", href: sharedRoutes.opportunity },
       { key: "inspire", label: "Inspire", href: sharedRoutes.inspire },
       { key: "learn", label: "Learn", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminar", href: sharedRoutes.adapt },
@@ -280,13 +282,13 @@ export const portalContent: Record<Language, PortalContent> = {
         sections: [],
         demo: {
           label: "AI Implementation Lab",
-          emptyState: "Choose Business Leader for an AI Opportunity Report or Employee for a Task Transformation Report.",
+          emptyState: "Choose Business Leader for a Personal AI Readiness Report or Employee for a Task Transformation Report.",
           submit: "Generate report",
           resultTitle: "Implementation pilot summary",
           notes: [
-            "Business Leader path: Enter a company website and email to see value opportunities, recoverable work, and a first AI pilot.",
+            "Business Leader path: Choose a work area and responsibilities to see a Personal AI Readiness Report.",
             "Employee path: Choose a work area and tasks to see what AI can automate, augment, or leave under human ownership.",
-            "MVP boundaries: Missing live audit keys use a labeled demo report; reports are saved locally to the AI-Ready Action Plan.",
+            "Company URL audits now live on the Opportunity page; Step 4 reports are saved locally to the AI-Ready Action Plan.",
           ],
         },
       },
@@ -365,6 +367,7 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "Español",
     nav: [
       { key: "overview", label: "Resumen", href: sharedRoutes.overview },
+      { key: "opportunity", label: "Oportunidad", href: sharedRoutes.opportunity },
       { key: "inspire", label: "Inspirar", href: sharedRoutes.inspire },
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminario", href: sharedRoutes.adapt },
@@ -515,14 +518,14 @@ export const portalContent: Record<Language, PortalContent> = {
         sections: [],
         demo: {
           label: "Laboratorio de implementación de IA",
-          emptyState: "Elige Líder de empresa para un reporte de oportunidad o Empleado para un reporte de transformación de tareas.",
+          emptyState: "Elige Líder de empresa para un reporte personal de preparación para IA o Empleado para un reporte de transformación de tareas.",
           submit: "Generar reporte",
           resultTitle: "Resumen del piloto de implementación",
           commentsLabel: "Comentarios:",
           notes: [
-            "Ruta de líderes: Ingresa un sitio web y email para ver oportunidades de valor, trabajo recuperable y un primer piloto de IA.",
+            "Ruta de líderes: Elige un área y responsabilidades para ver un reporte personal de preparación para IA.",
             "Ruta de empleados: Elige un área y tareas para ver qué puede automatizar IA, qué puede aumentar y qué debe quedar bajo juicio humano.",
-            "Límites del MVP: Si faltan llaves de auditoría en vivo, se usa un reporte demo identificado; los reportes se guardan localmente en el plan de acción listo para IA.",
+            "Las auditorías por URL de empresa ahora viven en la página Oportunidad; los reportes del Paso 4 se guardan localmente en el plan de acción listo para IA.",
           ],
         },
       },
@@ -601,6 +604,7 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "Português",
     nav: [
       { key: "overview", label: "Visão geral", href: sharedRoutes.overview },
+      { key: "opportunity", label: "Oportunidade", href: sharedRoutes.opportunity },
       { key: "inspire", label: "Inspirar", href: sharedRoutes.inspire },
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminário", href: sharedRoutes.adapt },
@@ -751,14 +755,14 @@ export const portalContent: Record<Language, PortalContent> = {
         sections: [],
         demo: {
           label: "Laboratório de implementação de IA",
-          emptyState: "Escolha Líder de empresa para um relatório de oportunidade ou Funcionário para um relatório de transformação de tarefas.",
+          emptyState: "Escolha Líder de empresa para um relatório pessoal de prontidão para IA ou Funcionário para um relatório de transformação de tarefas.",
           submit: "Gerar relatório",
           resultTitle: "Resumo do piloto de implementação",
           commentsLabel: "Comentários:",
           notes: [
-            "Trilha de líderes: Insira um site e email para ver oportunidades de valor, trabalho recuperável e um primeiro piloto de IA.",
+            "Trilha de líderes: Escolha uma área e responsabilidades para ver um relatório pessoal de prontidão para IA.",
             "Trilha de funcionários: Escolha uma área e tarefas para ver o que a IA pode automatizar, ampliar ou deixar sob responsabilidade humana.",
-            "Limites do MVP: Se faltarem chaves de auditoria ao vivo, um relatório demo identificado será usado; os relatórios ficam salvos localmente no plano de ação pronto para IA.",
+            "Auditorias por URL de empresa agora ficam na página Oportunidade; os relatórios do Passo 4 ficam salvos localmente no plano de ação pronto para IA.",
           ],
         },
       },

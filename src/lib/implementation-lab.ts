@@ -590,12 +590,15 @@ export function normalizeEmployeeReport(report: EmployeeTransformationReport): E
   };
 }
 
-export function pilotFromEmployeeTask(task: ImplementationTask): ImplementPilot {
+export function pilotFromEmployeeTask(
+  task: ImplementationTask,
+  audience: ImplementAudience = "employee",
+): ImplementPilot {
   return {
     id: `task-${task.task_id}`,
     label: task.task_name,
     workflow: task.bucket === "AUTOMATE" ? "Automation pilot" : "Augmentation pilot",
-    audience: "employee",
+    audience,
     hoursPerWeek: Number((task.monthly_hours_saved / 4.33).toFixed(1)),
     confidenceThreshold: task.bucket === "AUTOMATE" ? 88 : 82,
     reviewer: "Human workflow owner",
