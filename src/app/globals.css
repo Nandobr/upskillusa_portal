@@ -438,6 +438,7 @@ button {
 
 .overview-title-line {
   max-width: 760px;
+  margin: 0 auto;
   color: var(--blue-700);
   font-size: clamp(1rem, 2vw, 1.2rem);
   font-weight: 900;
@@ -636,10 +637,15 @@ button {
 }
 
 .framework-card .button {
+  width: min(100%, 210px);
   min-height: 32px;
   padding: 7px 11px;
   font-size: 0.74rem;
   font-weight: 650;
+}
+
+.framework-card .button-row {
+  justify-content: center;
 }
 
 .card {
@@ -3023,11 +3029,12 @@ button {
 
   .framework-card .button-row {
     display: flex;
+    justify-content: center;
     margin-top: 8px;
   }
 
   .framework-card .button {
-    width: auto;
+    width: min(100%, 210px);
     min-height: 32px;
     padding: 7px 10px;
     font-size: 0.74rem;
