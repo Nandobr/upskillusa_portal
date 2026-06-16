@@ -149,6 +149,10 @@ button {
 
 .demo-link {
   color: var(--gold-500);
+  min-height: 30px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
   white-space: nowrap;
 }
 
@@ -382,6 +386,7 @@ button {
 
 .overview-heading {
   display: block;
+  text-align: center;
 }
 
 .section-heading > div {
@@ -396,8 +401,26 @@ button {
 }
 
 .overview-heading h2 {
-  font-size: clamp(2rem, 4.2vw, 3rem);
-  white-space: nowrap;
+  font-size: clamp(1.45rem, 2.6vw, 2.15rem);
+  font-weight: 650;
+}
+
+.overview-arc-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 12px;
+}
+
+.overview-arc-part {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.overview-arc-part svg {
+  color: var(--slate-700);
 }
 
 .section-heading p {
@@ -408,7 +431,7 @@ button {
 }
 
 .section-heading .overview-promise {
-  margin-top: 10px;
+  margin: 10px auto 0;
   max-width: none;
   white-space: nowrap;
 }
@@ -439,6 +462,7 @@ button {
 
 .framework-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .card-grid {
@@ -528,8 +552,8 @@ button {
 .framework-card {
   display: grid;
   align-content: space-between;
-  min-height: 230px;
-  padding: 16px;
+  min-height: 196px;
+  padding: 14px;
   transition:
     border-color 160ms ease,
     transform 160ms ease,
@@ -543,14 +567,25 @@ button {
 }
 
 .framework-step {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   color: var(--blue-700);
-  font-size: 1.08rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.framework-step span {
+  grid-column: 2;
+  justify-self: center;
+}
+
+.framework-step svg {
+  grid-column: 3;
+  justify-self: end;
 }
 
 .framework-card h3,
@@ -573,8 +608,10 @@ button {
 }
 
 .framework-card h3 {
-  margin-top: 10px;
-  font-size: 1.12rem;
+  margin-top: 8px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .framework-card p,
@@ -586,21 +623,23 @@ button {
 }
 
 .framework-card p {
-  margin: 8px 0;
-  font-size: 0.86rem;
-  line-height: 1.5;
+  margin: 6px 0;
+  font-size: 0.76rem;
+  line-height: 1.42;
 }
 
 .framework-question {
   color: var(--navy-900);
-  font-size: 0.9rem;
-  font-weight: 900;
+  font-size: 0.8rem;
+  font-weight: 650;
+  text-align: center;
 }
 
 .framework-card .button {
-  min-height: 40px;
-  padding: 9px 14px;
-  font-size: 0.88rem;
+  min-height: 32px;
+  padding: 7px 11px;
+  font-size: 0.74rem;
+  font-weight: 650;
 }
 
 .card {
@@ -2729,7 +2768,7 @@ button {
   }
 
   .overview-heading h2 {
-    font-size: 1.75rem;
+    font-size: 1.42rem;
     line-height: 1.12;
   }
 
@@ -2791,9 +2830,9 @@ button {
   }
 
   .demo-link {
-    min-height: 32px;
-    padding: 6px 8px;
-    font-size: 0.68rem;
+    min-height: 28px;
+    padding: 5px 7px;
+    font-size: 0.64rem;
   }
 
   .mobile-menu-button {
@@ -2964,22 +3003,22 @@ button {
 
   .framework-card {
     min-height: auto;
-    padding: 14px;
+    padding: 12px;
   }
 
   .framework-step {
-    font-size: 0.96rem;
+    font-size: 0.95rem;
   }
 
   .framework-card h3 {
-    margin-top: 8px;
-    font-size: 1.03rem;
+    margin-top: 7px;
+    font-size: 0.95rem;
   }
 
   .framework-card p {
-    margin: 7px 0;
-    font-size: 0.82rem;
-    line-height: 1.45;
+    margin: 6px 0;
+    font-size: 0.76rem;
+    line-height: 1.4;
   }
 
   .framework-card .button-row {
@@ -2989,9 +3028,9 @@ button {
 
   .framework-card .button {
     width: auto;
-    min-height: 36px;
-    padding: 8px 12px;
-    font-size: 0.82rem;
+    min-height: 32px;
+    padding: 7px 10px;
+    font-size: 0.74rem;
   }
 
   .assessment-step-actions {

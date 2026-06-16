@@ -240,7 +240,7 @@ export const portalContent: Record<Language, PortalContent> = {
       },
       adapt: {
         hero:
-          "Step 3 turns learning into a worker-ready or company-ready plan for the seminar room. We don't fire. We upgrade.",
+            "Turn learning into a personal-ready or company-ready AI plan for the seminar room.\nWe don't fire. We upgrade.",
         sections: [
           {
             title: "Overview",

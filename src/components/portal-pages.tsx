@@ -87,6 +87,25 @@ const icons: Record<FrameworkKey, typeof Sparkles> = {
   implement: Workflow,
 };
 
+function FormattedStepLabel({ value }: { value: string }) {
+  return <>{value.toLowerCase().replace(/^\w/, (letter) => letter.toUpperCase())}</>;
+}
+
+function OverviewArcTitle({ value }: { value: string }) {
+  const parts = value.split(/\s*->\s*/);
+
+  return (
+    <>
+      {parts.map((part, index) => (
+        <span className="overview-arc-part" key={`${part}-${index}`}>
+          {index > 0 ? <ArrowRight size={22} strokeWidth={2.2} aria-hidden /> : null}
+          <span>{part}</span>
+        </span>
+      ))}
+    </>
+  );
+}
+
 const workCategoryKeys = Object.keys(workCategories) as WorkCategoryKey[];
 
 const workAreaIcons: Record<ImplementWorkAreaKey, typeof Crown> = {
@@ -441,7 +460,9 @@ function FrameworkCards() {
           <Link className="framework-card" href={framework.route} key={key}>
             <div>
               <div className="framework-step">
-                <span>{framework.tab}</span>
+                <span>
+                  <FormattedStepLabel value={framework.tab} />
+                </span>
                 <Icon size={18} aria-hidden />
               </div>
               <h3>{framework.title}</h3>
@@ -509,7 +530,9 @@ export function OverviewPage() {
           <div className="section-heading overview-heading">
             <div>
               <div className="overview-title-line">{content.overview.title}</div>
-              <h2>{content.brand.tagline}</h2>
+              <h2 className="overview-arc-title">
+                <OverviewArcTitle value={content.brand.tagline} />
+              </h2>
             </div>
             <p className="overview-promise">{content.brand.promise}</p>
           </div>
@@ -524,15 +547,13 @@ function PageHero({ keyName }: { keyName: FrameworkKey }) {
   const { content } = usePortalContent();
   const framework = content.frameworks[keyName];
   const Icon = icons[keyName];
-  const formattedTab = framework.tab.toLowerCase().replace(/^\w/, (letter) => letter.toUpperCase());
-  const heroLabel = `${formattedTab}: ${framework.title}`;
 
   return (
     <section className="page-hero framework-hero">
       <div className="section-inner">
         <span className="eyebrow page-step-label">
           <Icon size={13} aria-hidden />
-          {heroLabel}
+          <FormattedStepLabel value={framework.tab} />: {framework.title}
         </span>
         <h1>{framework.question}</h1>
         <p>{content.pages[keyName].hero}</p>
