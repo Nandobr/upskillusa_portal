@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { mergeWithDefaults, usePlanDraft } from "@/components/plan-provider";
 import { usePortalContent } from "@/components/language-provider";
+import { SegmentedProgress } from "@/components/segmented-progress";
 import { occupations } from "@/lib/data/occupations";
 import {
   assessmentCopy,
@@ -110,26 +111,33 @@ function buildUpdatedInspire(
 }
 
 function SectionShell({
+  action,
   children,
   complete,
   eyebrow,
   step,
   title,
 }: {
+  action?: ReactNode;
   children: ReactNode;
   complete?: boolean;
   eyebrow: string;
-  step: number;
+  step?: number;
   title: string;
 }) {
   return (
     <section className={`assessment-step-card ${complete ? "complete" : ""}`}>
-      <div className="assessment-step-heading">
-        <span className="assessment-step-number">{step}</span>
+      <div
+        className={`assessment-step-heading ${step === undefined ? "no-step-number" : ""} ${
+          action ? "with-action" : ""
+        }`}
+      >
+        {step !== undefined ? <span className="assessment-step-number">{step}</span> : null}
         <div>
           <span className="assessment-step-eyebrow">{eyebrow}</span>
           <h3>{title}</h3>
         </div>
+        {action ? <div className="assessment-heading-action">{action}</div> : null}
       </div>
       {children}
     </section>
@@ -209,24 +217,18 @@ function getComparisonValueClass(label: string, occupation: Occupation) {
 
 function getInitialAssessmentStep(assessment: IkigaiAssessmentResult): AssessmentStep {
   if (!assessment.pathwayId) return 0;
-  if (assessment.compareSlugs.length >= 2 || assessment.recommendations.length > 0) return 8;
+  if (assessment.matches.length > 0 && assessment.compareSlugs.length >= 2) return 8;
   if (assessment.matches.length > 0) return 7;
-  if (assessment.workStyle.length > 0 || assessment.interests.length > 0) return 6;
-  if (assessment.humanSkills.length > 0) return 5;
-  if (assessment.feelings.length > 0) return 4;
-  if (assessment.currentSituation) return 3;
+  if (assessment.workStyle.length > 0) return 6;
+  if (assessment.interests.length > 0) return 5;
+  if (assessment.humanSkills.length > 0) return 4;
+  if (assessment.feelings.length > 0) return 3;
+  if (assessment.currentSituation) return 2;
   return 1;
 }
 
-function AssessmentProgress({ step }: { step: Exclude<AssessmentStep, 0> }) {
-  return (
-    <div className="assessment-progress-wrap" aria-label={`Step ${step} of 8`}>
-      <div className="assessment-progress">
-        <span style={{ width: `${Math.round((step / 8) * 100)}%` }} />
-      </div>
-      <span>Step {step} of 8</span>
-    </div>
-  );
+function AssessmentProgress({ step }: { step: AssessmentStep }) {
+  return <SegmentedProgress current={step} total={8} />;
 }
 
 export function IkigaiAssessment() {
@@ -238,8 +240,7 @@ export function IkigaiAssessment() {
   const [currentStep, setCurrentStep] = useState<AssessmentStep>(() =>
     getInitialAssessmentStep(assessment),
   );
-  const activeStep =
-    currentStep === 0 && assessment.pathwayId ? getInitialAssessmentStep(assessment) : currentStep;
+  const activeStep = currentStep;
   const hasAssessmentProgress =
     Boolean(assessment.pathwayId) ||
     Boolean(assessment.currentSituation) ||
@@ -285,6 +286,7 @@ export function IkigaiAssessment() {
   function choosePathway(pathwayId: PathwayId) {
     saveAssessment({
       ...defaultAssessmentResult,
+      name: assessment.name,
       pathwayId,
     });
     setCurrentStep(1);
@@ -318,9 +320,9 @@ export function IkigaiAssessment() {
     const exists = assessment.compareSlugs.includes(occupation.slug);
     const compareSlugs = exists
       ? assessment.compareSlugs.filter((slug) => slug !== occupation.slug)
-      : assessment.compareSlugs.length >= maxComparisonSelections
-        ? [...assessment.compareSlugs.slice(1), occupation.slug]
-        : [...assessment.compareSlugs, occupation.slug];
+      : assessment.compareSlugs.length < maxComparisonSelections
+        ? [...assessment.compareSlugs, occupation.slug]
+        : assessment.compareSlugs;
     const best = getBestActionOccupation(compareSlugs, assessment.matches, occupations);
     const recommendations = getRecommendations(best, assessment.pathwayId);
 
@@ -349,70 +351,54 @@ export function IkigaiAssessment() {
 
   return (
     <article className="assessment-panel">
-      <div className="assessment-intro">
-        <div className="assessment-intro-top">
-          <span className="demo-label">{assessmentCopy.label}</span>
-          {hasAssessmentProgress ? (
-            <button
-              className="assessment-reset-button"
-              type="button"
-              onClick={confirmResetAssessment}
-            >
-              Start over
-            </button>
-          ) : null}
+      <SectionShell
+        complete={Boolean(pathway)}
+        eyebrow="Choose your pathway"
+        title="Where are you starting from?"
+      >
+        <div className="pathway-grid assessment-pathways">
+          {pathways.map((item) => {
+            const Icon = pathwayIcons[item.id];
+            return (
+              <button
+                aria-pressed={assessment.pathwayId === item.id}
+                className={`pathway-card assessment-pathway-card ${
+                  assessment.pathwayId === item.id ? "selected" : ""
+                }`}
+                key={item.id}
+                type="button"
+                onClick={() => choosePathway(item.id)}
+              >
+                <Icon size={20} aria-hidden />
+                <strong>{item.name}</strong>
+                <span>{item.audience}</span>
+                <p>{item.desc}</p>
+              </button>
+            );
+          })}
         </div>
-        <p className="assessment-intro-summary">
-          {content.frameworks.inspire.summary}
-        </p>
-        <p className="assessment-note">{assessmentCopy.storageNote}</p>
-      </div>
+      </SectionShell>
 
-      {activeStep === 0 || !pathway ? (
+      {pathway ? (
         <SectionShell
-          complete={Boolean(pathway)}
-          eyebrow="Choose your pathway"
+          action={
+            hasAssessmentProgress ? (
+              <button
+                className="assessment-reset-button"
+                type="button"
+                onClick={confirmResetAssessment}
+              >
+                Start over
+              </button>
+            ) : null
+          }
+          complete={activeStep > 1}
+          eyebrow="IKIGAI Preamble"
           step={1}
-          title="Where are you starting from?"
+          title={pathway.preamble.title}
         >
-          <div className="pathway-grid assessment-pathways">
-            {pathways.map((item) => {
-              const Icon = pathwayIcons[item.id];
-              return (
-                <button
-                  aria-pressed={assessment.pathwayId === item.id}
-                  className={`pathway-card assessment-pathway-card ${
-                    assessment.pathwayId === item.id ? "selected" : ""
-                  }`}
-                  key={item.id}
-                  type="button"
-                  onClick={() => choosePathway(item.id)}
-                >
-                  <Icon size={24} aria-hidden />
-                  <strong>{item.name}</strong>
-                  <span>{item.audience}</span>
-                  <p>{item.desc}</p>
-                </button>
-              );
-            })}
-          </div>
-        </SectionShell>
-      ) : null}
-
-      {pathway && activeStep === 1 ? (
-        <SectionShell complete={Boolean(assessment.name)} eyebrow="IKIGAI preamble" step={1} title={pathway.preamble.title}>
+          <AssessmentProgress step={1} />
           <div className="assessment-preamble">
-            <div>
-              <strong>{assessmentCopy.ikigaiTitle}</strong>
-              <p>{assessmentCopy.ikigaiBody}</p>
-            </div>
-            <div className="assessment-preamble-main">
-              <span className="assessment-preamble-icon" aria-hidden>
-                {pathway.icon}
-              </span>
-              <p>{pathway.preamble.message}</p>
-              <p className="assessment-preamble-tagline">{assessmentCopy.tagline}</p>
-            </div>
             <label className="field assessment-name-field">
               <span>{assessmentCopy.firstNameLabel}</span>
               <input
@@ -435,7 +421,7 @@ export function IkigaiAssessment() {
         </SectionShell>
       ) : null}
 
-      {pathway && activeStep === 2 ? (
+      {pathway && activeStep >= 2 ? (
         <SectionShell
           complete={Boolean(assessment.currentSituation)}
           eyebrow="Current situation"
@@ -482,11 +468,11 @@ export function IkigaiAssessment() {
         </SectionShell>
       ) : null}
 
-      {pathway && activeStep === 3 ? (
+      {pathway && activeStep >= 3 && Boolean(assessment.currentSituation) ? (
         <SectionShell complete={assessment.feelings.length > 0} eyebrow="Feelings check-in" step={3} title="How are you feeling about all this?">
           <AssessmentProgress step={3} />
           <p className="assessment-step-subtitle">Be honest — there are no wrong answers. Select all that resonate:</p>
-          <div className="assessment-chip-grid">
+          <div className="assessment-chip-grid assessment-feelings-grid">
             {currentFeelings.map((option) => (
               <ChipButton
                 active={assessment.feelings.includes(option)}
@@ -511,20 +497,23 @@ export function IkigaiAssessment() {
             <button className="button ghost" type="button" onClick={() => setCurrentStep(2)}>
               {assessmentCopy.backLabel}
             </button>
-            <button className="button primary" type="button" onClick={() => setCurrentStep(4)}>
+            <button
+              className="button primary"
+              type="button"
+              disabled={assessment.feelings.length < 1}
+              onClick={() => setCurrentStep(4)}
+            >
               {assessmentCopy.continueLabel}
             </button>
           </div>
         </SectionShell>
       ) : null}
 
-      {pathway && activeStep === 4 ? (
+      {pathway && activeStep >= 4 && assessment.feelings.length > 0 ? (
         <SectionShell complete={assessment.humanSkills.length > 0} eyebrow="What you are good at" step={4} title="Let's Discover Your Human Superpowers">
           <AssessmentProgress step={4} />
           <p className="assessment-step-subtitle">
-            {'IKIGAI asks: "What are you good at?" — These are the skills AI '}
-            <em>cannot</em>
-            {" replace. Pick your top 3–4:"}
+            These are the skills AI cannot replace. Pick your top 3
           </p>
           <div className="assessment-skill-grid">
             {humanSkills.map((skill) => {
@@ -571,11 +560,11 @@ export function IkigaiAssessment() {
         </SectionShell>
       ) : null}
 
-      {pathway && activeStep === 5 ? (
+      {pathway && activeStep >= 5 && assessment.humanSkills.length > 0 ? (
         <SectionShell complete={assessment.interests.length > 0} eyebrow="What you love" step={5} title="What Lights You Up?">
           <AssessmentProgress step={5} />
           <p className="assessment-step-subtitle">
-            {'IKIGAI asks: "What do you love?" — Pick 2–3 areas that genuinely interest you:'}
+            {'IKIGAI asks: "Pick up to 3 areas that genuinely interest you:"'}
           </p>
           <div className="assessment-chip-grid">
             {interestAreas.map((interest) => (
@@ -612,13 +601,13 @@ export function IkigaiAssessment() {
         </SectionShell>
       ) : null}
 
-      {pathway && activeStep === 6 ? (
+      {pathway && activeStep >= 6 && assessment.interests.length > 0 ? (
         <SectionShell complete={assessment.workStyle.length > 0} eyebrow="How you want to work" step={6} title="How Do You Want to Work?">
           <AssessmentProgress step={6} />
           <p className="assessment-step-subtitle">
             {'Select the work styles that feel most like "you":'}
           </p>
-          <div className="assessment-choice-list">
+          <div className="assessment-choice-list assessment-checkbox-choice-list">
             {workStyleOptions.map((option) => (
               <ChoiceButton
                 active={assessment.workStyle.includes(option.name)}
@@ -640,22 +629,28 @@ export function IkigaiAssessment() {
             <button className="button ghost" type="button" onClick={() => setCurrentStep(5)}>
               {assessmentCopy.backLabel}
             </button>
-            <button className="button primary" type="button" onClick={computeMatches}>
+            <button
+              className="button primary"
+              type="button"
+              disabled={assessment.workStyle.length < 1}
+              onClick={computeMatches}
+            >
               {assessmentCopy.seeMatchesLabel}
             </button>
           </div>
         </SectionShell>
       ) : null}
 
-      {pathway && activeStep === 7 ? (
+      {pathway && activeStep >= 7 && assessment.workStyle.length > 0 ? (
         <SectionShell complete={assessment.matches.length > 0} eyebrow="Ranked matches" step={7} title={`${assessment.name ? `${assessment.name}, here` : "Here"} Are Your Top Career Matches`}>
           <AssessmentProgress step={7} />
           {rankedMatches.length > 0 ? (
             <>
               <p className="assessment-step-subtitle">
-                Based on your human superpowers ({assessment.humanSkills.slice(0, 3).join(", ")}), interests ({assessment.interests.slice(0, 3).join(", ")}), and work style preferences, we narrowed 342 occupations to these {rankedMatches.length} matches:
+                Based on your human superpowers ({assessment.humanSkills.slice(0, 3).join(", ")}), interests ({assessment.interests.slice(0, 3).join(", ")}), and work style preferences, we narrowed 342 occupations to these {rankedMatches.length} matches.
+                <br />
+                Select up to 3 careers to compare:
               </p>
-              <p className="assessment-note">{assessmentCopy.sourceNote}</p>
               <div className="match-card-list">
                 {rankedMatches.map(({ occupation, score }, index) => {
                   const selected = assessment.compareSlugs.includes(occupation.slug);
@@ -695,14 +690,6 @@ export function IkigaiAssessment() {
               {assessment.compareSlugs.length > 0 ? (
                 <div className="compare-bar">
                   <span>{assessment.compareSlugs.length} selected for comparison</span>
-                  <button
-                    className="button blue"
-                    type="button"
-                    disabled={assessment.compareSlugs.length < 2}
-                    onClick={goToComparison}
-                  >
-                    {assessmentCopy.compareSideBySideLabel}
-                  </button>
                 </div>
               ) : null}
             </>
@@ -726,7 +713,7 @@ export function IkigaiAssessment() {
         </SectionShell>
       ) : null}
 
-      {pathway && activeStep === 8 ? (
+      {pathway && activeStep >= 8 && assessment.matches.length > 0 && comparedOccupations.length >= 2 ? (
         <SectionShell complete={comparedOccupations.length >= 2} eyebrow="Compare up to three" step={8} title={assessmentCopy.comparisonTitle}>
           <AssessmentProgress step={8} />
           <p className="assessment-step-subtitle">

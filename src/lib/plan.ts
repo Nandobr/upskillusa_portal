@@ -416,21 +416,19 @@ export function generateLearnReport(input: LearnPlanInput): LearnReport {
       ? "Add a human review gate before the output affects a real person, customer, grade, or business decision."
       : "Review the output like a draft, not a final answer.";
 
-  const profileSummary = `You are a ${labels.group.label.toLowerCase()} who is ${labels.startingPoint.label.toLowerCase()} and wants to ${labels.goal.label.toLowerCase()} with ${labels.tool.label}.`;
+  const profileSummary = `You are a ${labels.group.label.toLowerCase()} who wants to ${labels.goal.label.toLowerCase()} with ${labels.tool.label}.`;
   const practicePrompt = `Act as a practical AI learning coach for a ${labels.group.label.toLowerCase()}. Help me ${labels.goal.label.toLowerCase()} using ${labels.tool.label}. Give me a simple first draft, explain what I should check, and end with three ways I can improve the result.`;
   const nextAction = `${learningVerb} for ${labels.time.label.toLowerCase()}. ${timeAction}`;
-  const planSummary = `${labels.group.label}: ${labels.startingPoint.label}. Focus on "${labels.goal.label}" with ${labels.tool.label} using a ${labels.format.label.toLowerCase()} path for ${labels.time.label.toLowerCase()}.`;
+  const planSummary = `${labels.group.label}: Focus on "${labels.goal.label}" with ${labels.tool.label} using a ${labels.format.label.toLowerCase()} path.`;
 
   return {
     title: "Your LEARN Report",
     demoLabel: "Demo content - generated locally",
     path: [
       `Group: ${labels.group.label}`,
-      `Starting point: ${labels.startingPoint.label}`,
       `Goal: ${labels.goal.label}`,
       `Tool: ${labels.tool.label}`,
       `Format: ${labels.format.label}`,
-      `Time: ${labels.time.label}`,
     ],
     profileSummary,
     learningPath: [
@@ -534,7 +532,7 @@ export const planCopy = {
   en: {
     headings: {
       opportunitySeed: "Opportunity Seed",
-      learningPath: "Learning Path",
+      learningPath: "Build your AI Learning Path Report",
       opportunityDraft: "AI Opportunity Draft",
       completePlan: "Complete AI-Ready Action Plan",
       pageEyebrow: "AI-READY ACTION PLAN",
@@ -1351,7 +1349,6 @@ export function generateSeminarResult(input: AdaptPlanInput, language: Language 
   const category = copy.workCategories[input.workCategory];
   const annualValueLabel = formatSeminarCurrency(calculation.annualValue);
   const multiplierLabel = formatMultiplier(calculation.multiplier);
-  const readiness = getSeminarReadinessCount(input);
   const trackLabel = seminarTrackOptions[input.track];
   const title = input.track === "business" ? copy.plan.businessSeminarTitle : copy.plan.workerSeminarTitle;
   const summary =
@@ -1364,7 +1361,6 @@ export function generateSeminarResult(input: AdaptPlanInput, language: Language 
           copy.plan.track(trackLabel),
           copy.plan.workArea(category),
           copy.plan.workflow(input.workflow),
-          copy.plan.readiness(readiness.ready, readiness.total),
           copy.plan.workersAffected(formatSeminarNumber(calculation.workersAffected)),
           copy.plan.weeklyHours(formatSeminarNumber(calculation.weeklyHoursSaved)),
           copy.plan.hourlyValue(formatSeminarCurrency(calculation.blendedHourlyValue)),
@@ -1375,7 +1371,6 @@ export function generateSeminarResult(input: AdaptPlanInput, language: Language 
           copy.plan.track(trackLabel),
           copy.plan.workArea(category),
           copy.plan.workflow(input.workflow),
-          copy.plan.readiness(readiness.ready, readiness.total),
           copy.plan.weeklyHours(formatSeminarNumber(calculation.weeklyHoursSaved)),
           copy.plan.hourlyValue(formatSeminarCurrency(calculation.hourlyValue)),
           copy.plan.proofPoint(input.worker.proofPoint),
@@ -1549,12 +1544,13 @@ function getImplementationPlanSection(input: ImplementPlanInput, language: Langu
     const report = input.report as BusinessOpportunityReport;
 
     return {
-      title: "AI Opportunity Report",
+      title: "Company AI Opportunity Report",
       body: `${report.companyName} has a Step 4 opportunity score of ${Math.round(
         report.opportunityScore,
       )}/100. The selected first pilot is ${pilot?.label || copy.defaults.smallTest}.`,
       items: [
         `Report type: Business Leader`,
+        `Contact: ${report.email || input.email || "not specified"}`,
         `Annual value opportunity: ${formatShortUsd(report.annualValueAtRisk)}`,
         `Recoverable work: ${formatLabNumber(report.weeklyHoursReclaimable)} hours/week (${report.fteEquivalent.toFixed(
           1,

@@ -5,11 +5,9 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   AlertCircle,
-  BadgeCheck,
   Bot,
   Brain,
   BriefcaseBusiness,
-  Building2,
   CalendarDays,
   CheckCircle2,
   Clock,
@@ -22,6 +20,7 @@ import {
   GraduationCap,
   Globe,
   Lightbulb,
+  Mail,
   Megaphone,
   Network,
   PlayCircle,
@@ -41,22 +40,19 @@ import { frameworkOrder, type FrameworkKey, type Language } from "@/lib/content"
 import { IkigaiAssessment } from "@/components/ikigai-assessment";
 import { usePortalContent } from "@/components/language-provider";
 import { mergeWithDefaults, usePlanDraft } from "@/components/plan-provider";
+import { SegmentedProgress } from "@/components/segmented-progress";
 import {
-  aiStartingPointOptions,
   defaultDraft,
   generateSeminarResult,
   generateUpgradePlan,
   generateLearnReport,
-  getSeminarReadinessCount,
   getLearnToolOptions,
   getPlanCopy,
   learnFormatOptions,
   learnGoalsByGroup,
   learnGroupOptions,
   learnReportToText,
-  learnTimeOptions,
   planToText,
-  seminarReadinessItems,
   workCategories,
   type AdaptPlanInput,
   type ImplementPlanInput,
@@ -216,125 +212,14 @@ const proofPointOptions: Record<Language, SeminarChoice<string>[]> = {
   ],
 };
 
-const readinessChoiceOptions: Record<
-  Language,
-  (SeminarChoice<string> & { readiness: AdaptPlanInput["readiness"] })[]
-> = {
-  en: [
-    {
-      value: "ready",
-      label: "Ready now",
-      description: "I can bring the workflow, time estimate, sample, and review owner.",
-      readiness: {
-        bringWorkflow: true,
-        knowTimeSpent: true,
-        haveSample: true,
-        canExplainReview: true,
-      },
-    },
-    {
-      value: "partial",
-      label: "Partly ready",
-      description: "I know the workflow and time spent, but need help with evidence.",
-      readiness: {
-        bringWorkflow: true,
-        knowTimeSpent: true,
-        haveSample: false,
-        canExplainReview: false,
-      },
-    },
-    {
-      value: "guided",
-      label: "Need seminar help",
-      description: "I want the seminar to help me choose and prove the workflow.",
-      readiness: {
-        bringWorkflow: false,
-        knowTimeSpent: false,
-        haveSample: false,
-        canExplainReview: false,
-      },
-    },
-  ],
-  es: [
-    {
-      value: "ready",
-      label: "Listo ahora",
-      description: "Puedo llevar el flujo, tiempo estimado, muestra y responsable de revision.",
-      readiness: {
-        bringWorkflow: true,
-        knowTimeSpent: true,
-        haveSample: true,
-        canExplainReview: true,
-      },
-    },
-    {
-      value: "partial",
-      label: "Parcialmente listo",
-      description: "Conozco el flujo y el tiempo, pero necesito ayuda con evidencia.",
-      readiness: {
-        bringWorkflow: true,
-        knowTimeSpent: true,
-        haveSample: false,
-        canExplainReview: false,
-      },
-    },
-    {
-      value: "guided",
-      label: "Necesito ayuda",
-      description: "Quiero que el seminario me ayude a elegir y probar el flujo.",
-      readiness: {
-        bringWorkflow: false,
-        knowTimeSpent: false,
-        haveSample: false,
-        canExplainReview: false,
-      },
-    },
-  ],
-  pt: [
-    {
-      value: "ready",
-      label: "Pronto agora",
-      description: "Posso levar o fluxo, estimativa de tempo, amostra e responsavel por revisao.",
-      readiness: {
-        bringWorkflow: true,
-        knowTimeSpent: true,
-        haveSample: true,
-        canExplainReview: true,
-      },
-    },
-    {
-      value: "partial",
-      label: "Parcialmente pronto",
-      description: "Conheco o fluxo e o tempo, mas preciso de ajuda com evidencia.",
-      readiness: {
-        bringWorkflow: true,
-        knowTimeSpent: true,
-        haveSample: false,
-        canExplainReview: false,
-      },
-    },
-    {
-      value: "guided",
-      label: "Preciso de ajuda",
-      description: "Quero que o seminario me ajude a escolher e provar o fluxo.",
-      readiness: {
-        bringWorkflow: false,
-        knowTimeSpent: false,
-        haveSample: false,
-        canExplainReview: false,
-      },
-    },
-  ],
-};
-
 const seminarBuilderCopy = {
   en: {
     subtitle: "Build a local seminar prep artifact. Nothing is registered or sent.",
     trackEyebrow: "Seminar track",
     trackTitle: "Choose your seminar track",
-    workerLabel: "Worker / Employee",
+    workerLabel: "Employee",
     workerDescription: "Estimate saved hours and prepare a Manifest of Saved Hours.",
-    businessLabel: "Business Leader / Owner",
+    businessLabel: "Business Leader",
     businessDescription: "Map team productivity into a Company AI-Ready Action Plan.",
     readinessEyebrow: "Readiness",
     readinessTitle: "Check your seminar readiness",
@@ -508,20 +393,6 @@ export function OverviewPage() {
             ))}
           </h1>
           <p>{content.overview.intro}</p>
-          <div className="hero-actions">
-            <Link className="button primary" href="/inspire">
-              {content.overview.primaryCta}
-              <ArrowRight size={17} aria-hidden />
-            </Link>
-            <Link className="button secondary" href="/plan">
-              {content.ui.viewPlanCta}
-              <CheckCircle2 size={17} aria-hidden />
-            </Link>
-            <Link className="button secondary" href="/learn">
-              {content.overview.secondaryCta}
-              <PlayCircle size={17} aria-hidden />
-            </Link>
-          </div>
         </div>
       </section>
 
@@ -615,18 +486,16 @@ function LearnDemo() {
   const tools = getLearnToolOptions(values.goal);
   const completeValues =
     values.group &&
-    values.startingPoint &&
     values.goal &&
     values.tool &&
-    values.format &&
-    values.time
+    values.format
       ? {
           group: values.group,
-          startingPoint: values.startingPoint,
+          startingPoint: defaultDraft.learn.startingPoint,
           goal: values.goal,
           tool: values.tool,
           format: values.format,
-          time: values.time,
+          time: defaultDraft.learn.time,
           reportSummary: "",
           nextAction: "",
         }
@@ -707,9 +576,6 @@ function LearnDemo() {
         ) : null}
       </div>
       <h2>{copy.headings.learningPath}</h2>
-      <p className="assessment-step-subtitle">
-        Build a downloadable LEARN Report with selectable choices only.
-      </p>
 
       <section className={`assessment-step-card ${values.group ? "complete" : ""}`}>
         <div className="assessment-step-heading">
@@ -719,6 +585,7 @@ function LearnDemo() {
             <h3>Choose your group</h3>
           </div>
         </div>
+        <SegmentedProgress current={1} total={4} />
         <div className="assessment-pathways learn-option-grid four">
           {learnGroupOptions.map((option) => (
             <button
@@ -736,48 +603,15 @@ function LearnDemo() {
       </section>
 
       {values.group ? (
-        <section className={`assessment-step-card ${values.startingPoint ? "complete" : ""}`}>
+        <section className={`assessment-step-card ${values.goal ? "complete" : ""}`}>
           <div className="assessment-step-heading">
             <span className="assessment-step-number">2</span>
             <div>
-              <span className="assessment-step-eyebrow">AI starting point</span>
-              <h3>How familiar are you with AI tools?</h3>
-            </div>
-          </div>
-          <div className="assessment-choice-list">
-            {aiStartingPointOptions.map((option) => (
-              <button
-                aria-pressed={values.startingPoint === option.id}
-                className={`assessment-choice ${values.startingPoint === option.id ? "selected" : ""}`}
-                key={option.id}
-                type="button"
-                onClick={() =>
-                  updatePathway({
-                    group: values.group,
-                    startingPoint: option.id,
-                  })
-                }
-              >
-                <span className="assessment-choice-mark" aria-hidden />
-                <span>
-                  <strong>{option.label}</strong>
-                  <small>{option.description}</small>
-                </span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {values.group && values.startingPoint ? (
-        <section className={`assessment-step-card ${values.goal ? "complete" : ""}`}>
-          <div className="assessment-step-heading">
-            <span className="assessment-step-number">3</span>
-            <div>
               <span className="assessment-step-eyebrow">Practical goal</span>
               <h3>What do you want AI to help you do?</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={2} total={4} />
           <div className="assessment-skill-grid learn-option-grid three">
             {goals.map((option) => (
               <button
@@ -788,7 +622,6 @@ function LearnDemo() {
                 onClick={() =>
                   updatePathway({
                     group: values.group,
-                    startingPoint: values.startingPoint,
                     goal: option.id,
                   })
                 }
@@ -801,15 +634,16 @@ function LearnDemo() {
         </section>
       ) : null}
 
-      {values.group && values.startingPoint && values.goal ? (
+      {values.group && values.goal ? (
         <section className={`assessment-step-card ${values.tool ? "complete" : ""}`}>
           <div className="assessment-step-heading">
-            <span className="assessment-step-number">4</span>
+            <span className="assessment-step-number">3</span>
             <div>
               <span className="assessment-step-eyebrow">Tool</span>
               <h3>Choose the AI tool you want to learn</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={3} total={4} />
           <div className="assessment-skill-grid learn-option-grid four">
             {tools.map((option) => (
               <button
@@ -820,7 +654,6 @@ function LearnDemo() {
                 onClick={() =>
                   updatePathway({
                     group: values.group,
-                    startingPoint: values.startingPoint,
                     goal: values.goal,
                     tool: option.id,
                   })
@@ -834,15 +667,16 @@ function LearnDemo() {
         </section>
       ) : null}
 
-      {values.group && values.startingPoint && values.goal && values.tool ? (
+      {values.group && values.goal && values.tool ? (
         <section className={`assessment-step-card ${values.format ? "complete" : ""}`}>
           <div className="assessment-step-heading">
-            <span className="assessment-step-number">5</span>
+            <span className="assessment-step-number">4</span>
             <div>
               <span className="assessment-step-eyebrow">Learning format</span>
               <h3>How do you want to learn?</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={4} total={4} />
           <div className="assessment-chip-grid learn-option-grid three">
             {learnFormatOptions.map((option) => (
               <button
@@ -853,45 +687,9 @@ function LearnDemo() {
                 onClick={() =>
                   updatePathway({
                     group: values.group,
-                    startingPoint: values.startingPoint,
                     goal: values.goal,
                     tool: values.tool,
                     format: option.id,
-                  })
-                }
-              >
-                <strong>{option.label}</strong>
-                <span>{option.description}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      {values.group && values.startingPoint && values.goal && values.tool && values.format ? (
-        <section className={`assessment-step-card ${values.time ? "complete" : ""}`}>
-          <div className="assessment-step-heading">
-            <span className="assessment-step-number">6</span>
-            <div>
-              <span className="assessment-step-eyebrow">Time today</span>
-              <h3>How much time do you have?</h3>
-            </div>
-          </div>
-          <div className="assessment-chip-grid learn-option-grid three">
-            {learnTimeOptions.map((option) => (
-              <button
-                aria-pressed={values.time === option.id}
-                className={`assessment-chip ${values.time === option.id ? "selected" : ""}`}
-                key={option.id}
-                type="button"
-                onClick={() =>
-                  updatePathway({
-                    group: values.group,
-                    startingPoint: values.startingPoint,
-                    goal: values.goal,
-                    tool: values.tool,
-                    format: values.format,
-                    time: option.id,
                   })
                 }
               >
@@ -996,9 +794,7 @@ function AdaptDemo() {
   };
   const [resultStatus, setResultStatus] = useState("");
   const saved = Boolean(values.savedAt);
-  const readinessCount = getSeminarReadinessCount(values);
   const hasTrack = Boolean(builderValues.track);
-  const hasReadinessDecision = Boolean(builderValues.readiness);
   const hasWorkCategory = Boolean(builderValues.workCategory);
   const hasWorkflow = Boolean(builderValues.workflow?.trim());
   const hasWorkerWeeklyHours = Boolean(builderValues.worker?.weeklyHoursSaved);
@@ -1008,7 +804,7 @@ function AdaptDemo() {
   const hasBusinessWeeklyHours = Boolean(builderValues.business?.weeklyHoursSavedPerWorker);
   const hasBusinessHourlyValue = Boolean(builderValues.business?.blendedHourlyValue);
   const hasMultiplier = Boolean(builderValues.multiplier);
-  const showAreaStep = hasTrack && hasReadinessDecision;
+  const showAreaStep = hasTrack;
   const showWorkflowStep = showAreaStep && hasWorkCategory;
   const showFirstValueStep = showWorkflowStep && hasWorkflow;
   const showSecondValueStep =
@@ -1026,7 +822,6 @@ function AdaptDemo() {
     ? workCategories[builderValues.workCategory].examples
     : [];
   const proofOptions = proofPointOptions[language] ?? proofPointOptions.en;
-  const readinessOptions = readinessChoiceOptions[language] ?? readinessChoiceOptions.en;
   const hasSeminarProgress = Boolean(draft.adapt) || Object.keys(builderValues).length > 0;
 
   function replacePathway(nextValues: Partial<AdaptPlanInput>) {
@@ -1052,18 +847,6 @@ function AdaptDemo() {
     ) {
       resetSeminarPathway();
     }
-  }
-
-  function chooseReadiness(readiness: AdaptPlanInput["readiness"]) {
-    setResultStatus("");
-    replacePathway({
-      track: values.track,
-      readiness,
-    });
-  }
-
-  function isReadinessSelected(readiness: AdaptPlanInput["readiness"]) {
-    return seminarReadinessItems.every((item) => values.readiness[item.id] === readiness[item.id]);
   }
 
   function pathBase() {
@@ -1135,7 +918,6 @@ function AdaptDemo() {
         ) : null}
       </div>
       <h2>{content.frameworks.adapt.question}</h2>
-      <p className="assessment-step-subtitle">{builderCopy.subtitle}</p>
 
       <section className={`assessment-step-card ${hasTrack ? "complete" : ""}`}>
         <div className="assessment-step-heading">
@@ -1145,8 +927,9 @@ function AdaptDemo() {
             <h3>{builderCopy.trackTitle}</h3>
           </div>
         </div>
-        <div className="assessment-pathways learn-option-grid two">
-          {(["worker", "business"] as SeminarTrack[]).map((track) => (
+        <SegmentedProgress current={1} total={7} />
+        <div className="assessment-pathways learn-option-grid two seminar-track-grid">
+        {(["business", "worker"] as SeminarTrack[]).map((track) => (
             <button
               aria-pressed={builderValues.track === track}
               className={`assessment-pathway-card ${builderValues.track === track ? "selected" : ""}`}
@@ -1165,55 +948,16 @@ function AdaptDemo() {
         </div>
       </section>
 
-      {hasTrack ? (
-        <section className="assessment-step-card">
-          <div className="assessment-step-heading">
-            <span className="assessment-step-number">2</span>
-            <div>
-              <span className="assessment-step-eyebrow">{builderCopy.readinessEyebrow}</span>
-              <h3>{builderCopy.readinessTitle}</h3>
-            </div>
-          </div>
-          <div className="assessment-choice-list">
-            {readinessOptions.map((option) => {
-              const selected = hasReadinessDecision && isReadinessSelected(option.readiness);
-
-              return (
-                <button
-                  aria-pressed={selected}
-                  className={`assessment-choice ${selected ? "selected" : ""}`}
-                  key={option.value}
-                  type="button"
-                  onClick={() => chooseReadiness(option.readiness)}
-                >
-                  <span className="assessment-choice-mark" aria-hidden />
-                  <span>
-                    <strong>{option.label}</strong>
-                    <small>{option.description}</small>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {hasReadinessDecision ? (
-            <p className="seminar-readiness-status">
-              {readinessCount.ready === readinessCount.total
-                ? builderCopy.readinessComplete
-                : builderCopy.readinessPartial(readinessCount.ready, readinessCount.total)}
-            </p>
-          ) : null}
-        </section>
-      ) : null}
-
       {showAreaStep ? (
         <section className={`assessment-step-card ${hasWorkCategory ? "complete" : ""}`}>
           <div className="assessment-step-heading">
-            <span className="assessment-step-number">3</span>
+            <span className="assessment-step-number">2</span>
             <div>
               <span className="assessment-step-eyebrow">{builderCopy.areaEyebrow}</span>
               <h3>{builderCopy.areaTitle}</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={2} total={7} />
           <div className="assessment-skill-grid learn-option-grid four">
             {workCategoryKeys.map((key) => (
               <button
@@ -1240,12 +984,13 @@ function AdaptDemo() {
       {showWorkflowStep ? (
         <section className={`assessment-step-card ${hasWorkflow ? "complete" : ""}`}>
           <div className="assessment-step-heading">
-            <span className="assessment-step-number">4</span>
+            <span className="assessment-step-number">3</span>
             <div>
               <span className="assessment-step-eyebrow">{builderCopy.workflowEyebrow}</span>
               <h3>{builderCopy.workflowTitle}</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={3} total={7} />
           <div className="assessment-choice-list">
             {workflowOptions.map((workflow) => {
               return (
@@ -1282,12 +1027,13 @@ function AdaptDemo() {
           }`}
         >
           <div className="assessment-step-heading">
-            <span className="assessment-step-number">5</span>
+            <span className="assessment-step-number">4</span>
             <div>
               <span className="assessment-step-eyebrow">{builderCopy.valueEyebrow}</span>
               <h3>{values.track === "business" ? builderCopy.workersAffected : builderCopy.weeklyHoursSaved}</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={4} total={7} />
           <div className="assessment-choice-list">
             {(values.track === "business" ? businessWorkersAffectedOptions : workerWeeklyHourOptions).map((option) => {
               const selected =
@@ -1340,12 +1086,13 @@ function AdaptDemo() {
           }`}
         >
           <div className="assessment-step-heading">
-            <span className="assessment-step-number">6</span>
+            <span className="assessment-step-number">5</span>
             <div>
               <span className="assessment-step-eyebrow">{builderCopy.valueEyebrow}</span>
               <h3>{values.track === "business" ? builderCopy.weeklyHoursSavedPerWorker : builderCopy.hourlyValue}</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={5} total={7} />
           <div className="assessment-choice-list">
             {(values.track === "business" ? businessWeeklyHourOptions : workerHourlyValueOptions).map((option) => {
               const selected =
@@ -1400,12 +1147,13 @@ function AdaptDemo() {
           }`}
         >
           <div className="assessment-step-heading">
-            <span className="assessment-step-number">7</span>
+            <span className="assessment-step-number">6</span>
             <div>
               <span className="assessment-step-eyebrow">{builderCopy.valueEyebrow}</span>
               <h3>{values.track === "business" ? builderCopy.blendedHourlyValue : builderCopy.proofPoint}</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={6} total={7} />
           <div className="assessment-choice-list">
             {(values.track === "business" ? businessHourlyValueOptions : proofOptions).map((option) => {
               const selected =
@@ -1458,12 +1206,13 @@ function AdaptDemo() {
       {showMultiplierStep ? (
         <section className={`assessment-step-card ${hasMultiplier ? "complete" : ""}`}>
           <div className="assessment-step-heading">
-            <span className="assessment-step-number">8</span>
+            <span className="assessment-step-number">7</span>
             <div>
               <span className="assessment-step-eyebrow">{builderCopy.valueEyebrow}</span>
               <h3>{builderCopy.multiplier}</h3>
-            </div>
           </div>
+        </div>
+          <SegmentedProgress current={7} total={7} />
           <div className="assessment-choice-list">
             {seminarMultiplierOptions.map((option) => {
               const selected = builderValues.multiplier === option.value;
@@ -1570,7 +1319,12 @@ function ImplementDemo() {
       values.selectedPilot,
   );
   const taskCount = values.selectedTasks.length + values.customTasks.length;
+  const businessReport = values.report?.kind === "business" ? values.report : undefined;
   const employeeReport = values.report?.kind === "employee" ? values.report : undefined;
+  const normalizedCompanyUrl = values.companyUrl.trim();
+  const normalizedEmail = values.email.trim();
+  const canSubmitCompanyUrl = normalizedCompanyUrl.includes(".");
+  const canSubmitBusinessAudit = canSubmitCompanyUrl && normalizedEmail.includes("@") && normalizedEmail.includes(".");
   const storedImplementKey = JSON.stringify(draft.implement ?? null);
 
   useEffect(() => {
@@ -1661,10 +1415,50 @@ function ImplementDemo() {
     });
   }
 
-  async function analyzeEmployee() {
-    if (!values.workArea || !values.audience) return;
+  async function analyzeBusiness() {
+    if (!canSubmitBusinessAudit) {
+      setError(canSubmitCompanyUrl ? "Enter a valid contact email." : "Enter a valid company URL.");
+      return;
+    }
 
-    setLoadingPath(values.audience);
+    setLoadingPath("business");
+    setError("");
+    setSaveStatus("");
+
+    try {
+      const response = await fetch("/api/analyze-business-opportunity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ website: normalizedCompanyUrl, email: normalizedEmail }),
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        report?: BusinessOpportunityReport;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.report) {
+        throw new Error(payload.error || "Could not generate the opportunity audit.");
+      }
+
+      updateValues({
+        audience: "business",
+        companyUrl: normalizedCompanyUrl,
+        email: normalizedEmail,
+        report: payload.report,
+        selectedPilot: undefined,
+      });
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : "Could not generate audit.");
+    } finally {
+      setLoadingPath(null);
+    }
+  }
+
+  async function analyzeEmployee() {
+    if (!values.workArea || values.audience !== "employee") return;
+
+    setLoadingPath("employee");
     setError("");
     setSaveStatus("");
 
@@ -1673,7 +1467,7 @@ function ImplementDemo() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          audience: values.audience,
+          audience: "employee",
           workArea: values.workArea,
           tasks: values.selectedTasks,
           customTasks: values.customTasks,
@@ -1690,14 +1484,8 @@ function ImplementDemo() {
       }
 
       updateValues({
-        audience: values.audience,
-        report: {
-          ...payload.report,
-          title:
-            values.audience === "business"
-              ? "Personal AI Readiness Report"
-              : payload.report.title || "Task Transformation Report",
-        },
+        audience: "employee",
+        report: payload.report,
         selectedPilot: undefined,
       });
     } catch (caughtError) {
@@ -1708,12 +1496,22 @@ function ImplementDemo() {
   }
 
   function selectEmployeePilot(task: ImplementationTask) {
-    const pilot = pilotFromEmployeeTask(task, values.audience ?? "employee");
+    const pilot = pilotFromEmployeeTask(task, "employee");
     updateValues({
       selectedPilot: pilot,
       workflowName: task.task_name,
       pilotScope: task.description,
       humanGate: task.human_ownership,
+    });
+  }
+
+  function selectBusinessPilot(opportunity: BusinessOpportunity) {
+    const pilot = pilotFromBusinessOpportunity(opportunity);
+    updateValues({
+      selectedPilot: pilot,
+      workflowName: pilot.label,
+      pilotScope: pilot.workflow,
+      humanGate: pilot.humanReview,
     });
   }
 
@@ -1736,7 +1534,7 @@ function ImplementDemo() {
   }
 
   const selectedArea = values.workArea ? getWorkArea(values.workArea) : undefined;
-  const canAnalyzeEmployee = Boolean(values.audience && values.workArea && taskCount >= 3);
+  const canAnalyzeEmployee = Boolean(values.audience === "employee" && values.workArea && taskCount >= 3);
   const isLeaderPath = values.audience === "business";
 
   return (
@@ -1755,7 +1553,7 @@ function ImplementDemo() {
       </div>
       <h2>Build My First AI Pilot</h2>
       <p className="assessment-step-subtitle">
-        Choose the path that fits you. Leaders see personal AI readiness; employees see how daily tasks transform.
+        Choose the path that fits you. Leaders audit company opportunity; employees see how daily tasks transform.
       </p>
 
       <section className={`assessment-step-card ${values.audience ? "complete" : ""}`}>
@@ -1766,6 +1564,7 @@ function ImplementDemo() {
             <h3>Who are you exploring AI for?</h3>
           </div>
         </div>
+        <SegmentedProgress current={1} total={3} />
         <div className="assessment-pathways learn-option-grid two">
           <button
             aria-pressed={values.audience === "business"}
@@ -1774,7 +1573,7 @@ function ImplementDemo() {
             onClick={() => chooseAudience("business")}
           >
             <strong>Business Leader</strong>
-            <p>See how your responsibilities and decision workflows can become AI-ready.</p>
+            <p>Audit your company website, capture contact email, and choose a first AI pilot.</p>
           </button>
           <button
             aria-pressed={values.audience === "employee"}
@@ -1788,16 +1587,88 @@ function ImplementDemo() {
         </div>
       </section>
 
-      {values.audience ? (
+      {isLeaderPath ? (
+        <section className={`assessment-step-card ${canSubmitBusinessAudit ? "complete" : ""}`}>
+          <div className="assessment-step-heading">
+            <span className="assessment-step-number">2</span>
+            <div>
+              <span className="assessment-step-eyebrow">Company audit</span>
+              <h3>Start with your company website</h3>
+          </div>
+        </div>
+          <SegmentedProgress current={2} total={3} />
+          <form
+            className="implementation-business-audit"
+            onSubmit={(event) => {
+              event.preventDefault();
+              analyzeBusiness();
+            }}
+          >
+            <div className="implementation-business-audit-fields">
+              <label className="field">
+                <span>Company URL</span>
+                <span className="opportunity-input-shell">
+                  <Globe size={24} strokeWidth={1.9} aria-hidden />
+                  <input
+                    autoComplete="url"
+                    inputMode="url"
+                    value={values.companyUrl}
+                    placeholder="yourcompany.com"
+                    onChange={(event) =>
+                      updateValues({
+                        companyUrl: event.target.value,
+                        report: undefined,
+                        selectedPilot: undefined,
+                      })
+                    }
+                  />
+                </span>
+              </label>
+              <label className="field">
+                <span>Contact email</span>
+                <span className="opportunity-input-shell">
+                  <Mail size={22} strokeWidth={1.9} aria-hidden />
+                  <input
+                    autoComplete="email"
+                    inputMode="email"
+                    value={values.email}
+                    placeholder="name@company.com"
+                    onChange={(event) =>
+                      updateValues({
+                        email: event.target.value,
+                        report: undefined,
+                        selectedPilot: undefined,
+                      })
+                    }
+                  />
+                </span>
+              </label>
+            </div>
+            <div className="assessment-step-actions">
+              <button
+                className="button blue"
+                type="submit"
+                disabled={!canSubmitBusinessAudit || loadingPath === "business"}
+              >
+                {loadingPath === "business" ? "Analyzing..." : "Generate AI Opportunity Report"}
+                <ArrowRight size={16} aria-hidden />
+              </button>
+            </div>
+          </form>
+        </section>
+      ) : null}
+
+      {values.audience === "employee" ? (
         <>
           <section className={`assessment-step-card ${values.workArea ? "complete" : ""}`}>
             <div className="assessment-step-heading">
               <span className="assessment-step-number">2</span>
               <div>
                 <span className="assessment-step-eyebrow">Work area</span>
-                <h3>{isLeaderPath ? "Choose where you lead" : "Choose where your work sits"}</h3>
+                <h3>Choose where your work sits</h3>
               </div>
             </div>
+            <SegmentedProgress current={2} total={3} />
             <div className="assessment-skill-grid learn-option-grid three">
               {workAreaOptions.map((area) => {
                 const AreaIcon = workAreaIcons[area.category];
@@ -1829,13 +1700,14 @@ function ImplementDemo() {
                   <span className="assessment-step-eyebrow">
                     {selectedArea.category} · {selectedArea.skills.length} skills
                   </span>
-                  <h3>{isLeaderPath ? "Select your responsibilities" : "Select what fills your calendar"}</h3>
+                  <h3>Select what fills your calendar</h3>
                 </div>
                 <span className="implementation-selected-count">
                   <span aria-hidden />
-                  {taskCount} {isLeaderPath ? "responsibilities" : "tasks"} selected
+                  {taskCount} tasks selected
                 </span>
               </div>
+              <SegmentedProgress current={3} total={3} />
               <div className="implementation-chip-grid">
                 {selectedArea.skills.map((task) => {
                   const selected = values.selectedTasks.includes(task);
@@ -1866,10 +1738,10 @@ function ImplementDemo() {
               </div>
               <div className="implementation-custom-task">
                 <label className="field">
-                  <span>{isLeaderPath ? "Add a responsibility you do not see" : "Add a task you do not see"}</span>
+                  <span>Add a task you do not see</span>
                   <input
                     value={customTaskDraft}
-                    placeholder={isLeaderPath ? "Type a responsibility and press Add" : "Type a task and press Add"}
+                    placeholder="Type a task and press Add"
                     onChange={(event) => setCustomTaskDraft(event.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
@@ -1895,11 +1767,7 @@ function ImplementDemo() {
                   disabled={!canAnalyzeEmployee || loadingPath === "employee"}
                   onClick={analyzeEmployee}
                 >
-                  {loadingPath
-                    ? "Analyzing..."
-                    : isLeaderPath
-                      ? "Generate Personal AI Readiness Report"
-                      : "Generate Task Transformation Report"}
+                  {loadingPath === "employee" ? "Analyzing..." : "Generate Task Transformation Report"}
                   <ArrowRight size={16} aria-hidden />
                 </button>
               </div>
@@ -1908,8 +1776,17 @@ function ImplementDemo() {
         </>
       ) : null}
 
-      {loadingPath ? <ImplementationLoading audience={loadingPath} /> : null}
+      {loadingPath === "business" ? <OpportunityLoading /> : null}
+      {loadingPath === "employee" ? <ImplementationLoading audience="employee" /> : null}
       {error ? <ImplementationError message={error} /> : null}
+
+      {businessReport ? (
+        <BusinessOpportunityReportView
+          report={businessReport}
+          selectedPilot={values.selectedPilot}
+          onSelect={selectBusinessPilot}
+        />
+      ) : null}
 
       {employeeReport ? (
         <EmployeeTransformationReportView
@@ -2394,30 +2271,6 @@ function ImplementationGuardrails({
   );
 }
 
-function AgentsPanel() {
-  const { content } = usePortalContent();
-
-  return (
-    <div className="card-grid">
-      <article className="card">
-        <Building2 size={22} aria-hidden />
-        <h3>{content.ui.agents.installerTitle}</h3>
-        <p>{content.agents.installer}</p>
-      </article>
-      <article className="card">
-        <Brain size={22} aria-hidden />
-        <h3>{content.ui.agents.educatorTitle}</h3>
-        <p>{content.agents.educator}</p>
-      </article>
-      <article className="card">
-        <BadgeCheck size={22} aria-hidden />
-        <h3>{content.brand.giBillLine}</h3>
-        <p>{content.brand.promise}</p>
-      </article>
-    </div>
-  );
-}
-
 const opportunityCopy: Record<
   Language,
   {
@@ -2806,11 +2659,9 @@ function DemoForRoute({ keyName }: { keyName: FrameworkKey }) {
 export function FrameworkPage({ keyName }: { keyName: FrameworkKey }) {
   const { content } = usePortalContent();
   const framework = content.frameworks[keyName];
-  const nextIndex = frameworkOrder.indexOf(keyName) + 1;
-  const nextKey = frameworkOrder[nextIndex];
-  const nextFramework = nextKey ? content.frameworks[nextKey] : null;
   const isInspiration = keyName === "inspire";
-  const showIntroCta = keyName === "implement";
+  const showIntroCopy = !isInspiration && keyName !== "adapt";
+  const showPageSections = keyName !== "adapt" && content.pages[keyName].sections.length > 0;
 
   return (
     <>
@@ -2820,33 +2671,18 @@ export function FrameworkPage({ keyName }: { keyName: FrameworkKey }) {
         <div className={isInspiration ? "section-inner framework-flow-inspire" : "section-inner framework-flow-page"}>
           <div className={isInspiration ? "framework-intro" : "framework-intro framework-page-intro"}>
             <div className="pill-label">{framework.title}</div>
-            {!isInspiration ? (
+            {showIntroCopy ? (
               <>
                 <h2>{framework.audience}</h2>
-                <p>{framework.summary}</p>
+                {keyName !== "implement" ? <p>{framework.summary}</p> : null}
               </>
-            ) : null}
-            {showIntroCta ? (
-              <div className="button-row">
-                {nextFramework ? (
-                  <Link className="button blue" href={nextFramework.route}>
-                    {nextFramework.cta}
-                    <ArrowRight size={16} aria-hidden />
-                  </Link>
-                ) : (
-                  <Link className="button blue" href="/">
-                    {content.nav[0].label}
-                    <ArrowRight size={16} aria-hidden />
-                  </Link>
-                )}
-              </div>
             ) : null}
           </div>
           <DemoForRoute keyName={keyName} />
         </div>
       </section>
 
-      {content.pages[keyName].sections.length > 0 ? (
+      {showPageSections ? (
         <section className="section muted">
           <div className="section-inner">
             <PageSections keyName={keyName} />
@@ -2854,13 +2690,6 @@ export function FrameworkPage({ keyName }: { keyName: FrameworkKey }) {
         </section>
       ) : null}
 
-      {keyName === "implement" ? (
-        <section className="section">
-          <div className="section-inner">
-            <AgentsPanel />
-          </div>
-        </section>
-      ) : null}
     </>
   );
 }

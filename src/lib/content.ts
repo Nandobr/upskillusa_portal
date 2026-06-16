@@ -138,7 +138,6 @@ export const portalContent: Record<Language, PortalContent> = {
       { key: "learn", label: "Learn", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminar", href: sharedRoutes.adapt },
       { key: "implement", label: "Implement", href: sharedRoutes.implement },
-      { key: "opportunity", label: "Opportunity", href: sharedRoutes.opportunity },
     ],
     brand: {
       name: "UpSkill USA",
@@ -177,8 +176,7 @@ export const portalContent: Record<Language, PortalContent> = {
         title: "Education",
         question: "How do you learn?",
         audience: "Community colleges, professors, workers, employers, and the public.",
-        summary:
-          "A formal college channel and a free public channel make AI learning accessible, supported by role-ready tools and custom GPT preparation.",
+        summary: "",
         cta: "Learn AI for free",
       },
       adapt: {
@@ -207,7 +205,7 @@ export const portalContent: Record<Language, PortalContent> = {
     pages: {
       inspire: {
         hero:
-          "The front door is a mirror: before anyone learns a tool, they name the human value they bring.",
+          'A guided IKIGAI (Japanese concept of "reason for being"). The intersection of what you love, what you\'re good at, what the world needs, and what you can be paid for.',
         sections: [],
         demo: {
           label: "IKIGAI demo",
@@ -282,13 +280,13 @@ export const portalContent: Record<Language, PortalContent> = {
         sections: [],
         demo: {
           label: "AI Implementation Lab",
-          emptyState: "Choose Business Leader for a Personal AI Readiness Report or Employee for a Task Transformation Report.",
+          emptyState: "Choose Business Leader for a company AI Opportunity Report or Employee for a Task Transformation Report.",
           submit: "Generate report",
           resultTitle: "Implementation pilot summary",
           notes: [
-            "Business Leader path: Choose a work area and responsibilities to see a Personal AI Readiness Report.",
+            "Business Leader path: Enter a company URL and contact email to see a company AI Opportunity Report and first pilot options.",
             "Employee path: Choose a work area and tasks to see what AI can automate, augment, or leave under human ownership.",
-            "Company URL audits now live on the Opportunity page; Step 4 reports are saved locally to the AI-Ready Action Plan.",
+            "Step 4 reports are saved locally to the AI-Ready Action Plan.",
           ],
         },
       },
@@ -371,7 +369,6 @@ export const portalContent: Record<Language, PortalContent> = {
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminario", href: sharedRoutes.adapt },
       { key: "implement", label: "Implementar", href: sharedRoutes.implement },
-      { key: "opportunity", label: "Oportunidad", href: sharedRoutes.opportunity },
     ],
     brand: {
       name: "UpSkill USA",
@@ -518,14 +515,14 @@ export const portalContent: Record<Language, PortalContent> = {
         sections: [],
         demo: {
           label: "Laboratorio de implementación de IA",
-          emptyState: "Elige Líder de empresa para un reporte personal de preparación para IA o Empleado para un reporte de transformación de tareas.",
+          emptyState: "Elige Líder de empresa para un reporte de oportunidad de IA de la empresa o Empleado para un reporte de transformación de tareas.",
           submit: "Generar reporte",
           resultTitle: "Resumen del piloto de implementación",
           commentsLabel: "Comentarios:",
           notes: [
-            "Ruta de líderes: Elige un área y responsabilidades para ver un reporte personal de preparación para IA.",
+            "Ruta de líderes: Ingresa una URL de empresa y un email de contacto para ver un reporte de oportunidad de IA de la empresa y opciones de primer piloto.",
             "Ruta de empleados: Elige un área y tareas para ver qué puede automatizar IA, qué puede aumentar y qué debe quedar bajo juicio humano.",
-            "Las auditorías por URL de empresa ahora viven en la página Oportunidad; los reportes del Paso 4 se guardan localmente en el plan de acción listo para IA.",
+            "Los reportes del Paso 4 se guardan localmente en el plan de acción listo para IA.",
           ],
         },
       },
@@ -608,7 +605,6 @@ export const portalContent: Record<Language, PortalContent> = {
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminário", href: sharedRoutes.adapt },
       { key: "implement", label: "Implementar", href: sharedRoutes.implement },
-      { key: "opportunity", label: "Oportunidade", href: sharedRoutes.opportunity },
     ],
     brand: {
       name: "UpSkill USA",
@@ -755,14 +751,14 @@ export const portalContent: Record<Language, PortalContent> = {
         sections: [],
         demo: {
           label: "Laboratório de implementação de IA",
-          emptyState: "Escolha Líder de empresa para um relatório pessoal de prontidão para IA ou Funcionário para um relatório de transformação de tarefas.",
+          emptyState: "Escolha Líder de empresa para um relatório de oportunidade de IA da empresa ou Funcionário para um relatório de transformação de tarefas.",
           submit: "Gerar relatório",
           resultTitle: "Resumo do piloto de implementação",
           commentsLabel: "Comentários:",
           notes: [
-            "Trilha de líderes: Escolha uma área e responsabilidades para ver um relatório pessoal de prontidão para IA.",
+            "Trilha de líderes: Informe uma URL da empresa e um email de contato para ver um relatório de oportunidade de IA da empresa e opções de primeiro piloto.",
             "Trilha de funcionários: Escolha uma área e tarefas para ver o que a IA pode automatizar, ampliar ou deixar sob responsabilidade humana.",
-            "Auditorias por URL de empresa agora ficam na página Oportunidade; os relatórios do Passo 4 ficam salvos localmente no plano de ação pronto para IA.",
+            "Os relatórios do Passo 4 ficam salvos localmente no plano de ação pronto para IA.",
           ],
         },
       },

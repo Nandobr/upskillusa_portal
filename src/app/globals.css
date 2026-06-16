@@ -711,6 +711,13 @@ button {
 .framework-hero p {
   max-width: 850px;
   margin: 0 auto;
+  white-space: pre-line;
+}
+
+.seminar-track-grid .assessment-pathway-card {
+  min-height: 92px;
+  align-content: center;
+  padding: 16px;
 }
 
 .demo-page-section {
@@ -911,6 +918,22 @@ button {
   gap: 12px;
 }
 
+.assessment-step-heading.with-action {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
+.assessment-step-heading.no-step-number {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.assessment-step-heading.no-step-number.with-action {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.assessment-heading-action {
+  align-self: start;
+}
+
 .assessment-step-number {
   display: inline-flex;
   width: 34px;
@@ -933,7 +956,7 @@ button {
 
 .assessment-pathways {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
@@ -955,8 +978,14 @@ button {
 
 .assessment-pathway-card {
   display: grid;
-  gap: 8px;
-  padding: 16px;
+  gap: 5px;
+  min-height: 0;
+  padding: 11px;
+}
+
+.assessment-pathway-card svg {
+  width: 20px;
+  height: 20px;
 }
 
 .assessment-pathway-card strong,
@@ -964,19 +993,24 @@ button {
   color: var(--navy-900);
 }
 
+.assessment-pathway-card strong {
+  font-size: 0.92rem;
+  line-height: 1.18;
+}
+
 .assessment-pathway-card span,
 .assessment-skill-card span {
   color: var(--blue-700);
-  font-size: 0.84rem;
+  font-size: 0.78rem;
   font-weight: 700;
 }
 
 .assessment-pathway-card p,
 .assessment-skill-card span:last-child {
   color: var(--slate-600);
-  font-size: 0.8rem;
+  font-size: 0.74rem;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.35;
 }
 
 .assessment-pathway-card:hover,
@@ -1035,12 +1069,30 @@ button {
   text-align: center;
 }
 
-.assessment-progress-wrap {
+.assessment-progress-wrap,
+.segmented-progress-wrap {
   display: grid;
   gap: 8px;
   color: var(--slate-600);
   font-size: 0.9rem;
   font-weight: 800;
+}
+
+.segmented-progress-track {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+}
+
+.segmented-progress-track span {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(30, 86, 216, 0.12);
+}
+
+.segmented-progress-track span.filled {
+  background: var(--gold-500);
 }
 
 .assessment-progress {
@@ -1118,6 +1170,29 @@ button {
   font-weight: 500;
   line-height: 1.35;
   text-align: center;
+}
+
+.assessment-feelings-grid .assessment-chip {
+  text-align: left;
+}
+
+.assessment-checkbox-choice-list .assessment-choice-mark {
+  border-radius: 4px;
+}
+
+.assessment-checkbox-choice-list .assessment-choice.selected .assessment-choice-mark {
+  border-color: var(--blue-700);
+  background: var(--blue-700);
+}
+
+.assessment-checkbox-choice-list .assessment-choice.selected .assessment-choice-mark::after {
+  content: "✓";
+  display: grid;
+  place-items: center;
+  color: var(--white);
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .assessment-skill-grid {
@@ -2088,6 +2163,51 @@ button {
   align-items: end;
 }
 
+.implementation-business-audit {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.implementation-business-audit-fields {
+  display: grid;
+  gap: 8px;
+}
+
+.implementation-business-audit .field {
+  gap: 4px;
+}
+
+.implementation-business-audit .field > span:first-child {
+  color: var(--slate-700);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.implementation-business-audit .opportunity-input-shell {
+  min-height: 48px;
+  border: 1px solid var(--slate-200);
+  border-radius: 13px;
+  background: var(--white);
+}
+
+.implementation-business-audit .opportunity-input-shell input {
+  font-size: 0.92rem;
+}
+
+.implementation-business-audit .assessment-step-actions {
+  align-items: flex-end;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.implementation-business-audit .assessment-step-actions .button {
+  min-height: 48px;
+  white-space: nowrap;
+}
+
 .implementation-loading,
 .implementation-error,
 .implementation-report,
@@ -2922,6 +3042,15 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .implementation-business-audit {
+    grid-template-columns: 1fr;
+  }
+
+  .implementation-business-audit .assessment-step-actions,
+  .implementation-business-audit .assessment-step-actions .button {
+    width: 100%;
+  }
+
   .opportunity-form {
     grid-template-columns: 1fr;
     border-width: 5px;
@@ -3074,6 +3203,15 @@ button {
 
   .assessment-step-heading {
     grid-template-columns: 1fr;
+  }
+
+  .assessment-step-heading.with-action,
+  .assessment-step-heading.no-step-number.with-action {
+    grid-template-columns: 1fr;
+  }
+
+  .assessment-heading-action {
+    justify-self: start;
   }
 
   .match-card-title-row {

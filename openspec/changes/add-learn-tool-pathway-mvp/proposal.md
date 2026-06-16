@@ -10,7 +10,8 @@ The current Learn page explains Step 2 conceptually, but it does not yet show th
   - Educator
   - Worker
   - Entrepreneur
-- Add selectable follow-up filters for AI starting point, practical goal, tool, learning format, and available time.
+- Add selectable follow-up filters for practical goal, tool, and learning format.
+- Keep AI starting point and available time as internal default fields for plan/report compatibility, not visible MVP steps.
 - Keep most filter steps to three options, with four options for general LLM/tool selection when needed to include ChatGPT, Claude, Gemini, and Microsoft Copilot.
 - Generate a compact LEARN Report from the selected options.
 - Allow the visitor to copy or download the LEARN Report as an internal demo artifact.

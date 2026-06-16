@@ -27,7 +27,7 @@ This change replaces the Learn demo with a product-prototype pathway for common 
 
 ### Use a configuration-driven pathway
 
-Define the Learn pathway as static configuration: groups, starting points, goals, tool options, learning formats, time options, and report content fragments.
+Define the Learn pathway as static configuration: groups, goals, tool options, learning formats, internal default starting point/time values, and report content fragments.
 
 - Rationale: keeps the MVP easy to inspect, modify, and test.
 - Alternative considered: hard-code each step directly into JSX. That would be faster initially but harder to maintain as options change.
