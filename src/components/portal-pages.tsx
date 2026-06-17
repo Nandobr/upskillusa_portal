@@ -20,6 +20,7 @@ import {
   GraduationCap,
   Globe,
   Lightbulb,
+  Loader2,
   Mail,
   Megaphone,
   Network,
@@ -1839,7 +1840,7 @@ function ImplementationLoading({ audience }: { audience: ImplementPlanInput["aud
 
   return (
     <section className="implementation-loading">
-      <Clock size={28} aria-hidden />
+      <Loader2 size={28} aria-hidden />
       <h3>{audience === "business" ? "Building your Personal AI Readiness Report..." : "Building your Task Transformation Report..."}</h3>
       <ul>
         {items.map((item, index) => (
@@ -1872,7 +1873,7 @@ function OpportunityLoading() {
 
   return (
     <section className="implementation-loading">
-      <Clock size={28} aria-hidden />
+      <Loader2 size={28} aria-hidden />
       <h3>Building your Company Opportunity Audit...</h3>
       <ul>
         {items.map((item, index) => (

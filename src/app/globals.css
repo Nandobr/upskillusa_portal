@@ -2270,6 +2270,12 @@ button {
   animation: spin 1.1s linear infinite;
 }
 
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .implementation-loading ul {
   display: grid;
   width: min(100%, 420px);
