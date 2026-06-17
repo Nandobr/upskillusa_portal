@@ -1,4 +1,5 @@
 import type { BusinessOpportunity, BusinessOpportunityReport } from "@/lib/implementation-lab";
+import type { Language } from "@/lib/content";
 
 type ScrapeResult = {
   markdown: string;
@@ -81,6 +82,12 @@ Required outputs:
 Tone: serious, executive, defensible. No hype, no emojis, no marketing language. Every claim should sound like it came from a McKinsey diagnostic, not a sales deck.
 
 Return ONLY valid JSON matching the provided schema.`;
+
+const languageInstruction: Record<Language, string> = {
+  en: "Write all user-facing string values in English.",
+  es: "Write all user-facing string values in Spanish. Keep JSON keys, numbers, IDs, and enum-like values in English.",
+  pt: "Write all user-facing string values in Brazilian Portuguese. Keep JSON keys, numbers, IDs, and enum-like values in English.",
+};
 
 const auditJsonSchema = {
   type: "object",
@@ -170,6 +177,7 @@ export function hasRequiredLiveBusinessAuditKey() {
 export async function createLiveBusinessAudit(args: {
   websiteInput: string;
   email: string;
+  language?: Language;
 }): Promise<LiveBusinessAuditResult> {
   const { url, domain } = normalizeBusinessUrl(args.websiteInput);
   let leadId: string | null = null;
@@ -177,7 +185,13 @@ export async function createLiveBusinessAudit(args: {
   try {
     leadId = await createPendingLead(domain, args.email);
     const [scrape, enrichment] = await Promise.all([scrapeCompany(url), enrichCompany(domain)]);
-    const llmAudit = await runGeminiAudit({ domain, url, scrape, enrichment });
+    const llmAudit = await runGeminiAudit({
+      domain,
+      url,
+      scrape,
+      enrichment,
+      language: args.language ?? "en",
+    });
     const costModel = computeCostModel(enrichment as CompanyEnrichmentLike, llmAudit.pain_categories);
     const audit: AuditReport = { ...llmAudit, cost_model: costModel };
     const report = mapAuditToBusinessReport(audit, domain, args.email);
@@ -275,6 +289,7 @@ async function runGeminiAudit(args: {
   url: string;
   scrape: ScrapeResult | null;
   enrichment: unknown | null;
+  language: Language;
 }): Promise<LlmAuditPart> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
@@ -291,6 +306,9 @@ async function runGeminiAudit(args: {
 
 Schema:
 ${JSON.stringify(auditJsonSchema, null, 2)}
+
+Language:
+${languageInstruction[args.language]}
 
 Generate the AI Readiness diagnostic for this company. Data:
 

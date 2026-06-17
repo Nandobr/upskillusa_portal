@@ -5,13 +5,21 @@ import {
   isValidBusinessEmail,
   normalizeBusinessUrl,
 } from "@/lib/business-audit-services";
+import { defaultLanguage, languages, type Language } from "@/lib/content";
 import { createDemoBusinessReport } from "@/lib/implementation-lab";
+
+function parseLanguage(value: unknown): Language {
+  return typeof value === "string" && languages.includes(value as Language)
+    ? (value as Language)
+    : defaultLanguage;
+}
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as { website?: unknown; email?: unknown };
+    const body = (await request.json()) as { website?: unknown; email?: unknown; language?: unknown };
     const websiteInput = typeof body.website === "string" ? body.website.trim() : "";
     const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+    const language = parseLanguage(body.language);
 
     if (!websiteInput || !websiteInput.includes(".")) {
       return NextResponse.json({ ok: false, error: "Enter a valid company URL." }, { status: 400 });
@@ -33,7 +41,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const result = await createLiveBusinessAudit({ websiteInput, email });
+    const result = await createLiveBusinessAudit({ websiteInput, email, language });
 
     return NextResponse.json({
       ok: true,

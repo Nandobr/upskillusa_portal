@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit",
     "build": "next build",
     "data:update:bls-oews": "python3 scripts/update_bls_oews.py",
+    "localization:test": "node scripts/check_localization.mjs",
     "services:test": "node scripts/test_services.mjs"
   },
   "dependencies": {

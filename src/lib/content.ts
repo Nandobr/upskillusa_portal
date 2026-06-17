@@ -1,3 +1,4 @@
+// "pt" represents Brazilian Portuguese (pt-BR) in the MVP language selector.
 export const languages = ["en", "es", "pt"] as const;
 
 export type Language = (typeof languages)[number];

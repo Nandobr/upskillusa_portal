@@ -42,16 +42,18 @@ import { IkigaiAssessment } from "@/components/ikigai-assessment";
 import { usePortalContent } from "@/components/language-provider";
 import { mergeWithDefaults, usePlanDraft } from "@/components/plan-provider";
 import { SegmentedProgress } from "@/components/segmented-progress";
+import { implementationLabCopy, type ImplementationLabCopy } from "@/lib/implementation-lab-copy";
 import {
   defaultDraft,
   generateSeminarResult,
   generateUpgradePlan,
   generateLearnReport,
+  getLearnFormatOptions,
+  getLearnGoalsByGroup,
+  getLearnGroupOptions,
+  getLearnReportCopy,
   getLearnToolOptions,
   getPlanCopy,
-  learnFormatOptions,
-  learnGoalsByGroup,
-  learnGroupOptions,
   learnReportToText,
   planToText,
   workCategories,
@@ -474,17 +476,122 @@ function DemoNotes({ demo }: { demo: { commentsLabel?: string; notes?: string[];
   );
 }
 
+const learnDemoCopy: Record<
+  Language,
+  {
+    resetConfirm: string;
+    startOver: string;
+    saved: string;
+    copied: string;
+    pdfOpened: string;
+    pdfTitle: string;
+    saveComplete: string;
+    steps: {
+      groupEyebrow: string;
+      groupTitle: string;
+      goalEyebrow: string;
+      goalTitle: string;
+      toolEyebrow: string;
+      toolTitle: string;
+      formatEyebrow: string;
+      formatTitle: string;
+    };
+    actions: {
+      copyReport: string;
+      downloadPdf: string;
+      saveToPlan: string;
+    };
+  }
+> = {
+  en: {
+    resetConfirm: "Start the LEARN pathway over? This will clear your current LEARN selections and saved report.",
+    startOver: "Start over",
+    saved: "LEARN Report saved to your AI-Ready Action Plan.",
+    copied: "LEARN Report copied.",
+    pdfOpened: "LEARN Report PDF dialog opened.",
+    pdfTitle: "UpSkill USA LEARN Report",
+    saveComplete: "Saved. Your LEARN Report is complete; you can continue when ready.",
+    steps: {
+      groupEyebrow: "Who is learning?",
+      groupTitle: "Choose your group",
+      goalEyebrow: "Practical goal",
+      goalTitle: "What do you want AI to help you do?",
+      toolEyebrow: "Tool",
+      toolTitle: "Choose the AI tool you want to learn",
+      formatEyebrow: "Learning format",
+      formatTitle: "How do you want to learn?",
+    },
+    actions: {
+      copyReport: "Copy report",
+      downloadPdf: "Download PDF",
+      saveToPlan: "Save to AI-Ready Action Plan",
+    },
+  },
+  es: {
+    resetConfirm: "¿Empezar de nuevo la ruta LEARN? Esto borrará tus selecciones actuales y el reporte guardado.",
+    startOver: "Empezar de nuevo",
+    saved: "Reporte LEARN guardado en tu Plan de acción listo para IA.",
+    copied: "Reporte LEARN copiado.",
+    pdfOpened: "Diálogo de PDF del reporte LEARN abierto.",
+    pdfTitle: "Reporte LEARN de UpSkill USA",
+    saveComplete: "Guardado. Tu reporte LEARN está completo; puedes continuar cuando estés listo.",
+    steps: {
+      groupEyebrow: "¿Quién aprende?",
+      groupTitle: "Elige tu grupo",
+      goalEyebrow: "Meta práctica",
+      goalTitle: "¿En qué quieres que la IA te ayude?",
+      toolEyebrow: "Herramienta",
+      toolTitle: "Elige la herramienta de IA que quieres aprender",
+      formatEyebrow: "Formato de aprendizaje",
+      formatTitle: "¿Cómo quieres aprender?",
+    },
+    actions: {
+      copyReport: "Copiar reporte",
+      downloadPdf: "Descargar PDF",
+      saveToPlan: "Guardar en el Plan de acción listo para IA",
+    },
+  },
+  pt: {
+    resetConfirm: "Começar a trilha LEARN de novo? Isso limpará suas seleções atuais e o relatório salvo.",
+    startOver: "Começar de novo",
+    saved: "Relatório LEARN salvo no seu Plano de ação pronto para IA.",
+    copied: "Relatório LEARN copiado.",
+    pdfOpened: "Diálogo de PDF do relatório LEARN aberto.",
+    pdfTitle: "Relatório LEARN da UpSkill USA",
+    saveComplete: "Salvo. Seu relatório LEARN está completo; você pode continuar quando estiver pronto.",
+    steps: {
+      groupEyebrow: "Quem está aprendendo?",
+      groupTitle: "Escolha seu grupo",
+      goalEyebrow: "Meta prática",
+      goalTitle: "No que você quer que a IA ajude?",
+      toolEyebrow: "Ferramenta",
+      toolTitle: "Escolha a ferramenta de IA que quer aprender",
+      formatEyebrow: "Formato de aprendizagem",
+      formatTitle: "Como você quer aprender?",
+    },
+    actions: {
+      copyReport: "Copiar relatório",
+      downloadPdf: "Baixar PDF",
+      saveToPlan: "Salvar no Plano de ação pronto para IA",
+    },
+  },
+};
+
 function LearnDemo() {
   const { content, language } = usePortalContent();
   const copy = getPlanCopy(language);
+  const learnCopy = learnDemoCopy[language];
+  const reportCopy = getLearnReportCopy(language);
   const demo = content.pages.learn.demo;
   const { draft, updateLearn, clearLearn } = usePlanDraft();
   const [values, setValues] = useState<Partial<LearnPlanInput>>(() => draft.learn ?? {});
   const [reportStatus, setReportStatus] = useState("");
   const [saved, setSaved] = useState(false);
   const hasLearnProgress = Object.values(values).some(Boolean) || Boolean(draft.learn);
-  const goals = values.group ? learnGoalsByGroup[values.group] : [];
-  const tools = getLearnToolOptions(values.goal);
+  const groupOptions = getLearnGroupOptions(language);
+  const goals = values.group ? getLearnGoalsByGroup(values.group, language) : [];
+  const tools = getLearnToolOptions(values.goal, language);
+  const formatOptions = getLearnFormatOptions(language);
   const completeValues =
     values.group &&
     values.goal &&
@@ -501,8 +608,8 @@ function LearnDemo() {
           nextAction: "",
         }
       : null;
-  const report = completeValues ? generateLearnReport(completeValues) : null;
-  const reportText = report ? learnReportToText(report) : "";
+  const report = completeValues ? generateLearnReport(completeValues, language) : null;
+  const reportText = report ? learnReportToText(report, language) : "";
 
   function updatePathway(nextValues: Partial<LearnPlanInput>) {
     setSaved(false);
@@ -518,7 +625,7 @@ function LearnDemo() {
   }
 
   function confirmResetLearnPathway() {
-    if (window.confirm("Start the LEARN pathway over? This will clear your current LEARN selections and saved report.")) {
+    if (window.confirm(learnCopy.resetConfirm)) {
       resetLearnPathway();
     }
   }
@@ -532,7 +639,7 @@ function LearnDemo() {
       nextAction: report.nextAction,
     });
     setSaved(true);
-    setReportStatus("LEARN Report saved to your AI-Ready Action Plan.");
+    setReportStatus(learnCopy.saved);
   }
 
   function copyReport() {
@@ -545,15 +652,15 @@ function LearnDemo() {
 
     navigator.clipboard
       .writeText(reportText)
-      .then(() => setReportStatus("LEARN Report copied."))
+      .then(() => setReportStatus(learnCopy.copied))
       .catch(() => setReportStatus(copy.feedback.copyFailed));
   }
 
   function downloadReport() {
     if (!report) return;
 
-    printReportAsPdf("UpSkill USA LEARN Report");
-    setReportStatus("LEARN Report PDF dialog opened.");
+    printReportAsPdf(learnCopy.pdfTitle);
+    setReportStatus(learnCopy.pdfOpened);
   }
 
   return (
@@ -566,7 +673,7 @@ function LearnDemo() {
             type="button"
             onClick={confirmResetLearnPathway}
           >
-            Start over
+            {learnCopy.startOver}
           </button>
         ) : null}
       </div>
@@ -576,13 +683,13 @@ function LearnDemo() {
         <div className="assessment-step-heading">
           <span className="assessment-step-number">1</span>
           <div>
-            <span className="assessment-step-eyebrow">Who is learning?</span>
-            <h3>Choose your group</h3>
+            <span className="assessment-step-eyebrow">{learnCopy.steps.groupEyebrow}</span>
+            <h3>{learnCopy.steps.groupTitle}</h3>
           </div>
         </div>
         <SegmentedProgress current={1} total={4} />
         <div className="assessment-pathways learn-option-grid four">
-          {learnGroupOptions.map((option) => (
+          {groupOptions.map((option) => (
             <button
               aria-pressed={values.group === option.id}
               className={`assessment-pathway-card ${values.group === option.id ? "selected" : ""}`}
@@ -602,8 +709,8 @@ function LearnDemo() {
           <div className="assessment-step-heading">
             <span className="assessment-step-number">2</span>
             <div>
-              <span className="assessment-step-eyebrow">Practical goal</span>
-              <h3>What do you want AI to help you do?</h3>
+              <span className="assessment-step-eyebrow">{learnCopy.steps.goalEyebrow}</span>
+              <h3>{learnCopy.steps.goalTitle}</h3>
           </div>
         </div>
           <SegmentedProgress current={2} total={4} />
@@ -634,8 +741,8 @@ function LearnDemo() {
           <div className="assessment-step-heading">
             <span className="assessment-step-number">3</span>
             <div>
-              <span className="assessment-step-eyebrow">Tool</span>
-              <h3>Choose the AI tool you want to learn</h3>
+              <span className="assessment-step-eyebrow">{learnCopy.steps.toolEyebrow}</span>
+              <h3>{learnCopy.steps.toolTitle}</h3>
           </div>
         </div>
           <SegmentedProgress current={3} total={4} />
@@ -667,13 +774,13 @@ function LearnDemo() {
           <div className="assessment-step-heading">
             <span className="assessment-step-number">4</span>
             <div>
-              <span className="assessment-step-eyebrow">Learning format</span>
-              <h3>How do you want to learn?</h3>
+              <span className="assessment-step-eyebrow">{learnCopy.steps.formatEyebrow}</span>
+              <h3>{learnCopy.steps.formatTitle}</h3>
           </div>
         </div>
           <SegmentedProgress current={4} total={4} />
           <div className="assessment-chip-grid learn-option-grid three">
-            {learnFormatOptions.map((option) => (
+            {formatOptions.map((option) => (
               <button
                 aria-pressed={values.format === option.id}
                 className={`assessment-chip ${values.format === option.id ? "selected" : ""}`}
@@ -702,7 +809,7 @@ function LearnDemo() {
           <h3>{report.title}</h3>
           <div className="learn-report-grid">
             <div>
-              <h4>Selected Path</h4>
+              <h4>{reportCopy.selectedPath}</h4>
               <ul>
                 {report.path.map((item) => (
                   <li key={item}>{item}</li>
@@ -710,11 +817,11 @@ function LearnDemo() {
               </ul>
             </div>
             <div>
-              <h4>AI Learning Profile</h4>
+              <h4>{reportCopy.profile}</h4>
               <p>{report.profileSummary}</p>
             </div>
             <div>
-              <h4>Recommended Learning Path</h4>
+              <h4>{reportCopy.recommendedPath}</h4>
               <ul>
                 {report.learningPath.map((item) => (
                   <li key={item}>{item}</li>
@@ -722,7 +829,7 @@ function LearnDemo() {
               </ul>
             </div>
             <div>
-              <h4>Tool Starter Guide</h4>
+              <h4>{reportCopy.starterGuide}</h4>
               <ul>
                 {report.toolStarterGuide.map((item) => (
                   <li key={item}>{item}</li>
@@ -731,29 +838,29 @@ function LearnDemo() {
             </div>
           </div>
           <div className="learn-report-prompt">
-            <h4>Practice Prompt</h4>
+            <h4>{reportCopy.practicePrompt}</h4>
             <p>{report.practicePrompt}</p>
           </div>
           <div className="learn-report-next">
-            <h4>Next Action</h4>
+            <h4>{reportCopy.nextAction}</h4>
             <p>{report.nextAction}</p>
           </div>
           <div className="plan-actions learn-report-actions">
             <button className="button ghost" type="button" onClick={copyReport}>
-              Copy report
+              {learnCopy.actions.copyReport}
               <Clipboard size={16} aria-hidden />
             </button>
             <button className="button ghost" type="button" onClick={downloadReport}>
-              Download PDF
+              {learnCopy.actions.downloadPdf}
               <Download size={16} aria-hidden />
             </button>
             <button className="button blue" type="button" onClick={saveReport}>
-              Save to AI-Ready Action Plan
+              {learnCopy.actions.saveToPlan}
               <CheckCircle2 size={16} aria-hidden />
             </button>
           </div>
           {reportStatus ? <p className="copy-status">{reportStatus}</p> : null}
-          {saved ? <p className="demo-next-step">Saved. Your LEARN Report is complete; you can continue when ready.</p> : null}
+          {saved ? <p className="demo-next-step">{learnCopy.saveComplete}</p> : null}
         </section>
       ) : null}
       <DemoNotes demo={demo} />
@@ -1283,7 +1390,7 @@ function AdaptDemo() {
               <Clipboard size={16} aria-hidden />
             </button>
             <button className="button ghost" type="button" onClick={downloadResult}>
-              Download PDF
+              {builderCopy.downloadResult}
               <Download size={16} aria-hidden />
             </button>
             <button className="button blue" type="button" onClick={saveResult}>
@@ -1309,6 +1416,7 @@ function AdaptDemo() {
 function ImplementDemo() {
   const { content, language } = usePortalContent();
   const copy = getPlanCopy(language);
+  const labCopy = implementationLabCopy[language];
   const demo = content.pages.implement.demo;
   const { draft, updateImplement, clearImplement } = usePlanDraft();
   const [values, setValues] = useState<ImplementPlanInput>(
@@ -1365,7 +1473,7 @@ function ImplementDemo() {
   function confirmResetImplementationLab() {
     if (
       window.confirm(
-        "Start the AI Implementation Lab over? This will clear your current Step 4 selections and saved report.",
+        labCopy.resetConfirm,
       )
     ) {
       resetImplementationLab();
@@ -1426,7 +1534,7 @@ function ImplementDemo() {
 
   async function analyzeBusiness() {
     if (!canSubmitBusinessAudit) {
-      setError(canSubmitCompanyUrl ? "Enter a valid contact email." : "Enter a valid company URL.");
+      setError(canSubmitCompanyUrl ? labCopy.errors.email : labCopy.errors.companyUrl);
       return;
     }
 
@@ -1438,7 +1546,11 @@ function ImplementDemo() {
       const response = await fetch("/api/analyze-business-opportunity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ website: normalizedCompanyUrl, email: normalizedEmail }),
+        body: JSON.stringify({
+          website: normalizedCompanyUrl,
+          email: normalizedEmail,
+          language,
+        }),
       });
       const payload = (await response.json()) as {
         ok: boolean;
@@ -1447,7 +1559,7 @@ function ImplementDemo() {
       };
 
       if (!response.ok || !payload.ok || !payload.report) {
-        throw new Error(payload.error || "Could not generate the opportunity audit.");
+        throw new Error(payload.error || labCopy.errors.opportunityAudit);
       }
 
       updateValues({
@@ -1458,7 +1570,7 @@ function ImplementDemo() {
         selectedPilot: undefined,
       });
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Could not generate audit.");
+      setError(caughtError instanceof Error ? caughtError.message : labCopy.errors.audit);
     } finally {
       setLoadingPath(null);
     }
@@ -1480,6 +1592,7 @@ function ImplementDemo() {
           workArea: values.workArea,
           tasks: values.selectedTasks,
           customTasks: values.customTasks,
+          language,
         }),
       });
       const payload = (await response.json()) as {
@@ -1489,7 +1602,7 @@ function ImplementDemo() {
       };
 
       if (!response.ok || !payload.ok || !payload.report) {
-        throw new Error(payload.error || "Could not generate the Task Transformation Report.");
+        throw new Error(payload.error || labCopy.errors.taskReport);
       }
 
       updateValues({
@@ -1498,7 +1611,7 @@ function ImplementDemo() {
         selectedPilot: undefined,
       });
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Could not generate report.");
+      setError(caughtError instanceof Error ? caughtError.message : labCopy.errors.report);
     } finally {
       setLoadingPath(null);
     }
@@ -1526,7 +1639,7 @@ function ImplementDemo() {
 
   function saveImplementation() {
     if (!values.report || !values.selectedPilot) {
-      setError("Choose a first pilot before saving Step 4.");
+      setError(labCopy.errors.choosePilot);
       return;
     }
 
@@ -1539,7 +1652,7 @@ function ImplementDemo() {
     };
     setValues(savedValues);
     updateImplement(savedValues);
-    setSaveStatus("Saved to your AI-Ready Action Plan.");
+    setSaveStatus(labCopy.saved);
   }
 
   const selectedArea = values.workArea ? getWorkArea(values.workArea) : undefined;
@@ -1556,21 +1669,21 @@ function ImplementDemo() {
             type="button"
             onClick={confirmResetImplementationLab}
           >
-            Start over
+            {labCopy.startOver}
           </button>
         ) : null}
       </div>
-      <h2>Build My First AI Pilot</h2>
+      <h2>{labCopy.title}</h2>
       <p className="assessment-step-subtitle">
-        Choose the path that fits you. Leaders audit company opportunity; employees see how daily tasks transform.
+        {labCopy.subtitle}
       </p>
 
       <section className={`assessment-step-card ${values.audience ? "complete" : ""}`}>
         <div className="assessment-step-heading">
           <span className="assessment-step-number">1</span>
           <div>
-            <span className="assessment-step-eyebrow">Audience</span>
-            <h3>Who are you exploring AI for?</h3>
+            <span className="assessment-step-eyebrow">{labCopy.audience.eyebrow}</span>
+            <h3>{labCopy.audience.title}</h3>
           </div>
         </div>
         <SegmentedProgress current={1} total={3} />
@@ -1581,8 +1694,8 @@ function ImplementDemo() {
             type="button"
             onClick={() => chooseAudience("business")}
           >
-            <strong>Business Leader</strong>
-            <p>Audit your company website, capture contact email, and choose a first AI pilot.</p>
+            <strong>{labCopy.audience.businessLabel}</strong>
+            <p>{labCopy.audience.businessDescription}</p>
           </button>
           <button
             aria-pressed={values.audience === "employee"}
@@ -1590,8 +1703,8 @@ function ImplementDemo() {
             type="button"
             onClick={() => chooseAudience("employee")}
           >
-            <strong>Employee / Worker</strong>
-            <p>See which daily tasks AI can automate, augment, or leave human-owned.</p>
+            <strong>{labCopy.audience.employeeLabel}</strong>
+            <p>{labCopy.audience.employeeDescription}</p>
           </button>
         </div>
       </section>
@@ -1601,8 +1714,8 @@ function ImplementDemo() {
           <div className="assessment-step-heading">
             <span className="assessment-step-number">2</span>
             <div>
-              <span className="assessment-step-eyebrow">Company audit</span>
-              <h3>Start with your company website</h3>
+              <span className="assessment-step-eyebrow">{labCopy.business.eyebrow}</span>
+              <h3>{labCopy.business.title}</h3>
           </div>
         </div>
           <SegmentedProgress current={2} total={3} />
@@ -1615,14 +1728,14 @@ function ImplementDemo() {
           >
             <div className="implementation-business-audit-fields">
               <label className="field">
-                <span>Company URL</span>
+                <span>{labCopy.business.companyUrl}</span>
                 <span className="opportunity-input-shell">
                   <Globe size={24} strokeWidth={1.9} aria-hidden />
                   <input
                     autoComplete="url"
                     inputMode="url"
                     value={values.companyUrl}
-                    placeholder="yourcompany.com"
+                    placeholder={labCopy.business.companyPlaceholder}
                     onChange={(event) =>
                       updateValues({
                         companyUrl: event.target.value,
@@ -1634,14 +1747,14 @@ function ImplementDemo() {
                 </span>
               </label>
               <label className="field">
-                <span>Contact email</span>
+                <span>{labCopy.business.contactEmail}</span>
                 <span className="opportunity-input-shell">
                   <Mail size={22} strokeWidth={1.9} aria-hidden />
                   <input
                     autoComplete="email"
                     inputMode="email"
                     value={values.email}
-                    placeholder="name@company.com"
+                    placeholder={labCopy.business.emailPlaceholder}
                     onChange={(event) =>
                       updateValues({
                         email: event.target.value,
@@ -1659,7 +1772,7 @@ function ImplementDemo() {
                 type="submit"
                 disabled={!canSubmitBusinessAudit || loadingPath === "business"}
               >
-                {loadingPath === "business" ? "Analyzing..." : "Generate AI Opportunity Report"}
+                {loadingPath === "business" ? labCopy.business.analyzing : labCopy.business.generate}
                 <ArrowRight size={16} aria-hidden />
               </button>
             </div>
@@ -1673,8 +1786,8 @@ function ImplementDemo() {
             <div className="assessment-step-heading">
               <span className="assessment-step-number">2</span>
               <div>
-                <span className="assessment-step-eyebrow">Work area</span>
-                <h3>Choose where your work sits</h3>
+                <span className="assessment-step-eyebrow">{labCopy.employee.areaEyebrow}</span>
+                <h3>{labCopy.employee.areaTitle}</h3>
               </div>
             </div>
             <SegmentedProgress current={2} total={3} />
@@ -1709,11 +1822,11 @@ function ImplementDemo() {
                   <span className="assessment-step-eyebrow">
                     {selectedArea.category} · {selectedArea.skills.length} skills
                   </span>
-                  <h3>Select what fills your calendar</h3>
+                  <h3>{labCopy.employee.taskTitle}</h3>
                 </div>
                 <span className="implementation-selected-count">
                   <span aria-hidden />
-                  {taskCount} tasks selected
+                  {labCopy.employee.selected(taskCount)}
                 </span>
               </div>
               <SegmentedProgress current={3} total={3} />
@@ -1747,10 +1860,10 @@ function ImplementDemo() {
               </div>
               <div className="implementation-custom-task">
                 <label className="field">
-                  <span>Add a task you do not see</span>
+                  <span>{labCopy.employee.addTask}</span>
                   <input
                     value={customTaskDraft}
-                    placeholder="Type a task and press Add"
+                    placeholder={labCopy.employee.taskPlaceholder}
                     onChange={(event) => setCustomTaskDraft(event.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
@@ -1766,7 +1879,7 @@ function ImplementDemo() {
                   disabled={!customTaskDraft.trim()}
                   onClick={addCustomTask}
                 >
-                  Add
+                  {labCopy.employee.add}
                 </button>
               </div>
               <div className="assessment-step-actions">
@@ -1776,7 +1889,7 @@ function ImplementDemo() {
                   disabled={!canAnalyzeEmployee || loadingPath === "employee"}
                   onClick={analyzeEmployee}
                 >
-                  {loadingPath === "employee" ? "Analyzing..." : "Generate Task Transformation Report"}
+                  {loadingPath === "employee" ? labCopy.employee.analyzing : labCopy.employee.generate}
                   <ArrowRight size={16} aria-hidden />
                 </button>
               </div>
@@ -1785,13 +1898,14 @@ function ImplementDemo() {
         </>
       ) : null}
 
-      {loadingPath === "business" ? <OpportunityLoading /> : null}
-      {loadingPath === "employee" ? <ImplementationLoading audience="employee" /> : null}
+      {loadingPath === "business" ? <OpportunityLoading copy={labCopy} /> : null}
+      {loadingPath === "employee" ? <ImplementationLoading audience="employee" copy={labCopy} /> : null}
       {error ? <ImplementationError message={error} /> : null}
 
       {businessReport ? (
         <BusinessOpportunityReportView
           report={businessReport}
+          copy={labCopy}
           selectedPilot={values.selectedPilot}
           onSelect={selectBusinessPilot}
         />
@@ -1801,6 +1915,7 @@ function ImplementDemo() {
         <EmployeeTransformationReportView
           report={employeeReport}
           audience={values.audience ?? "employee"}
+          copy={labCopy}
           selectedPilot={values.selectedPilot}
           onSelect={selectEmployeePilot}
           onRegenerate={analyzeEmployee}
@@ -1810,6 +1925,7 @@ function ImplementDemo() {
       {values.selectedPilot ? (
         <ImplementationGuardrails
           copy={copy}
+          labCopy={labCopy}
           values={values}
           saveStatus={saveStatus}
           onChange={updateValues}
@@ -1822,26 +1938,19 @@ function ImplementDemo() {
   );
 }
 
-function ImplementationLoading({ audience }: { audience: ImplementPlanInput["audience"] }) {
-  const items =
-    audience === "business"
-      ? [
-          "Mapping selected responsibilities...",
-          "Classifying Automate / Augment / Own...",
-          "Estimating personal AI readiness...",
-          "Preparing first pilot options...",
-        ]
-      : [
-          "Mapping selected work tasks...",
-          "Classifying Automate / Augment / Own...",
-          "Calculating monthly hours saved...",
-          "Preparing first pilot options...",
-        ];
+function ImplementationLoading({
+  audience,
+  copy,
+}: {
+  audience: ImplementPlanInput["audience"];
+  copy: ImplementationLabCopy;
+}) {
+  const items = audience === "business" ? copy.loading.businessItems : copy.loading.employeeItems;
 
   return (
     <section className="implementation-loading">
       <Loader2 size={28} aria-hidden />
-      <h3>{audience === "business" ? "Building your Personal AI Readiness Report..." : "Building your Task Transformation Report..."}</h3>
+      <h3>{audience === "business" ? copy.loading.businessTitle : copy.loading.employeeTitle}</h3>
       <ul>
         {items.map((item, index) => (
           <li key={item}>
@@ -1863,20 +1972,13 @@ function ImplementationError({ message }: { message: string }) {
   );
 }
 
-function OpportunityLoading() {
-  const items = [
-    "Scanning your website...",
-    "Enriching company context...",
-    "Calculating addressable workforce...",
-    "Modeling first opportunity areas...",
-  ];
-
+function OpportunityLoading({ copy }: { copy: ImplementationLabCopy }) {
   return (
     <section className="implementation-loading">
       <Loader2 size={28} aria-hidden />
-      <h3>Building your Company Opportunity Audit...</h3>
+      <h3>{copy.loading.opportunityTitle}</h3>
       <ul>
-        {items.map((item, index) => (
+        {copy.loading.opportunityItems.map((item, index) => (
           <li key={item}>
             <CheckCircle2 size={16} aria-hidden />
             <span>{index + 1}. {item}</span>
@@ -1889,32 +1991,35 @@ function OpportunityLoading() {
 
 function BusinessOpportunityReportView({
   report,
+  copy,
   selectedPilot,
   onSelect,
 }: {
   report: BusinessOpportunityReport;
+  copy: ImplementationLabCopy;
   selectedPilot?: ImplementPilot;
   onSelect: (opportunity: BusinessOpportunity) => void;
 }) {
+  const reportCopy = copy.businessReport;
   const reportText = businessReportToText(report);
 
   return (
     <section className="implementation-report business-audit-report printable-report">
       <div className="business-audit-header">
         <div>
-          <span className="implementation-report-eyebrow">AI Readiness Diagnostic</span>
+          <span className="implementation-report-eyebrow">{reportCopy.eyebrow}</span>
           <h3>{report.companyName}</h3>
           <p>{report.website} · {report.industry} · {report.sizeEstimate}</p>
         </div>
         <div className="implementation-report-actions">
-          <span className="implementation-report-pill">{report.isDemo ? "Sample data" : "Live audit"}</span>
-          <ReportActionButton icon={Clipboard} label="Copy" onClick={() => copyReportText(reportText)} />
+          <span className="implementation-report-pill">{report.isDemo ? copy.actions.sampleData : copy.actions.liveAudit}</span>
+          <ReportActionButton icon={Clipboard} label={copy.actions.copy} onClick={() => copyReportText(reportText)} />
           <ReportActionButton
             icon={Download}
-            label="Download PDF"
+            label={copy.actions.downloadPdf}
             onClick={() => printReportAsPdf(`${report.companyName} AI Opportunity Report`)}
           />
-          <ReportActionButton icon={Printer} label="Print / Save PDF" onClick={() => printReportAsPdf(`${report.companyName} AI Opportunity Report`)} />
+          <ReportActionButton icon={Printer} label={copy.actions.printSavePdf} onClick={() => printReportAsPdf(`${report.companyName} AI Opportunity Report`)} />
         </div>
       </div>
       {report.demoReason ? <p className="implementation-demo-note">{report.demoReason}</p> : null}
@@ -1923,25 +2028,23 @@ function BusinessOpportunityReportView({
         <div className="business-audit-value-content">
           <span>
             <TrendingUp size={15} aria-hidden />
-            Annual Cost of Inaction
+            {reportCopy.annualCost}
           </span>
           <strong>{formatShortUsd(report.annualValueAtRisk)}</strong>
-          <p>
-            in fully loaded labor value locked inside repeatable, addressable work at {report.companyName}.
-          </p>
+          <p>{reportCopy.laborValue(report.companyName)}</p>
           <div className="business-audit-dark-stats">
-            <BusinessDarkStat icon={Users} label="Employees" value={formatLabNumber(report.employees)} hint={report.sizeEstimate} />
+            <BusinessDarkStat icon={Users} label={reportCopy.employees} value={formatLabNumber(report.employees)} hint={report.sizeEstimate} />
             <BusinessDarkStat
               icon={Users}
-              label="Addressable roles"
+              label={reportCopy.addressableRoles}
               value={formatLabNumber(report.addressableRoles)}
               hint={report.industry}
             />
             <BusinessDarkStat
               icon={Clock}
-              label="Recoverable / week"
-              value={`${formatLabNumber(report.weeklyHoursReclaimable)} hrs`}
-              hint={`${formatLabNumber(report.annualHoursReclaimable)} hrs/year`}
+              label={reportCopy.recoverableWeek}
+              value={`${formatLabNumber(report.weeklyHoursReclaimable)} ${reportCopy.hoursShort}`}
+              hint={`${formatLabNumber(report.annualHoursReclaimable)} ${reportCopy.hoursYear}`}
             />
           </div>
         </div>
@@ -1951,28 +2054,28 @@ function BusinessOpportunityReportView({
         <div>
           <span>
             <AlertCircle size={15} aria-hidden />
-            5-Year Competitive Gap
+            {reportCopy.gap}
           </span>
-          <p>Cumulative value lost if competitors deploy AI before you do.</p>
+          <p>{reportCopy.gapDescription}</p>
         </div>
         <strong>{formatShortUsd(report.fiveYearCostOfInaction)}</strong>
       </div>
 
       <div className="business-audit-summary">
         <div className="business-audit-score">
-          <span>Workforce Score</span>
+          <span>{reportCopy.workforceScore}</span>
           <strong>{Math.round(report.opportunityScore)}<small>/100</small></strong>
         </div>
         <div>
-          <h4>Executive Summary</h4>
+          <h4>{reportCopy.executiveSummary}</h4>
           <p>{report.executiveSummary}</p>
           <p className="implementation-muted">{report.scoreRationale}</p>
         </div>
       </div>
 
       <div className="business-audit-opportunities">
-        <h4>What&apos;s hiding in your operations</h4>
-        <p className="implementation-muted">High-volume manual work surfaced from company signals and common workflow patterns.</p>
+        <h4>{reportCopy.hiddenTitle}</h4>
+        <p className="implementation-muted">{reportCopy.hiddenSubtitle}</p>
         <div className="business-opportunity-list">
           {report.opportunities.map((opportunity) => {
             const selected = selectedPilot?.id === opportunity.id;
@@ -1990,8 +2093,8 @@ function BusinessOpportunityReportView({
                   <small>{opportunity.symptom}</small>
                 </div>
                 <em>
-                  <span>Trapped</span>
-                  ~{formatLabNumber(opportunity.estimatedAnnualHours)} hrs/year
+                  <span>{reportCopy.trapped}</span>
+                  ~{formatLabNumber(opportunity.estimatedAnnualHours)} {reportCopy.hoursYear}
                 </em>
               </button>
             );
@@ -2000,8 +2103,7 @@ function BusinessOpportunityReportView({
       </div>
 
       <div className="business-audit-methodology">
-        <b>Methodology:</b> directional figures combine company context, common addressable workflow patterns,
-        and conservative labor-value assumptions. Use this as a first-pilot planning estimate.
+        {reportCopy.methodology}
       </div>
     </section>
   );
@@ -2010,17 +2112,20 @@ function BusinessOpportunityReportView({
 function EmployeeTransformationReportView({
   report,
   audience,
+  copy,
   selectedPilot,
   onSelect,
   onRegenerate,
 }: {
   report: EmployeeTransformationReport;
   audience: ImplementAudience;
+  copy: ImplementationLabCopy;
   selectedPilot?: ImplementPilot;
   onSelect: (task: ImplementationTask) => void;
   onRegenerate: () => void;
 }) {
   const isLeader = audience === "business";
+  const reportCopy = copy.employeeReport;
   const sortedTasks = [...report.tasks].sort((a, b) => {
     const order: Record<ImplementationTask["bucket"], number> = {
       AUTOMATE: 0,
@@ -2047,24 +2152,22 @@ function EmployeeTransformationReportView({
           </span>
           <div>
             <span className="implementation-report-eyebrow">
-              {isLeader ? "Personal AI Readiness Report" : "AI-Ready Action Plan"}
+              {isLeader ? reportCopy.personalTitle : reportCopy.actionPlanTitle}
             </span>
             <h3>{report.workArea}</h3>
             <p>
-              {report.skillsAnalyzed} skills analyzed · {report.tasks.length}{" "}
-              {isLeader ? "responsibilities generated" : "tasks generated"} · readiness band:{" "}
-              <b>{readinessBand}</b>
+              {reportCopy.skillsSummary(report.skillsAnalyzed, report.tasks.length, isLeader, readinessBand)}
             </p>
           </div>
         </div>
         <div className="implementation-report-actions">
-          {report.isDemo || report.demoReason ? <span className="implementation-report-pill">Sample data</span> : null}
-          <ReportActionButton icon={RotateCw} label="Regenerate" onClick={onRegenerate} />
-          <ReportActionButton icon={Clipboard} label="Copy" onClick={() => copyReportText(reportText)} />
+          {report.isDemo || report.demoReason ? <span className="implementation-report-pill">{copy.actions.sampleData}</span> : null}
+          <ReportActionButton icon={RotateCw} label={copy.actions.regenerate} onClick={onRegenerate} />
+          <ReportActionButton icon={Clipboard} label={copy.actions.copy} onClick={() => copyReportText(reportText)} />
           <ReportActionButton
             icon={Download}
-            label="Download PDF"
-            onClick={() => printReportAsPdf(`${report.workArea} AI-Ready Action Plan`)}
+            label={copy.actions.downloadPdf}
+            onClick={() => printReportAsPdf(reportCopy.pdfTitle(report.workArea))}
           />
         </div>
       </div>
@@ -2072,44 +2175,43 @@ function EmployeeTransformationReportView({
 
       <div className="employee-metric-grid">
         <EmployeeMetricCard
-          label="Hours recovered / week"
+          label={reportCopy.hoursRecovered}
           value={weeklyHours.toFixed(1)}
-          sub="From automated and augmented work"
+          sub={reportCopy.hoursRecoveredSub}
           tone="green"
         />
         <EmployeeMetricCard
-          label="AI readiness score"
+          label={reportCopy.readinessScore}
           value={`${readinessScore}/100`}
-          sub="Task-level confidence"
+          sub={reportCopy.readinessSub}
           tone="blue"
         />
         <EmployeeMetricCard
-          label="Recommended pathway"
-          value="3 tracks"
-          sub="Personalized"
+          label={reportCopy.pathway}
+          value={reportCopy.pathwayValue}
+          sub={reportCopy.pathwaySub}
           tone="slate"
         />
       </div>
 
       <div className="employee-bucket-row">
-        <BucketCount label="Automate" count={report.summary.automate_count} bucket="AUTOMATE" />
-        <BucketCount label="Augment" count={report.summary.augment_count} bucket="AUGMENT" />
-        <BucketCount label="OWN" count={report.summary.own_count} bucket="OWN" />
+        <BucketCount label={reportCopy.automate} count={report.summary.automate_count} bucket="AUTOMATE" />
+        <BucketCount label={reportCopy.augment} count={report.summary.augment_count} bucket="AUGMENT" />
+        <BucketCount label={reportCopy.own} count={report.summary.own_count} bucket="OWN" />
       </div>
 
       <div className="employee-report-body">
         <section>
-          <h4>Task-by-task breakdown</h4>
+          <h4>{reportCopy.breakdown}</h4>
           <p className="implementation-muted">
-            {isLeader
-              ? "Hours per month across leadership work, before vs. after AI deployment."
-              : "Hours per month, before vs. after AI deployment."}
+            {isLeader ? reportCopy.breakdownLeader : reportCopy.breakdownEmployee}
           </p>
           <div className="implementation-task-list">
             {sortedTasks.map((task) => (
               <ImplementationTaskRow
                 key={task.task_id}
                 task={task}
+                aiDoesLabel={reportCopy.aiDoes}
                 selected={selectedPilot?.id === `task-${task.task_id}`}
                 onSelect={onSelect}
               />
@@ -2117,7 +2219,7 @@ function EmployeeTransformationReportView({
           </div>
         </section>
         <section>
-          <h4>Recommended AI tools</h4>
+          <h4>{reportCopy.tools}</h4>
           <div className="employee-tool-list">
             {report.tools.map((tool) => (
               <span key={tool}>
@@ -2129,43 +2231,36 @@ function EmployeeTransformationReportView({
         </section>
       </div>
       <div className="implementation-workflow-cta">
-        <span className="implementation-workflow-cta-label">Your skill roadmap is ready</span>
-        <h4>{isLeader ? "Turn this into your leadership AI workflow." : "Turn this into your daily AI workflow."}</h4>
+        <span className="implementation-workflow-cta-label">{reportCopy.ctaLabel}</span>
+        <h4>{isLeader ? reportCopy.ctaTitleLeader : reportCopy.ctaTitleEmployee}</h4>
         <ul>
           {firstPilotTask ? (
             <li>
               <CheckCircle2 size={16} aria-hidden />
               <span>
-                Customize <b>{firstPilotTask.task_name}</b>
+                {reportCopy.customizePrefix} <b>{firstPilotTask.task_name}</b>
                 {moreAutomateCount > 0 ? (
                   <>
-                    {" "}(and <b>{moreAutomateCount}</b> more)
+                    {" "}{reportCopy.more(moreAutomateCount)}
                   </>
                 ) : null}{" "}
-                inside your first AI pilot
               </span>
             </li>
           ) : null}
           <li>
             <CheckCircle2 size={16} aria-hidden />
-            <span>
-              Reclaim <b>{report.summary.estimated_monthly_hours_saved.toFixed(0)}h/month</b> - that is{" "}
-              <b>{report.summary.estimated_fte_equivalent_saved.toFixed(2)} FTE</b> of your week back
-            </span>
+            <span>{reportCopy.reclaim(report.summary.estimated_monthly_hours_saved.toFixed(0), report.summary.estimated_fte_equivalent_saved.toFixed(2))}</span>
           </li>
           {report.summary.own_count > 0 ? (
             <li>
               <CheckCircle2 size={16} aria-hidden />
-              <span>
-                Keep owning the <b>{report.summary.own_count}</b>{" "}
-                {isLeader ? "responsibilities only you can lead" : "tasks only you can do"}
-              </span>
+              <span>{reportCopy.keepOwning(report.summary.own_count, isLeader)}</span>
             </li>
           ) : null}
         </ul>
         {firstPilotTask ? (
           <button className="button primary" type="button" onClick={() => onSelect(firstPilotTask)}>
-            Use this as my first pilot
+            {reportCopy.usePilot}
             <ArrowRight size={16} aria-hidden />
           </button>
         ) : null}
@@ -2253,10 +2348,12 @@ function BucketCount({
 
 function ImplementationTaskRow({
   task,
+  aiDoesLabel,
   selected,
   onSelect,
 }: {
   task: ImplementationTask;
+  aiDoesLabel: string;
   selected: boolean;
   onSelect: (task: ImplementationTask) => void;
 }) {
@@ -2286,7 +2383,7 @@ function ImplementationTaskRow({
         <span style={{ width: `${progressPct}%` }} />
       </span>
       <p>
-        <b>AI does:</b> {task.ai_action}
+        <b>{aiDoesLabel}</b> {task.ai_action}
       </p>
     </button>
   );
@@ -2414,12 +2511,14 @@ function printReportAsPdf(title: string) {
 
 function ImplementationGuardrails({
   copy,
+  labCopy,
   values,
   saveStatus,
   onChange,
   onSave,
 }: {
   copy: ReturnType<typeof getPlanCopy>;
+  labCopy: ImplementationLabCopy;
   values: ImplementPlanInput;
   saveStatus: string;
   onChange: (patch: Partial<ImplementPlanInput>) => void;
@@ -2433,19 +2532,19 @@ function ImplementationGuardrails({
       <div className="assessment-step-heading">
         <span className="assessment-step-number">4</span>
         <div>
-          <span className="assessment-step-eyebrow">First pilot</span>
-          <h3>Add guardrails and save</h3>
+          <span className="assessment-step-eyebrow">{labCopy.guardrails.eyebrow}</span>
+          <h3>{labCopy.guardrails.title}</h3>
         </div>
       </div>
       <div className="implementation-pilot-card">
         <div>
-          <span className="demo-label">Selected pilot</span>
+          <span className="demo-label">{labCopy.guardrails.selectedPilot}</span>
           <h4>{pilot.label}</h4>
-          <p>{pilot.workflow} · {pilot.hoursPerWeek} hrs/week estimate · threshold {pilot.confidenceThreshold}%</p>
+          <p>{pilot.workflow} · {labCopy.guardrails.estimate(pilot.hoursPerWeek, pilot.confidenceThreshold)}</p>
         </div>
         <div className="implementation-scope-grid">
           <div>
-            <h5>In scope</h5>
+            <h5>{labCopy.guardrails.inScope}</h5>
             <ul>
               {pilot.inScope.map((item) => (
                 <li key={item}>{item}</li>
@@ -2453,7 +2552,7 @@ function ImplementationGuardrails({
             </ul>
           </div>
           <div>
-            <h5>Out of scope</h5>
+            <h5>{labCopy.guardrails.outOfScope}</h5>
             <ul>
               {pilot.outOfScope.map((item) => (
                 <li key={item}>{item}</li>
@@ -2486,7 +2585,7 @@ function ImplementationGuardrails({
           <CheckCircle2 size={16} aria-hidden />
         </button>
         <Link className="button ghost" href="/plan">
-          View AI-Ready Action Plan
+          {labCopy.guardrails.viewPlan}
           <ArrowRight size={16} aria-hidden />
         </Link>
       </div>
@@ -2647,8 +2746,9 @@ function HighlightedOpportunityTitle({ title, highlight }: { title: string; high
 const opportunityWhyIcons = [AlertCircle, EyeOff, Unplug];
 
 export function OpportunityPage() {
-  const { language } = usePortalContent();
+  const { content, language } = usePortalContent();
   const copy = opportunityCopy[language];
+  const labCopy = implementationLabCopy[language];
   const [step, setStep] = useState<"website" | "email" | "loading" | "report">("website");
   const [website, setWebsite] = useState("");
   const [email, setEmail] = useState("");
@@ -2672,7 +2772,7 @@ export function OpportunityPage() {
   function submitWebsite(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canSubmitWebsite) {
-      setError("Enter a valid company URL.");
+      setError(labCopy.errors.companyUrl);
       return;
     }
     setError("");
@@ -2682,7 +2782,7 @@ export function OpportunityPage() {
   async function submitEmail(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canSubmitEmail) {
-      setError("Enter a valid email.");
+      setError(labCopy.errors.email);
       return;
     }
 
@@ -2694,7 +2794,7 @@ export function OpportunityPage() {
       const response = await fetch("/api/analyze-business-opportunity", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ website: normalizedWebsite, email }),
+        body: JSON.stringify({ website: normalizedWebsite, email, language }),
       });
       const payload = (await response.json()) as {
         ok: boolean;
@@ -2703,13 +2803,13 @@ export function OpportunityPage() {
       };
 
       if (!response.ok || !payload.ok || !payload.report) {
-        throw new Error(payload.error || "Could not generate the opportunity audit.");
+        throw new Error(payload.error || labCopy.errors.opportunityAudit);
       }
 
       setReport(payload.report);
       setStep("report");
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : "Could not generate audit.");
+      setError(caughtError instanceof Error ? caughtError.message : labCopy.errors.audit);
       setStep("email");
     }
   }
@@ -2775,7 +2875,7 @@ export function OpportunityPage() {
               </div>
               <Link className="button primary opportunity-demo-button" href="/demo">
                 <PlayCircle size={16} aria-hidden />
-                Watch Demo
+                {content.ui.watchDemoLabel}
               </Link>
             </>
           ) : null}
@@ -2815,19 +2915,20 @@ export function OpportunityPage() {
             </article>
           ) : null}
 
-          {step === "loading" ? <OpportunityLoading /> : null}
+          {step === "loading" ? <OpportunityLoading copy={labCopy} /> : null}
           {step !== "website" && error ? <ImplementationError message={error} /> : null}
 
           {step === "report" && report ? (
             <div className="opportunity-report-wrap">
               <div className="assessment-intro-top">
-                <span className="demo-label">Company Opportunity Audit</span>
+                <span className="demo-label">{labCopy.loading.opportunityTitle.replace("...", "")}</span>
                 <button className="assessment-reset-button" type="button" onClick={resetAudit}>
                   {copy.restart}
                 </button>
               </div>
               <BusinessOpportunityReportView
                 report={report}
+                copy={labCopy}
                 selectedPilot={selectedPilot}
                 onSelect={selectOpportunity}
               />
@@ -2852,7 +2953,7 @@ export function OpportunityPage() {
                     <h3>{card.title}</h3>
                     <p>{card.description}</p>
                     <a href="#opportunity-audit">
-                      We solve this
+                      {copy.urlButton}
                       <ArrowRight size={13} aria-hidden />
                     </a>
                   </article>
@@ -2999,7 +3100,7 @@ export function PlanPage() {
                 {copy.actions.copyPlan}
               </button>
               <button className="button ghost" type="button" onClick={downloadPlan}>
-                Download PDF
+                {copy.actions.downloadPlan}
               </button>
               <button className="button danger" type="button" onClick={clearSavedPlan}>
                 {copy.actions.clearPlan}

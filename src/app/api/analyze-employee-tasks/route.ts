@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { defaultLanguage, languages, type Language } from "@/lib/content";
 import {
   getWorkArea,
   normalizeEmployeeReport,
@@ -28,6 +29,45 @@ type RoleAnalysis = {
   total_tasks_analyzed: number;
   summary: ImplementationSummary;
   tasks: RoleAnalysisTask[];
+};
+
+const reportLanguageName: Record<Language, string> = {
+  en: "English",
+  es: "Spanish",
+  pt: "Brazilian Portuguese",
+};
+
+const employeeReportTitles: Record<Language, { employee: string; business: string }> = {
+  en: {
+    employee: "Task Transformation Report",
+    business: "Personal AI Readiness Report",
+  },
+  es: {
+    employee: "Reporte de transformación de tareas",
+    business: "Reporte personal de preparación para IA",
+  },
+  pt: {
+    employee: "Relatório de transformação de tarefas",
+    business: "Relatório pessoal de prontidão para IA",
+  },
+};
+
+const humanOwnershipFallbacks: Record<Language, Record<"AUTOMATE" | "AUGMENT" | "OWN", string>> = {
+  en: {
+    AUTOMATE: "Human reviews exceptions and keeps final accountability.",
+    AUGMENT: "Human reviews AI-prepared work and keeps judgment.",
+    OWN: "Human owns the relationship, decision, and accountability.",
+  },
+  es: {
+    AUTOMATE: "La persona revisa excepciones y conserva la responsabilidad final.",
+    AUGMENT: "La persona revisa el trabajo preparado por IA y conserva el juicio.",
+    OWN: "La persona conserva la relación, la decisión y la responsabilidad.",
+  },
+  pt: {
+    AUTOMATE: "A pessoa revisa exceções e mantém a responsabilidade final.",
+    AUGMENT: "A pessoa revisa o trabalho preparado por IA e mantém o julgamento.",
+    OWN: "A pessoa mantém a relação, a decisão e a responsabilidade.",
+  },
 };
 
 const EMPLOYEE_ANALYSIS_SYSTEM_PROMPT = `You are an expert organizational designer and AI transformation consultant with deep knowledge of corporate structures, workforce automation, and human-AI collaboration frameworks.
@@ -210,7 +250,18 @@ function isAudience(value: unknown): value is ImplementAudience {
   return value === "business" || value === "employee";
 }
 
-function buildUserMessage(workArea: ImplementWorkAreaKey, tasks: string[], audience: ImplementAudience) {
+function parseLanguage(value: unknown): Language {
+  return typeof value === "string" && languages.includes(value as Language)
+    ? (value as Language)
+    : defaultLanguage;
+}
+
+function buildUserMessage(
+  workArea: ImplementWorkAreaKey,
+  tasks: string[],
+  audience: ImplementAudience,
+  language: Language,
+) {
   const area = getWorkArea(workArea);
   const isLeader = audience === "business";
   const role = isLeader ? `${area.category} business leader` : `${area.category} professional`;
@@ -226,15 +277,15 @@ function buildUserMessage(workArea: ImplementWorkAreaKey, tasks: string[], audie
     "",
     "Treat this skill list as ground truth for what this person actually does. Do not invent tasks unrelated to these skills, but you may add 2-4 supporting/adjacent tasks that naturally co-occur.",
     "",
+    `Write all user-facing string values in ${reportLanguageName[language]}. Keep JSON keys, enum values, numbers, and internal identifiers in English exactly as the schema defines them.`,
+    "",
     "Return between 10 and 20 tasks total.",
   ].join("\n");
 }
 
-function humanOwnershipForTask(task: RoleAnalysisTask) {
+function humanOwnershipForTask(task: RoleAnalysisTask, language: Language) {
   if (task.human_ownership) return task.human_ownership;
-  if (task.bucket === "OWN") return "Human owns the relationship, decision, and accountability.";
-  if (task.bucket === "AUTOMATE") return "Human reviews exceptions and keeps final accountability.";
-  return "Human reviews AI-prepared work and keeps judgment.";
+  return humanOwnershipFallbacks[language][task.bucket];
 }
 
 function toEmployeeReport(
@@ -242,16 +293,17 @@ function toEmployeeReport(
   workArea: ImplementWorkAreaKey,
   tasksRequested: number,
   audience: ImplementAudience,
+  language: Language,
 ): EmployeeTransformationReport {
   return normalizeEmployeeReport({
     kind: "employee",
-    title: audience === "business" ? "Personal AI Readiness Report" : "Task Transformation Report",
+    title: employeeReportTitles[language][audience],
     workArea,
     skillsAnalyzed: tasksRequested,
     summary: analysis.summary,
     tasks: analysis.tasks.map((task) => ({
       ...task,
-      human_ownership: humanOwnershipForTask(task),
+      human_ownership: humanOwnershipForTask(task, language),
     })),
     tools: [],
   });
@@ -275,9 +327,11 @@ export async function POST(request: Request) {
       tasks?: unknown;
       customTasks?: unknown;
       audience?: unknown;
+      language?: unknown;
     };
     const workArea = isWorkArea(body.workArea) ? body.workArea : undefined;
     const audience = isAudience(body.audience) ? body.audience : "employee";
+    const language = parseLanguage(body.language);
     const selectedTasks = Array.isArray(body.tasks)
       ? body.tasks.filter((task): task is string => typeof task === "string" && task.trim().length > 0)
       : [];
@@ -305,7 +359,7 @@ export async function POST(request: Request) {
     const prompt = [
       EMPLOYEE_ANALYSIS_SYSTEM_PROMPT,
       "",
-      buildUserMessage(workArea, tasks, audience),
+      buildUserMessage(workArea, tasks, audience, language),
     ].join("\n\n");
 
     const response = await fetch(
@@ -337,7 +391,7 @@ export async function POST(request: Request) {
       const text = json.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "";
       if (!text) throw new Error("AI returned no structured output.");
       const parsed = parseJsonObject(text) as RoleAnalysis;
-      report = toEmployeeReport(parsed, workArea, tasks.length, audience);
+      report = toEmployeeReport(parsed, workArea, tasks.length, audience, language);
     } catch (caughtError) {
       const error = caughtError instanceof Error ? caughtError.message : "AI returned invalid structured output.";
       console.error("analyze-employee-tasks parse failed:", error);

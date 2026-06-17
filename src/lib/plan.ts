@@ -377,97 +377,362 @@ export const learnToolOptions: Record<LearnTool, LearnOption<LearnTool>> = {
   },
 };
 
+const learnLocalization: Record<
+  Language,
+  {
+    groups: Record<LearnGroup, Omit<LearnOption<LearnGroup>, "id">>;
+    goals: Record<LearnGoal, Omit<LearnOption<LearnGoal>, "id">>;
+    formats: Record<LearnFormat, Omit<LearnOption<LearnFormat>, "id">>;
+    tools: Record<LearnTool, Omit<LearnOption<LearnTool>, "id">>;
+    report: {
+      title: string;
+      demoLabel: string;
+      selectedPath: string;
+      profile: string;
+      recommendedPath: string;
+      starterGuide: string;
+      practicePrompt: string;
+      nextAction: string;
+      group: string;
+      goal: string;
+      tool: string;
+      format: string;
+      learningVerb: Record<LearnFormat, string>;
+      timeAction: Record<LearnTime, string>;
+      reviewAction: Record<AiStartingPoint, string>;
+      profileSummary: (group: string, goal: string, tool: string) => string;
+      prompt: (group: string, goal: string, tool: string) => string;
+      planSummary: (group: string, goal: string, tool: string, format: string) => string;
+      learningPath: (goal: string, tool: string, reviewAction: string) => string[];
+      starterGuideItems: (tool: string) => string[];
+    };
+  }
+> = {
+  en: {
+    groups: {
+      student: learnGroupOptions[0],
+      educator: learnGroupOptions[1],
+      worker: learnGroupOptions[2],
+      entrepreneur: learnGroupOptions[3],
+    },
+    goals: Object.fromEntries(
+      Object.values(learnGoalsByGroup).flat().map((option) => [option.id, option]),
+    ) as unknown as Record<LearnGoal, Omit<LearnOption<LearnGoal>, "id">>,
+    formats: {
+      watch: learnFormatOptions[0],
+      read: learnFormatOptions[1],
+      practice: learnFormatOptions[2],
+    },
+    tools: learnToolOptions,
+    report: {
+      title: "Your LEARN Report",
+      demoLabel: "Demo content - generated locally",
+      selectedPath: "Selected Path",
+      profile: "AI Learning Profile",
+      recommendedPath: "Recommended Learning Path",
+      starterGuide: "Tool Starter Guide",
+      practicePrompt: "Practice Prompt",
+      nextAction: "Next Action",
+      group: "Group",
+      goal: "Goal",
+      tool: "Tool",
+      format: "Format",
+      learningVerb: {
+        watch: "Watch one short demo",
+        read: "Read one quick guide",
+        practice: "Practice with one real prompt",
+      },
+      timeAction: {
+        "10-minutes": "Use one low-risk task today and stop after the first useful result.",
+        "30-minutes": "Complete the starter practice, revise once, and save the best prompt.",
+        "1-hour": "Run the practice on a real example, review the output, and write your repeatable next step.",
+      },
+      reviewAction: {
+        "new-to-ai": "Review the output like a draft, not a final answer.",
+        "tried-ai": "Review the output like a draft, not a final answer.",
+        "ready-for-work":
+          "Add a human review gate before the output affects a real person, customer, grade, or business decision.",
+      },
+      profileSummary: (group, goal, tool) => `You are a ${group.toLowerCase()} who wants to ${goal.toLowerCase()} with ${tool}.`,
+      prompt: (group, goal, tool) =>
+        `Act as a practical AI learning coach for a ${group.toLowerCase()}. Help me ${goal.toLowerCase()} using ${tool}. Give me a simple first draft, explain what I should check, and end with three ways I can improve the result.`,
+      planSummary: (group, goal, tool, format) =>
+        `${group}: Focus on "${goal}" with ${tool} using a ${format.toLowerCase()} path.`,
+      learningPath: (goal, tool, reviewAction) => [
+        `Start with the smallest useful version of "${goal}" before trying advanced workflows.`,
+        `Use ${tool} for draft support, explanation, comparison, and practice - not as the final authority.`,
+        reviewAction,
+      ],
+      starterGuideItems: (tool) => [
+        `${tool} fits this path because it can help turn unclear work into a structured first draft.`,
+        "Begin with context, desired output, constraints, and what a good answer should include.",
+        "Ask for a revision after you review the first output; the second pass is usually where the value appears.",
+      ],
+    },
+  },
+  es: {
+    groups: {
+      student: { label: "Estudiante", description: "Quiero usar IA para estudiar, investigar y prepararme para trabajar." },
+      educator: { label: "Educador", description: "Quiero usar IA para enseñar, guiar estudiantes y ahorrar tiempo." },
+      worker: { label: "Trabajador", description: "Quiero usar IA para mejorar tareas diarias y seguir siendo valioso en el trabajo." },
+      entrepreneur: { label: "Emprendedor", description: "Quiero usar IA para planear, vender, promocionar y operar mejor." },
+    },
+    goals: {
+      "study-faster": { label: "Estudiar y entender más rápido", description: "Convierte material confuso en explicaciones y pasos de estudio más claros." },
+      "research-sources": { label: "Investigar y resumir fuentes", description: "Trabaja mejor con lecturas, notas y material fuente." },
+      "prepare-projects": { label: "Preparar currículos, proyectos o presentaciones", description: "Redacta mejores materiales escolares y laborales con revisión humana." },
+      "create-materials": { label: "Crear materiales de enseñanza", description: "Redacta clases, ejemplos, cuestionarios y actividades más rápido." },
+      "responsible-use": { label: "Guiar el uso responsable de IA", description: "Define límites claros y modela un uso ético." },
+      "planning-feedback": { label: "Ahorrar tiempo en planeación y retroalimentación", description: "Usa IA para borradores manteniendo el juicio del educador." },
+      "communicate-better": { label: "Escribir y comunicar mejor", description: "Redacta, revisa y aclara comunicación diaria de trabajo." },
+      "summarize-docs": { label: "Resumir documentos o reuniones", description: "Convierte notas y documentos largos en acciones claras." },
+      "routine-tasks": { label: "Ahorrar tiempo en tareas rutinarias", description: "Crea prompts repetibles para trabajo frecuente." },
+      "plan-offer": { label: "Planear mi negocio u oferta", description: "Aclara el cliente, la promesa, la oferta y los primeros pasos." },
+      "marketing-sales": { label: "Crear contenido de marketing y ventas", description: "Redacta mensajes, publicaciones, páginas y seguimientos." },
+      "operations-follow-up": { label: "Organizar operaciones y seguimiento", description: "Crea sistemas simples para tareas, clientes y próximas acciones." },
+    },
+    formats: {
+      watch: { label: "Ver", description: "Lecciones cortas y ejemplos." },
+      read: { label: "Leer", description: "Guías rápidas y listas de verificación." },
+      practice: { label: "Practicar", description: "Prompts, ejercicios y plantillas." },
+    },
+    tools: {
+      chatgpt: { label: "ChatGPT", description: "Un asistente flexible para escritura, planeación y práctica." },
+      claude: { label: "Claude", description: "Un asistente fuerte para escritura, razonamiento y documentos largos." },
+      gemini: { label: "Gemini", description: "El asistente de Google para ayuda general y trabajo conectado a Google." },
+      copilot: { label: "Microsoft Copilot", description: "Apoyo de IA para documentos, reuniones, email y tareas de Microsoft." },
+      notebooklm: { label: "NotebookLM", description: "Una herramienta basada en fuentes para notas, documentos y lecturas." },
+    },
+    report: {
+      title: "Tu reporte LEARN",
+      demoLabel: "Contenido demo - generado localmente",
+      selectedPath: "Ruta seleccionada",
+      profile: "Perfil de aprendizaje con IA",
+      recommendedPath: "Ruta de aprendizaje recomendada",
+      starterGuide: "Guía inicial de la herramienta",
+      practicePrompt: "Prompt de práctica",
+      nextAction: "Próxima acción",
+      group: "Grupo",
+      goal: "Meta",
+      tool: "Herramienta",
+      format: "Formato",
+      learningVerb: {
+        watch: "Mira una demostración corta",
+        read: "Lee una guía rápida",
+        practice: "Practica con un prompt real",
+      },
+      timeAction: {
+        "10-minutes": "Usa hoy una tarea de bajo riesgo y detente después del primer resultado útil.",
+        "30-minutes": "Completa la práctica inicial, revisa una vez y guarda el mejor prompt.",
+        "1-hour": "Prueba con un ejemplo real, revisa el resultado y escribe tu próximo paso repetible.",
+      },
+      reviewAction: {
+        "new-to-ai": "Revisa el resultado como borrador, no como respuesta final.",
+        "tried-ai": "Revisa el resultado como borrador, no como respuesta final.",
+        "ready-for-work": "Agrega una revisión humana antes de que el resultado afecte a una persona, cliente, calificación o decisión empresarial.",
+      },
+      profileSummary: (group, goal, tool) => `Eres ${group.toLowerCase()} y quieres ${goal.toLowerCase()} con ${tool}.`,
+      prompt: (group, goal, tool) =>
+        `Actúa como un coach práctico de aprendizaje con IA para ${group.toLowerCase()}. Ayúdame a ${goal.toLowerCase()} usando ${tool}. Dame un primer borrador simple, explica qué debo revisar y termina con tres formas de mejorar el resultado.`,
+      planSummary: (group, goal, tool, format) =>
+        `${group}: Enfócate en "${goal}" con ${tool} usando una ruta de ${format.toLowerCase()}.`,
+      learningPath: (goal, tool, reviewAction) => [
+        `Empieza con la versión útil más pequeña de "${goal}" antes de probar flujos avanzados.`,
+        `Usa ${tool} para apoyo de borradores, explicación, comparación y práctica; no como autoridad final.`,
+        reviewAction,
+      ],
+      starterGuideItems: (tool) => [
+        `${tool} encaja con esta ruta porque ayuda a convertir trabajo poco claro en un primer borrador estructurado.`,
+        "Comienza con contexto, resultado deseado, límites y lo que debe incluir una buena respuesta.",
+        "Pide una revisión después de evaluar el primer resultado; normalmente el valor aparece en la segunda pasada.",
+      ],
+    },
+  },
+  pt: {
+    groups: {
+      student: { label: "Estudante", description: "Quero usar IA para estudar, pesquisar e me preparar para o trabalho." },
+      educator: { label: "Educador", description: "Quero usar IA para ensinar, orientar estudantes e economizar tempo." },
+      worker: { label: "Trabalhador", description: "Quero usar IA para melhorar tarefas diárias e seguir valioso no trabalho." },
+      entrepreneur: { label: "Empreendedor", description: "Quero usar IA para planejar, vender, divulgar e operar melhor." },
+    },
+    goals: {
+      "study-faster": { label: "Estudar e entender mais rápido", description: "Transforme material confuso em explicações e passos de estudo mais claros." },
+      "research-sources": { label: "Pesquisar e resumir fontes", description: "Trabalhe melhor com leituras, notas e materiais de referência." },
+      "prepare-projects": { label: "Preparar currículos, projetos ou apresentações", description: "Crie materiais escolares e profissionais melhores com revisão humana." },
+      "create-materials": { label: "Criar materiais de ensino", description: "Rascunhe aulas, exemplos, questionários e atividades mais rápido." },
+      "responsible-use": { label: "Orientar o uso responsável de IA", description: "Defina limites claros e modele uso ético." },
+      "planning-feedback": { label: "Economizar tempo em planejamento e feedback", description: "Use IA para rascunhos mantendo o julgamento do educador." },
+      "communicate-better": { label: "Escrever e comunicar melhor", description: "Rascunhe, revise e esclareça a comunicação diária de trabalho." },
+      "summarize-docs": { label: "Resumir documentos ou reuniões", description: "Transforme notas e documentos longos em ações claras." },
+      "routine-tasks": { label: "Economizar tempo em tarefas rotineiras", description: "Crie prompts repetíveis para trabalho frequente." },
+      "plan-offer": { label: "Planejar meu negócio ou oferta", description: "Esclareça o cliente, a promessa, a oferta e os primeiros passos." },
+      "marketing-sales": { label: "Criar conteúdo de marketing e vendas", description: "Rascunhe mensagens, posts, páginas e sequências de acompanhamento." },
+      "operations-follow-up": { label: "Organizar operações e acompanhamento", description: "Crie sistemas simples para tarefas, clientes e próximas ações." },
+    },
+    formats: {
+      watch: { label: "Assistir", description: "Aulas curtas e exemplos." },
+      read: { label: "Ler", description: "Guias rápidos e listas de verificação." },
+      practice: { label: "Praticar", description: "Prompts, exercícios e modelos." },
+    },
+    tools: {
+      chatgpt: { label: "ChatGPT", description: "Um assistente flexível para escrita, planejamento e prática." },
+      claude: { label: "Claude", description: "Um assistente forte para escrita, raciocínio e documentos longos." },
+      gemini: { label: "Gemini", description: "O assistente do Google para ajuda geral e trabalho conectado ao Google." },
+      copilot: { label: "Microsoft Copilot", description: "Apoio de IA para documentos, reuniões, email e tarefas da Microsoft." },
+      notebooklm: { label: "NotebookLM", description: "Uma ferramenta baseada em fontes para notas, documentos e leituras." },
+    },
+    report: {
+      title: "Seu relatório LEARN",
+      demoLabel: "Conteúdo demo - gerado localmente",
+      selectedPath: "Trilha selecionada",
+      profile: "Perfil de aprendizagem com IA",
+      recommendedPath: "Trilha de aprendizagem recomendada",
+      starterGuide: "Guia inicial da ferramenta",
+      practicePrompt: "Prompt de prática",
+      nextAction: "Próxima ação",
+      group: "Grupo",
+      goal: "Meta",
+      tool: "Ferramenta",
+      format: "Formato",
+      learningVerb: {
+        watch: "Assista a uma demonstração curta",
+        read: "Leia um guia rápido",
+        practice: "Pratique com um prompt real",
+      },
+      timeAction: {
+        "10-minutes": "Use hoje uma tarefa de baixo risco e pare depois do primeiro resultado útil.",
+        "30-minutes": "Complete a prática inicial, revise uma vez e salve o melhor prompt.",
+        "1-hour": "Teste em um exemplo real, revise o resultado e escreva seu próximo passo repetível.",
+      },
+      reviewAction: {
+        "new-to-ai": "Revise o resultado como rascunho, não como resposta final.",
+        "tried-ai": "Revise o resultado como rascunho, não como resposta final.",
+        "ready-for-work": "Adicione revisão humana antes que o resultado afete uma pessoa, cliente, nota ou decisão empresarial.",
+      },
+      profileSummary: (group, goal, tool) => `Você é ${group.toLowerCase()} e quer ${goal.toLowerCase()} com ${tool}.`,
+      prompt: (group, goal, tool) =>
+        `Atue como um coach prático de aprendizagem com IA para ${group.toLowerCase()}. Ajude-me a ${goal.toLowerCase()} usando ${tool}. Dê um primeiro rascunho simples, explique o que devo revisar e termine com três formas de melhorar o resultado.`,
+      planSummary: (group, goal, tool, format) =>
+        `${group}: Foque em "${goal}" com ${tool} usando uma trilha de ${format.toLowerCase()}.`,
+      learningPath: (goal, tool, reviewAction) => [
+        `Comece pela menor versão útil de "${goal}" antes de tentar fluxos avançados.`,
+        `Use ${tool} para apoio em rascunhos, explicação, comparação e prática; não como autoridade final.`,
+        reviewAction,
+      ],
+      starterGuideItems: (tool) => [
+        `${tool} combina com esta trilha porque ajuda a transformar trabalho pouco claro em um primeiro rascunho estruturado.`,
+        "Comece com contexto, resultado desejado, limites e o que uma boa resposta deve incluir.",
+        "Peça uma revisão depois de avaliar o primeiro resultado; geralmente o valor aparece na segunda passada.",
+      ],
+    },
+  },
+};
+
 const documentHeavyGoals = new Set<LearnGoal>(["research-sources", "summarize-docs"]);
 const generalToolIds: LearnTool[] = ["chatgpt", "claude", "gemini", "copilot"];
 const documentToolIds: LearnTool[] = ["notebooklm", "chatgpt", "claude", "copilot"];
 
-export function getLearnToolOptions(goal: LearnGoal | undefined): LearnOption<LearnTool>[] {
+function localizeLearnOption<T extends string>(
+  option: LearnOption<T>,
+  copy: Record<T, Omit<LearnOption<T>, "id">>,
+): LearnOption<T> {
+  return { id: option.id, ...copy[option.id] };
+}
+
+export function getLearnGroupOptions(language: Language = "en"): LearnOption<LearnGroup>[] {
+  return learnGroupOptions.map((option) => localizeLearnOption(option, learnLocalization[language].groups));
+}
+
+export function getLearnGoalsByGroup(group: LearnGroup, language: Language = "en"): LearnOption<LearnGoal>[] {
+  return learnGoalsByGroup[group].map((option) => localizeLearnOption(option, learnLocalization[language].goals));
+}
+
+export function getLearnFormatOptions(language: Language = "en"): LearnOption<LearnFormat>[] {
+  return learnFormatOptions.map((option) => localizeLearnOption(option, learnLocalization[language].formats));
+}
+
+export function getLearnReportCopy(language: Language = "en") {
+  return learnLocalization[language].report;
+}
+
+export function getLearnToolOptions(goal: LearnGoal | undefined, language: Language = "en"): LearnOption<LearnTool>[] {
   const ids = goal && documentHeavyGoals.has(goal) ? documentToolIds : generalToolIds;
-  return ids.map((id) => learnToolOptions[id]);
+  return ids.map((id) => localizeLearnOption(learnToolOptions[id], learnLocalization[language].tools));
 }
 
 function findLearnOption<T extends string>(options: LearnOption<T>[], id: T) {
   return options.find((option) => option.id === id) ?? options[0];
 }
 
-export function getLearnLabels(input: LearnPlanInput) {
-  const group = findLearnOption(learnGroupOptions, input.group);
+export function getLearnLabels(input: LearnPlanInput, language: Language = "en") {
+  const groupOptions = getLearnGroupOptions(language);
+  const goalOptions = getLearnGoalsByGroup(input.group, language);
+  const formatOptions = getLearnFormatOptions(language);
+  const toolOptions = learnLocalization[language].tools;
+
+  const group = findLearnOption(groupOptions, input.group);
   const startingPoint = findLearnOption(aiStartingPointOptions, input.startingPoint);
-  const goal = findLearnOption(learnGoalsByGroup[input.group], input.goal);
-  const tool = learnToolOptions[input.tool];
-  const format = findLearnOption(learnFormatOptions, input.format);
+  const goal = findLearnOption(goalOptions, input.goal);
+  const tool = { id: input.tool, ...toolOptions[input.tool] };
+  const format = findLearnOption(formatOptions, input.format);
   const time = findLearnOption(learnTimeOptions, input.time);
 
   return { group, startingPoint, goal, tool, format, time };
 }
 
-export function generateLearnReport(input: LearnPlanInput): LearnReport {
-  const labels = getLearnLabels(input);
-  const learningVerb =
-    input.format === "watch" ? "Watch one short demo" : input.format === "read" ? "Read one quick guide" : "Practice with one real prompt";
-  const timeAction =
-    input.time === "10-minutes"
-      ? "Use one low-risk task today and stop after the first useful result."
-      : input.time === "30-minutes"
-        ? "Complete the starter practice, revise once, and save the best prompt."
-        : "Run the practice on a real example, review the output, and write your repeatable next step.";
-  const reviewAction =
-    input.startingPoint === "ready-for-work"
-      ? "Add a human review gate before the output affects a real person, customer, grade, or business decision."
-      : "Review the output like a draft, not a final answer.";
+export function generateLearnReport(input: LearnPlanInput, language: Language = "en"): LearnReport {
+  const labels = getLearnLabels(input, language);
+  const copy = getLearnReportCopy(language);
+  const learningVerb = copy.learningVerb[input.format];
+  const timeAction = copy.timeAction[input.time];
+  const reviewAction = copy.reviewAction[input.startingPoint];
 
-  const profileSummary = `You are a ${labels.group.label.toLowerCase()} who wants to ${labels.goal.label.toLowerCase()} with ${labels.tool.label}.`;
-  const practicePrompt = `Act as a practical AI learning coach for a ${labels.group.label.toLowerCase()}. Help me ${labels.goal.label.toLowerCase()} using ${labels.tool.label}. Give me a simple first draft, explain what I should check, and end with three ways I can improve the result.`;
-  const nextAction = `${learningVerb} for ${labels.time.label.toLowerCase()}. ${timeAction}`;
-  const planSummary = `${labels.group.label}: Focus on "${labels.goal.label}" with ${labels.tool.label} using a ${labels.format.label.toLowerCase()} path.`;
+  const profileSummary = copy.profileSummary(labels.group.label, labels.goal.label, labels.tool.label);
+  const practicePrompt = copy.prompt(labels.group.label, labels.goal.label, labels.tool.label);
+  const nextAction = `${learningVerb} ${labels.time.label.toLowerCase()}. ${timeAction}`;
+  const planSummary = copy.planSummary(labels.group.label, labels.goal.label, labels.tool.label, labels.format.label);
 
   return {
-    title: "Your LEARN Report",
-    demoLabel: "Demo content - generated locally",
+    title: copy.title,
+    demoLabel: copy.demoLabel,
     path: [
-      `Group: ${labels.group.label}`,
-      `Goal: ${labels.goal.label}`,
-      `Tool: ${labels.tool.label}`,
-      `Format: ${labels.format.label}`,
+      `${copy.group}: ${labels.group.label}`,
+      `${copy.goal}: ${labels.goal.label}`,
+      `${copy.tool}: ${labels.tool.label}`,
+      `${copy.format}: ${labels.format.label}`,
     ],
     profileSummary,
-    learningPath: [
-      `Start with the smallest useful version of "${labels.goal.label}" before trying advanced workflows.`,
-      `Use ${labels.tool.label} for draft support, explanation, comparison, and practice - not as the final authority.`,
-      reviewAction,
-    ],
-    toolStarterGuide: [
-      `${labels.tool.label} fits this path because it can help turn unclear work into a structured first draft.`,
-      "Begin with context, desired output, constraints, and what a good answer should include.",
-      "Ask for a revision after you review the first output; the second pass is usually where the value appears.",
-    ],
+    learningPath: copy.learningPath(labels.goal.label, labels.tool.label, reviewAction),
+    toolStarterGuide: copy.starterGuideItems(labels.tool.label),
     practicePrompt,
     nextAction,
     planSummary,
   };
 }
 
-export function learnReportToText(report: LearnReport) {
+export function learnReportToText(report: LearnReport, language: Language = "en") {
+  const copy = getLearnReportCopy(language);
+
   return [
     report.title,
     report.demoLabel,
     "",
-    "Selected Path",
+    copy.selectedPath,
     ...report.path.map((item) => `- ${item}`),
     "",
-    "AI Learning Profile",
+    copy.profile,
     report.profileSummary,
     "",
-    "Recommended Learning Path",
+    copy.recommendedPath,
     ...report.learningPath.map((item) => `- ${item}`),
     "",
-    "Tool Starter Guide",
+    copy.starterGuide,
     ...report.toolStarterGuide.map((item) => `- ${item}`),
     "",
-    "Practice Prompt",
+    copy.practicePrompt,
     report.practicePrompt,
     "",
-    "Next Action",
+    copy.nextAction,
     report.nextAction,
   ].join("\n");
 }
