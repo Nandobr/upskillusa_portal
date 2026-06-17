@@ -24,6 +24,7 @@ import {
   Megaphone,
   Network,
   PlayCircle,
+  Printer,
   RotateCw,
   Scale,
   Settings,
@@ -31,7 +32,6 @@ import {
   TrendingUp,
   Unplug,
   Users,
-  Wrench,
   Workflow,
   X,
 } from "lucide-react";
@@ -1887,67 +1887,112 @@ function BusinessOpportunityReportView({
   selectedPilot?: ImplementPilot;
   onSelect: (opportunity: BusinessOpportunity) => void;
 }) {
+  const reportText = businessReportToText(report);
+
   return (
-    <section className="implementation-report">
-      <div className="implementation-report-header">
+    <section className="implementation-report business-audit-report">
+      <div className="business-audit-header">
         <div>
-          <span className="demo-label">{report.isDemo ? "Demo AI Opportunity Report" : "AI Opportunity Report"}</span>
+          <span className="implementation-report-eyebrow">AI Readiness Diagnostic</span>
           <h3>{report.companyName}</h3>
           <p>{report.website} · {report.industry} · {report.sizeEstimate}</p>
         </div>
-        <button className="implementation-small-action" type="button" onClick={() => window.print()}>
-          Print / Save PDF
-        </button>
+        <div className="implementation-report-actions">
+          <span className="implementation-report-pill">{report.isDemo ? "Sample data" : "Live audit"}</span>
+          <ReportActionButton icon={Clipboard} label="Copy" onClick={() => copyReportText(reportText)} />
+          <ReportActionButton
+            icon={Download}
+            label="Download"
+            onClick={() => downloadReportText(`${report.companyName}-ai-opportunity-report.txt`, reportText)}
+          />
+          <ReportActionButton icon={Printer} label="Print / Save PDF" onClick={() => window.print()} />
+        </div>
       </div>
       {report.demoReason ? <p className="implementation-demo-note">{report.demoReason}</p> : null}
-      <div className="implementation-kpi-band">
-        <ImplementationStat
-          icon={TrendingUp}
-          label="Annual value opportunity"
-          value={formatShortUsd(report.annualValueAtRisk)}
-          sub="Directional estimate"
-        />
-        <ImplementationStat
-          icon={Clock}
-          label="Recoverable / week"
-          value={`${formatLabNumber(report.weeklyHoursReclaimable)} hrs`}
-          sub={`${report.fteEquivalent.toFixed(1)} FTE equivalent`}
-        />
-        <ImplementationStat
-          icon={Sparkles}
-          label="Opportunity score"
-          value={`${Math.round(report.opportunityScore)}/100`}
-          sub="Workflow readiness"
-        />
+
+      <div className="business-audit-value-band">
+        <div className="business-audit-value-content">
+          <span>
+            <TrendingUp size={15} aria-hidden />
+            Annual Cost of Inaction
+          </span>
+          <strong>{formatShortUsd(report.annualValueAtRisk)}</strong>
+          <p>
+            in fully loaded labor value locked inside repeatable, addressable work at {report.companyName}.
+          </p>
+          <div className="business-audit-dark-stats">
+            <BusinessDarkStat icon={Users} label="Employees" value={formatLabNumber(report.employees)} hint={report.sizeEstimate} />
+            <BusinessDarkStat
+              icon={Users}
+              label="Addressable roles"
+              value={formatLabNumber(report.addressableRoles)}
+              hint={report.industry}
+            />
+            <BusinessDarkStat
+              icon={Clock}
+              label="Recoverable / week"
+              value={`${formatLabNumber(report.weeklyHoursReclaimable)} hrs`}
+              hint={`${formatLabNumber(report.annualHoursReclaimable)} hrs/year`}
+            />
+          </div>
+        </div>
       </div>
-      <div className="implementation-report-body">
+
+      <div className="business-audit-gap-band">
+        <div>
+          <span>
+            <AlertCircle size={15} aria-hidden />
+            5-Year Competitive Gap
+          </span>
+          <p>Cumulative value lost if competitors deploy AI before you do.</p>
+        </div>
+        <strong>{formatShortUsd(report.fiveYearCostOfInaction)}</strong>
+      </div>
+
+      <div className="business-audit-summary">
+        <div className="business-audit-score">
+          <span>Workforce Score</span>
+          <strong>{Math.round(report.opportunityScore)}<small>/100</small></strong>
+        </div>
         <div>
           <h4>Executive Summary</h4>
           <p>{report.executiveSummary}</p>
           <p className="implementation-muted">{report.scoreRationale}</p>
         </div>
-        <div>
-          <h4>Choose a first opportunity</h4>
-          <div className="implementation-opportunity-list">
-            {report.opportunities.map((opportunity) => {
-              const selected = selectedPilot?.id === opportunity.id;
-              return (
-                <button
-                  aria-pressed={selected}
-                  className={`implementation-opportunity ${selected ? "selected" : ""}`}
-                  key={opportunity.id}
-                  type="button"
-                  onClick={() => onSelect(opportunity)}
-                >
+      </div>
+
+      <div className="business-audit-opportunities">
+        <h4>What&apos;s hiding in your operations</h4>
+        <p className="implementation-muted">High-volume manual work surfaced from company signals and common workflow patterns.</p>
+        <div className="business-opportunity-list">
+          {report.opportunities.map((opportunity) => {
+            const selected = selectedPilot?.id === opportunity.id;
+            return (
+              <button
+                aria-pressed={selected}
+                className={`business-opportunity-row ${selected ? "selected" : ""}`}
+                key={opportunity.id}
+                type="button"
+                onClick={() => onSelect(opportunity)}
+              >
+                <div>
                   <span>{opportunity.department}</span>
                   <strong>{opportunity.pilotLabel}</strong>
                   <small>{opportunity.symptom}</small>
-                  <em>~{formatLabNumber(opportunity.estimatedAnnualHours)} hrs/year</em>
-                </button>
-              );
-            })}
-          </div>
+                </div>
+                <em>
+                  <span>Trapped</span>
+                  ~{formatLabNumber(opportunity.estimatedAnnualHours)} hrs/year
+                </em>
+              </button>
+            );
+          })}
         </div>
+      </div>
+
+      <div className="business-audit-methodology">
+        <b>Methodology:</b> directional figures combine company context, common addressable workflow patterns,
+        and conservative labor-value assumptions. Use this as a first-pilot planning estimate.
       </div>
     </section>
   );
@@ -1980,54 +2025,71 @@ function EmployeeTransformationReportView({
   const moreAutomateCount = Math.max(0, report.summary.automate_count - 1);
   const automationPotential = Math.round((report.summary.automate_count / Math.max(1, report.tasks.length)) * 100);
   const readinessBand = report.tasks.length >= 12 ? "Developing" : "Emerging";
+  const weeklyHours = report.summary.estimated_monthly_hours_saved / 4.33;
+  const readinessScore = Math.min(92, Math.max(58, 62 + automationPotential));
+  const reportText = employeeReportToText(report);
 
   return (
-    <section className="implementation-report">
-      <div className="implementation-report-header implementation-report-header-spacious">
-        <div>
-          <span className="implementation-report-eyebrow">
-            {isLeader ? "Personal AI Readiness Report" : "Task Transformation Report"}
+    <section className="employee-action-report">
+      <div className="employee-action-header">
+        <div className="employee-action-identity">
+          <span className="employee-action-avatar" aria-hidden>
+            AI
           </span>
-          <h3>{report.workArea}</h3>
-          <p>
-            {report.skillsAnalyzed} skills analyzed · {report.tasks.length}{" "}
-            {isLeader ? "responsibilities generated" : "tasks generated"} · readiness band:{" "}
-            <b>{readinessBand}</b>
-          </p>
+          <div>
+            <span className="implementation-report-eyebrow">
+              {isLeader ? "Personal AI Readiness Report" : "AI-Ready Action Plan"}
+            </span>
+            <h3>{report.workArea}</h3>
+            <p>
+              {report.skillsAnalyzed} skills analyzed · {report.tasks.length}{" "}
+              {isLeader ? "responsibilities generated" : "tasks generated"} · readiness band:{" "}
+              <b>{readinessBand}</b>
+            </p>
+          </div>
         </div>
-        <button className="implementation-small-action" type="button" onClick={onRegenerate}>
-          <RotateCw size={14} aria-hidden />
-          Regenerate
-        </button>
+        <div className="implementation-report-actions">
+          {report.isDemo || report.demoReason ? <span className="implementation-report-pill">Sample data</span> : null}
+          <ReportActionButton icon={RotateCw} label="Regenerate" onClick={onRegenerate} />
+          <ReportActionButton icon={Clipboard} label="Copy" onClick={() => copyReportText(reportText)} />
+          <ReportActionButton
+            icon={Download}
+            label="Download"
+            onClick={() => downloadReportText(`${report.workArea}-ai-ready-action-plan.txt`, reportText)}
+          />
+        </div>
       </div>
       {report.demoReason ? <p className="implementation-demo-note">{report.demoReason}</p> : null}
-      <div className="implementation-kpi-band">
-        <ImplementationStat
-          icon={Clock}
-          label="Hours saved / month"
-          value={report.summary.estimated_monthly_hours_saved.toFixed(0)}
-          sub="From AI deployment"
+
+      <div className="employee-metric-grid">
+        <EmployeeMetricCard
+          label="Hours recovered / week"
+          value={weeklyHours.toFixed(1)}
+          sub="From automated and augmented work"
+          tone="green"
         />
-        <ImplementationStat
-          icon={Users}
-          label="FTE equivalent"
-          value={report.summary.estimated_fte_equivalent_saved.toFixed(2)}
-          sub="Per month"
+        <EmployeeMetricCard
+          label="AI readiness score"
+          value={`${readinessScore}/100`}
+          sub="Task-level confidence"
+          tone="blue"
         />
-        <ImplementationStat
-          icon={Sparkles}
-          label="Automation potential"
-          value={`${automationPotential}%`}
-          sub={`${report.summary.automate_count} of ${report.tasks.length} tasks`}
+        <EmployeeMetricCard
+          label="Recommended pathway"
+          value="3 tracks"
+          sub="Personalized"
+          tone="slate"
         />
       </div>
-      <div className="implementation-bucket-row">
+
+      <div className="employee-bucket-row">
+        <BucketCount label="Automate" count={report.summary.automate_count} bucket="AUTOMATE" />
         <BucketCount label="Augment" count={report.summary.augment_count} bucket="AUGMENT" />
         <BucketCount label="OWN" count={report.summary.own_count} bucket="OWN" />
-        <BucketCount label="Automate" count={report.summary.automate_count} bucket="AUTOMATE" />
       </div>
-      <div className="implementation-report-body">
-        <div>
+
+      <div className="employee-report-body">
+        <section>
           <h4>Task-by-task breakdown</h4>
           <p className="implementation-muted">
             {isLeader
@@ -2044,18 +2106,18 @@ function EmployeeTransformationReportView({
               />
             ))}
           </div>
-        </div>
-        <div>
+        </section>
+        <section>
           <h4>Recommended AI tools</h4>
-          <div className="implementation-tool-list">
+          <div className="employee-tool-list">
             {report.tools.map((tool) => (
               <span key={tool}>
-                <Wrench size={14} aria-hidden />
+                <CheckCircle2 size={14} aria-hidden />
                 {tool}
               </span>
             ))}
           </div>
-        </div>
+        </section>
       </div>
       <div className="implementation-workflow-cta">
         <span className="implementation-workflow-cta-label">Your skill roadmap is ready</span>
@@ -2103,23 +2165,60 @@ function EmployeeTransformationReportView({
   );
 }
 
-function ImplementationStat({
+function ReportActionButton({
+  icon: Icon,
+  label,
+  onClick,
+}: {
+  icon: typeof Clock;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button className="implementation-small-action" type="button" onClick={onClick}>
+      <Icon size={14} aria-hidden />
+      {label}
+    </button>
+  );
+}
+
+function BusinessDarkStat({
   icon: Icon,
   label,
   value,
-  sub,
+  hint,
 }: {
   icon: typeof Clock;
   label: string;
   value: string;
-  sub: string;
+  hint: string;
 }) {
   return (
-    <div className="implementation-stat">
+    <div className="business-dark-stat">
       <span>
         <Icon size={14} aria-hidden />
         {label}
       </span>
+      <strong>{value}</strong>
+      <small>{hint}</small>
+    </div>
+  );
+}
+
+function EmployeeMetricCard({
+  label,
+  value,
+  sub,
+  tone,
+}: {
+  label: string;
+  value: string;
+  sub: string;
+  tone: "green" | "blue" | "slate";
+}) {
+  return (
+    <div className={`employee-metric-card ${tone}`}>
+      <span>{label}</span>
       <strong>{value}</strong>
       <small>{sub}</small>
     </div>
@@ -2171,7 +2270,7 @@ function ImplementationTaskRow({
           <strong>{task.task_name}</strong>
         </div>
         <span className="implementation-task-hours">
-          {beforeHours.toFixed(1)}h {"->"} {afterHours.toFixed(1)}h
+          {beforeHours.toFixed(1)}h {"->"} <b>{afterHours.toFixed(1)}h</b>
         </span>
       </div>
       <span className="implementation-task-progress" aria-hidden>
@@ -2186,6 +2285,70 @@ function ImplementationTaskRow({
 
 function BucketBadge({ bucket }: { bucket: ImplementationTask["bucket"] }) {
   return <span className={`implementation-badge ${bucket.toLowerCase()}`}>{bucket}</span>;
+}
+
+function businessReportToText(report: BusinessOpportunityReport) {
+  return [
+    "AI Opportunity Report",
+    `${report.companyName}`,
+    `${report.website} · ${report.industry} · ${report.sizeEstimate}`,
+    "",
+    `Annual Cost of Inaction: ${formatShortUsd(report.annualValueAtRisk)}`,
+    `5-Year Competitive Gap: ${formatShortUsd(report.fiveYearCostOfInaction)}`,
+    `Workforce Score: ${Math.round(report.opportunityScore)}/100`,
+    `Recoverable / week: ${formatLabNumber(report.weeklyHoursReclaimable)} hrs`,
+    "",
+    "Executive Summary",
+    report.executiveSummary,
+    report.scoreRationale,
+    "",
+    "What's hiding in your operations",
+    ...report.opportunities.map(
+      (opportunity) =>
+        `- ${opportunity.department}: ${opportunity.pilotLabel} (${formatLabNumber(
+          opportunity.estimatedAnnualHours,
+        )} hrs/year) - ${opportunity.symptom}`,
+    ),
+  ].join("\n");
+}
+
+function employeeReportToText(report: EmployeeTransformationReport) {
+  return [
+    "AI-Ready Action Plan",
+    `${report.workArea}`,
+    `${report.skillsAnalyzed} skills analyzed · ${report.tasks.length} tasks generated`,
+    "",
+    `Hours saved / month: ${report.summary.estimated_monthly_hours_saved.toFixed(1)}`,
+    `FTE equivalent: ${report.summary.estimated_fte_equivalent_saved.toFixed(2)}`,
+    `Buckets: ${report.summary.automate_count} automate, ${report.summary.augment_count} augment, ${report.summary.own_count} own`,
+    "",
+    "Task-by-task breakdown",
+    ...report.tasks.map((task) => {
+      const beforeHours = (task.avg_minutes_per_instance * task.instances_per_month) / 60;
+      const afterHours = Math.max(0, beforeHours - task.monthly_hours_saved);
+      return `- ${task.bucket}: ${task.task_name} (${beforeHours.toFixed(1)}h -> ${afterHours.toFixed(1)}h). AI does: ${task.ai_action}`;
+    }),
+    "",
+    "Recommended AI tools",
+    ...report.tools.map((tool) => `- ${tool}`),
+  ].join("\n");
+}
+
+function copyReportText(text: string) {
+  if (!navigator.clipboard) return;
+  void navigator.clipboard.writeText(text);
+}
+
+function downloadReportText(filename: string, text: string) {
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename.replace(/[^a-z0-9._-]+/gi, "-").toLowerCase();
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
 
 function ImplementationGuardrails({
