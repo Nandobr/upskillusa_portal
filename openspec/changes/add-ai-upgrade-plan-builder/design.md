@@ -14,7 +14,7 @@ The MVP constraints remain unchanged: no authentication, database, backend persi
 - Save the user's plan draft locally in the browser for MVP continuity across pages.
 - Generate deterministic plan text from templates and rules.
 - Provide plan completeness levels, next 3 days/next 7 days guidance, and after-7-days momentum options.
-- Allow users to copy or download the generated plan.
+- Allow users to copy the generated plan as text and download it through the browser print-to-PDF flow.
 
 **Non-Goals:**
 
@@ -61,6 +61,12 @@ Alternative considered: implement the full NIST AI RMF or another full AI risk q
 Every plan level should include next actions. Partial plans include a next 3 days section and a CTA to continue the next framework step. Complete plans include a next 7 days section and an "After 7 Days: Choose Your Next Move" section.
 
 Alternative considered: only generate a plan after Implement. That would make the product less useful for visitors who do not have all answers yet.
+
+### Decision: Plan Download Uses Print-To-PDF
+
+The `/plan` download action should print only the final plan document, not the sidebar, navigation, or page shell. Copy remains text-based.
+
+Alternative considered: continue downloading plain text. That is simpler, but it does not match the report-style artifacts used elsewhere in the portal.
 
 ## Risks / Trade-offs
 

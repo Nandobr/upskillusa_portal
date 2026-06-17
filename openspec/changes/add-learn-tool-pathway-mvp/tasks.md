@@ -10,7 +10,7 @@
 - [x] 2.1 Replace the current Learn demo with a cascading selectable pathway UI on `/learn`
 - [x] 2.2 Implement downstream reset behavior when an earlier selection changes
 - [x] 2.3 Render the generated LEARN Report only after all required selections are complete
-- [x] 2.4 Add copy and download actions for the generated LEARN Report
+- [x] 2.4 Add copy and PDF download actions for the generated LEARN Report
 - [x] 2.5 Ensure Learn pathway layout follows `DESIGN.md` and the Step 1 selectable-card visual pattern
 - [x] 2.6 Simplify the visible Learn MVP to four steps: group, practical goal, tool, and learning format
 
@@ -25,5 +25,5 @@
 
 - [x] 4.1 Verify all selectable pathways use selectable controls only and no free-text questions
 - [x] 4.2 Verify Gemini appears in general LLM/tool option sets
-- [x] 4.3 Verify report copy/download actions work and Learn save does not automatically navigate to Adapt
+- [x] 4.3 Verify report copy/PDF-download actions work and Learn save does not automatically navigate to Adapt
 - [x] 4.4 Run lint, type check, and production build verification commands

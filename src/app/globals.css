@@ -1760,6 +1760,45 @@ button {
   justify-content: flex-start;
 }
 
+.seminar-print-inputs {
+  border: 1px solid rgba(23, 32, 51, 0.1);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 12px;
+}
+
+.seminar-print-inputs dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.seminar-print-inputs div {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--slate-200);
+  border-radius: var(--radius);
+  background: var(--slate-100);
+  padding: 9px 10px;
+}
+
+.seminar-print-inputs dt {
+  color: var(--slate-600);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.seminar-print-inputs dd {
+  margin: 0;
+  color: var(--slate-900);
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .seminar-value-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3259,6 +3298,66 @@ button {
   text-align: right;
 }
 
+@media print {
+  @page {
+    margin: 0.45in;
+  }
+
+  body.printing-report {
+    background: var(--white);
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  body.printing-report * {
+    visibility: hidden !important;
+  }
+
+  body.printing-report .printable-report,
+  body.printing-report .printable-report * {
+    visibility: visible !important;
+  }
+
+  body.printing-report .printable-report {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0 !important;
+    box-shadow: none;
+  }
+
+  body.printing-report .implementation-report-actions,
+  body.printing-report .printable-report .plan-actions,
+  body.printing-report .implementation-workflow-cta .button {
+    display: none !important;
+  }
+
+  body.printing-report .business-audit-value-band,
+  body.printing-report .business-audit-gap-band,
+  body.printing-report .business-audit-summary,
+  body.printing-report .business-audit-opportunities,
+  body.printing-report .business-audit-methodology,
+  body.printing-report .employee-metric-grid,
+  body.printing-report .employee-bucket-row,
+  body.printing-report .employee-report-body,
+  body.printing-report .implementation-workflow-cta,
+  body.printing-report .learn-report-grid > div,
+  body.printing-report .learn-report-prompt,
+  body.printing-report .learn-report-next,
+  body.printing-report .seminar-print-inputs,
+  body.printing-report .seminar-value-grid {
+    break-inside: avoid;
+  }
+
+  body.printing-report .business-opportunity-row,
+  body.printing-report .implementation-task-row,
+  body.printing-report .employee-tool-list span {
+    break-inside: avoid;
+  }
+}
+
 .footer-line {
   display: block;
 }
@@ -3295,6 +3394,7 @@ button {
   .learn-option-grid.three,
   .learn-option-grid.four,
   .learn-report-grid,
+  .seminar-print-inputs dl,
   .seminar-value-grid,
   .opportunity-why-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3454,6 +3554,7 @@ button {
   .learn-option-grid.three,
   .learn-option-grid.four,
   .learn-report-grid,
+  .seminar-print-inputs dl,
   .seminar-value-grid,
   .implementation-kpi-band,
   .implementation-bucket-row,

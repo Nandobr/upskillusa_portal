@@ -27,4 +27,5 @@ The Business Leader report should follow the reference app's executive audit:
 - Keep report data contracts unchanged.
 - Keep selected-pilot behavior unchanged.
 - Keep all outputs labeled as demo/fallback where the current data says they are demo/fallback.
-- No browser verification until the user approves it.
+- Report download actions should use the browser print-to-PDF flow and isolate the report card for printing.
+- Browser verification is required for the report action flow after implementation.

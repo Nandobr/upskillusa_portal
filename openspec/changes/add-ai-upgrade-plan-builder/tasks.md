@@ -23,7 +23,7 @@
 - [x] 4.1 Add the `/plan` route and page component.
 - [x] 4.2 Render empty, partial, and complete plan states with the correct completeness level.
 - [x] 4.3 Render generated plan sections for opportunity, learning path, adaptation strategy, pilot plan, risk level, next steps, and after-7-days momentum.
-- [x] 4.4 Add copy, download, and clear-plan actions.
+- [x] 4.4 Add copy, PDF-download, and clear-plan actions.
 
 ## 5. Navigation, Content, And Styling
 
@@ -38,3 +38,4 @@
 - [x] 6.2 Run `npm run typecheck`.
 - [x] 6.3 Run `npm run build`.
 - [x] 6.4 Manually verify the four-step journey can produce Level 1, Level 2, Level 3, and Level 4 plans.
+- [x] 6.5 Browser-test that `/plan` PDF download prints only the final plan document.

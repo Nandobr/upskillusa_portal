@@ -90,7 +90,8 @@ The system SHALL allow the visitor to copy or download the generated LEARN Repor
 
 #### Scenario: Visitor downloads the report
 - **WHEN** the visitor activates the download report action
-- **THEN** the system downloads the generated LEARN Report as a local text or markdown file
+- **THEN** the system opens the browser print-to-PDF flow for the generated LEARN Report
+- **AND** the PDF output SHALL include the selected learning options and generated report sections
 
 #### Scenario: Visitor views report labeling
 - **WHEN** the visitor views the generated LEARN Report

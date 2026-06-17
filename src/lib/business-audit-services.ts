@@ -46,8 +46,12 @@ type CompanyEnrichmentLike = {
   } | null;
 } | null;
 
-type OpenAiChatResponse = {
-  choices?: { message?: { content?: string } }[];
+type GeminiResponse = {
+  candidates?: {
+    content?: {
+      parts?: { text?: string }[];
+    };
+  }[];
 };
 
 type LiveBusinessAuditResult = {
@@ -160,7 +164,7 @@ export function isValidBusinessEmail(value: string) {
 }
 
 export function hasRequiredLiveBusinessAuditKey() {
-  return Boolean(process.env.OPENAI_API_KEY);
+  return Boolean(process.env.GEMINI_API_KEY);
 }
 
 export async function createLiveBusinessAudit(args: {
@@ -173,7 +177,7 @@ export async function createLiveBusinessAudit(args: {
   try {
     leadId = await createPendingLead(domain, args.email);
     const [scrape, enrichment] = await Promise.all([scrapeCompany(url), enrichCompany(domain)]);
-    const llmAudit = await runOpenAiAudit({ domain, url, scrape, enrichment });
+    const llmAudit = await runGeminiAudit({ domain, url, scrape, enrichment });
     const costModel = computeCostModel(enrichment as CompanyEnrichmentLike, llmAudit.pain_categories);
     const audit: AuditReport = { ...llmAudit, cost_model: costModel };
     const report = mapAuditToBusinessReport(audit, domain, args.email);
@@ -254,14 +258,26 @@ async function enrichCompany(domain: string): Promise<unknown | null> {
   }
 }
 
-async function runOpenAiAudit(args: {
+function parseJsonObject(text: string) {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  const source = fenced?.[1]?.trim() || trimmed;
+  const start = source.indexOf("{");
+  const end = source.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error("Gemini returned no JSON object");
+  }
+  return JSON.parse(source.slice(start, end + 1));
+}
+
+async function runGeminiAudit(args: {
   domain: string;
   url: string;
   scrape: ScrapeResult | null;
   enrichment: unknown | null;
 }): Promise<LlmAuditPart> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("OPENAI_API_KEY is not configured");
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
 
   const userPayload = {
     domain: args.domain,
@@ -271,46 +287,39 @@ async function runOpenAiAudit(args: {
     enrichment: args.enrichment ?? null,
   };
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+  const prompt = `${AUDIT_SYSTEM_PROMPT}
+
+Schema:
+${JSON.stringify(auditJsonSchema, null, 2)}
+
+Generate the AI Readiness diagnostic for this company. Data:
+
+${JSON.stringify(userPayload, null, 2)}`;
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.3,
+          responseMimeType: "application/json",
+        },
+      }),
     },
-    body: JSON.stringify({
-      model: process.env.OPENAI_AUDIT_MODEL || "gpt-4o-mini",
-      temperature: 0.3,
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "ai_readiness_audit",
-          strict: true,
-          schema: auditJsonSchema,
-        },
-      },
-      messages: [
-        { role: "system", content: AUDIT_SYSTEM_PROMPT },
-        {
-          role: "user",
-          content: `Generate the AI Readiness diagnostic for this company. Data:\n\n${JSON.stringify(
-            userPayload,
-            null,
-            2,
-          )}`,
-        },
-      ],
-    }),
-  });
+  );
 
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(`OpenAI error ${response.status}: ${text.slice(0, 300)}`);
+    throw new Error(`Gemini error ${response.status}: ${text.slice(0, 300)}`);
   }
 
-  const json = (await response.json()) as OpenAiChatResponse;
-  const content = json.choices?.[0]?.message?.content;
-  if (!content) throw new Error("OpenAI returned no content");
-  return JSON.parse(content) as LlmAuditPart;
+  const json = (await response.json()) as GeminiResponse;
+  const content = json.candidates?.[0]?.content?.parts?.map((part) => part.text || "").join("") || "";
+  if (!content) throw new Error("Gemini returned no content");
+  return parseJsonObject(content) as LlmAuditPart;
 }
 
 function computeCostModel(enrichment: CompanyEnrichmentLike, painCategories: PainCategory[]): CostModel {

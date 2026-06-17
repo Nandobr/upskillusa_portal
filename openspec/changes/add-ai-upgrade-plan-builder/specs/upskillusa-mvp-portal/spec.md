@@ -55,6 +55,7 @@ The Adapt route SHALL include a simple client-side process mapping and action pl
 #### Scenario: Visitor builds an action plan
 - **WHEN** a visitor enters plan inputs such as role, automation opportunity, augmentation opportunity, ownership goal, and future skill
 - **THEN** the system displays a draft action plan summary using those inputs
+- **AND** the system SHALL allow the visitor to download the generated Seminar result through the browser print-to-PDF flow with the selected form inputs included
 
 #### Scenario: Visitor completes process mapping inputs
 - **WHEN** a visitor enters work category, workflow pain, delays, repetitive work, judgment needs, and desired outcome

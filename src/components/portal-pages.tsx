@@ -549,16 +549,10 @@ function LearnDemo() {
   }
 
   function downloadReport() {
-    if (!reportText) return;
+    if (!report) return;
 
-    const blob = new Blob([reportText], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "upskill-usa-learn-report.md";
-    link.click();
-    URL.revokeObjectURL(url);
-    setReportStatus("LEARN Report downloaded.");
+    printReportAsPdf("UpSkill USA LEARN Report");
+    setReportStatus("LEARN Report PDF dialog opened.");
   }
 
   return (
@@ -702,7 +696,7 @@ function LearnDemo() {
       ) : null}
 
       {report ? (
-        <section className="result-panel learn-report-panel">
+        <section className="result-panel learn-report-panel printable-report">
           <span className="demo-label">{report.demoLabel}</span>
           <h3>{report.title}</h3>
           <div className="learn-report-grid">
@@ -749,7 +743,7 @@ function LearnDemo() {
               <Clipboard size={16} aria-hidden />
             </button>
             <button className="button ghost" type="button" onClick={downloadReport}>
-              Download report
+              Download PDF
               <Download size={16} aria-hidden />
             </button>
             <button className="button blue" type="button" onClick={saveReport}>
@@ -823,6 +817,15 @@ function AdaptDemo() {
     : [];
   const proofOptions = proofPointOptions[language] ?? proofPointOptions.en;
   const hasSeminarProgress = Boolean(draft.adapt) || Object.keys(builderValues).length > 0;
+  const seminarInputRows =
+    showResult && result
+      ? buildSeminarInputRows({
+          values,
+          copy,
+          builderCopy,
+          proofOptions,
+        })
+      : [];
 
   function replacePathway(nextValues: Partial<AdaptPlanInput>) {
     setResultStatus("");
@@ -875,14 +878,8 @@ function AdaptDemo() {
   function downloadResult() {
     if (!result) return;
 
-    const blob = new Blob([result.text], { type: "text/markdown;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = result.filename;
-    link.click();
-    URL.revokeObjectURL(url);
-    setResultStatus(builderCopy.downloaded);
+    printReportAsPdf(result.title);
+    setResultStatus("Seminar PDF dialog opened.");
   }
 
   function saveResult() {
@@ -1245,10 +1242,21 @@ function AdaptDemo() {
       ) : null}
 
       {showResult && result ? (
-        <section className="result-panel learn-report-panel">
+        <section className="result-panel learn-report-panel printable-report">
           <span className="demo-label">{content.ui.demoContentTitle}</span>
           <h3>{result.title}</h3>
           <p>{result.summary}</p>
+          <div className="seminar-print-inputs">
+            <h4>Selected Seminar Inputs</h4>
+            <dl>
+              {seminarInputRows.map(([label, value]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
           <div className="seminar-value-grid">
             <div className="seminar-value-card">
               <span>{builderCopy.annualValue}</span>
@@ -1274,7 +1282,7 @@ function AdaptDemo() {
               <Clipboard size={16} aria-hidden />
             </button>
             <button className="button ghost" type="button" onClick={downloadResult}>
-              {builderCopy.downloadResult}
+              Download PDF
               <Download size={16} aria-hidden />
             </button>
             <button className="button blue" type="button" onClick={saveResult}>
@@ -1890,7 +1898,7 @@ function BusinessOpportunityReportView({
   const reportText = businessReportToText(report);
 
   return (
-    <section className="implementation-report business-audit-report">
+    <section className="implementation-report business-audit-report printable-report">
       <div className="business-audit-header">
         <div>
           <span className="implementation-report-eyebrow">AI Readiness Diagnostic</span>
@@ -1902,10 +1910,10 @@ function BusinessOpportunityReportView({
           <ReportActionButton icon={Clipboard} label="Copy" onClick={() => copyReportText(reportText)} />
           <ReportActionButton
             icon={Download}
-            label="Download"
-            onClick={() => downloadReportText(`${report.companyName}-ai-opportunity-report.txt`, reportText)}
+            label="Download PDF"
+            onClick={() => printReportAsPdf(`${report.companyName} AI Opportunity Report`)}
           />
-          <ReportActionButton icon={Printer} label="Print / Save PDF" onClick={() => window.print()} />
+          <ReportActionButton icon={Printer} label="Print / Save PDF" onClick={() => printReportAsPdf(`${report.companyName} AI Opportunity Report`)} />
         </div>
       </div>
       {report.demoReason ? <p className="implementation-demo-note">{report.demoReason}</p> : null}
@@ -2030,7 +2038,7 @@ function EmployeeTransformationReportView({
   const reportText = employeeReportToText(report);
 
   return (
-    <section className="employee-action-report">
+    <section className="employee-action-report printable-report">
       <div className="employee-action-header">
         <div className="employee-action-identity">
           <span className="employee-action-avatar" aria-hidden>
@@ -2054,8 +2062,8 @@ function EmployeeTransformationReportView({
           <ReportActionButton icon={Clipboard} label="Copy" onClick={() => copyReportText(reportText)} />
           <ReportActionButton
             icon={Download}
-            label="Download"
-            onClick={() => downloadReportText(`${report.workArea}-ai-ready-action-plan.txt`, reportText)}
+            label="Download PDF"
+            onClick={() => printReportAsPdf(`${report.workArea} AI-Ready Action Plan`)}
           />
         </div>
       </div>
@@ -2334,21 +2342,73 @@ function employeeReportToText(report: EmployeeTransformationReport) {
   ].join("\n");
 }
 
+function buildSeminarInputRows({
+  values,
+  copy,
+  builderCopy,
+  proofOptions,
+}: {
+  values: AdaptPlanInput;
+  copy: ReturnType<typeof getPlanCopy>;
+  builderCopy: (typeof seminarBuilderCopy)[keyof typeof seminarBuilderCopy];
+  proofOptions: SeminarChoice<string>[];
+}) {
+  const rows: Array<[string, string]> = [
+    [builderCopy.trackEyebrow, values.track === "business" ? builderCopy.businessLabel : builderCopy.workerLabel],
+    [builderCopy.areaEyebrow, copy.workCategories[values.workCategory]],
+    [builderCopy.workflowEyebrow, values.workflow],
+  ];
+
+  if (values.track === "business") {
+    const workersAffected = businessWorkersAffectedOptions.find(
+      (option) => option.value === values.business.workersAffected,
+    );
+    const weeklyHours = businessWeeklyHourOptions.find(
+      (option) => option.value === values.business.weeklyHoursSavedPerWorker,
+    );
+    const hourlyValue = businessHourlyValueOptions.find(
+      (option) => option.value === values.business.blendedHourlyValue,
+    );
+    rows.push(
+      [builderCopy.workersAffected, workersAffected?.label ?? `${values.business.workersAffected}`],
+      [builderCopy.weeklyHoursSavedPerWorker, weeklyHours?.label ?? `${values.business.weeklyHoursSavedPerWorker}`],
+      [builderCopy.blendedHourlyValue, hourlyValue?.label ?? `$${values.business.blendedHourlyValue}/hr`],
+    );
+  } else {
+    const weeklyHours = workerWeeklyHourOptions.find((option) => option.value === values.worker.weeklyHoursSaved);
+    const hourlyValue = workerHourlyValueOptions.find((option) => option.value === values.worker.hourlyValue);
+    const proofPoint = proofOptions.find((option) => option.value === values.worker.proofPoint);
+    rows.push(
+      [builderCopy.weeklyHoursSaved, weeklyHours?.label ?? `${values.worker.weeklyHoursSaved} hours`],
+      [builderCopy.hourlyValue, hourlyValue?.label ?? `$${values.worker.hourlyValue}/hr`],
+      [builderCopy.proofPoint, proofPoint?.label ?? values.worker.proofPoint],
+    );
+  }
+
+  const multiplier = seminarMultiplierOptions.find((option) => option.value === values.multiplier);
+  rows.push([builderCopy.multiplier, multiplier?.label ?? `${values.multiplier}x`]);
+  return rows;
+}
+
 function copyReportText(text: string) {
   if (!navigator.clipboard) return;
   void navigator.clipboard.writeText(text);
 }
 
-function downloadReportText(filename: string, text: string) {
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename.replace(/[^a-z0-9._-]+/gi, "-").toLowerCase();
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
+function printReportAsPdf(title: string) {
+  const previousTitle = document.title;
+  document.title = title;
+  document.body.classList.add("printing-report");
+
+  const cleanup = () => {
+    document.body.classList.remove("printing-report");
+    document.title = previousTitle;
+    window.removeEventListener("afterprint", cleanup);
+  };
+
+  window.addEventListener("afterprint", cleanup);
+  window.print();
+  window.setTimeout(cleanup, 800);
 }
 
 function ImplementationGuardrails({
@@ -2879,13 +2939,7 @@ export function PlanPage() {
   }
 
   function downloadPlan() {
-    const blob = new Blob([planText], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "upskill-usa-ai-upgrade-plan.txt";
-    link.click();
-    URL.revokeObjectURL(url);
+    printReportAsPdf("UpSkill USA AI Upgrade Plan");
   }
 
   function clearSavedPlan() {
@@ -2944,7 +2998,7 @@ export function PlanPage() {
                 {copy.actions.copyPlan}
               </button>
               <button className="button ghost" type="button" onClick={downloadPlan}>
-                {copy.actions.downloadPlan}
+                Download PDF
               </button>
               <button className="button danger" type="button" onClick={clearSavedPlan}>
                 {copy.actions.clearPlan}
@@ -2953,7 +3007,7 @@ export function PlanPage() {
             {copyStatus ? <p className="copy-status">{copyStatus}</p> : null}
           </aside>
 
-          <article className="plan-document">
+          <article className="plan-document printable-report">
             {plan.sections.map((section) => (
               <section className="plan-section" key={section.title}>
                 <h2>{section.title}</h2>

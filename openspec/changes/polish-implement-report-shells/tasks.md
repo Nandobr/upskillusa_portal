@@ -16,7 +16,7 @@
 
 ## 3. Actions And Compatibility
 
-- [x] 3.1 Add copy/download/print actions without changing backend behavior.
+- [x] 3.1 Add copy and print-to-PDF download actions without changing backend behavior.
 - [x] 3.2 Preserve existing generated report rendering and selected-pilot state.
 - [x] 3.3 Keep existing API routes and report data types unchanged.
 
@@ -26,4 +26,4 @@
 - [x] 4.2 Run `npm run lint`.
 - [x] 4.3 Run `npm run typecheck`.
 - [x] 4.4 Run `npm run build`.
-- [x] 4.5 Ask before running browser checks. Browser check not run; awaiting user approval.
+- [x] 4.5 Browser-check Business Leader and Employee report PDF actions.

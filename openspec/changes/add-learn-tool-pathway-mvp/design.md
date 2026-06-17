@@ -48,9 +48,9 @@ Use three options for most steps. Use four tool options for general LLM/tool sel
 
 ### Generate a compact LEARN Report
 
-The result should show a report-style output with the selected path, a recommended learning path, a tool starter guide, one practice prompt, one next action, copy/download actions, and a save-to-plan action.
+The result should show a report-style output with the selected path, a recommended learning path, a tool starter guide, one practice prompt, one next action, copy and PDF-download actions, and a save-to-plan action.
 
-- Rationale: this proves the value of curation without requiring a full learning library or asset click-through system.
+- Rationale: this proves the value of curation without requiring a full learning library or asset click-through system. The PDF flow keeps the selected learning options visible in the artifact.
 - Alternative considered: a larger shelf with videos, guides, prompts, detail pages, and downloadable files. That can follow after the MVP proves the report interaction.
 
 ### Reuse local AI Upgrade Plan persistence

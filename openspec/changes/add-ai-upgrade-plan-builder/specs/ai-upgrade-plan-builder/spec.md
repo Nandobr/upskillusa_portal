@@ -106,7 +106,8 @@ The system SHALL allow visitors to copy or download their current AI Upgrade Pla
 
 #### Scenario: Visitor downloads the plan
 - **WHEN** a visitor activates the download action on `/plan`
-- **THEN** the system downloads a text version of the current plan
+- **THEN** the system opens the browser print-to-PDF flow for the current plan document
+- **AND** the PDF output SHALL include only the final plan document and exclude the sidebar, navigation, and page shell
 
 ### Requirement: Clear plan reset
 The system SHALL allow visitors to clear their locally saved AI Upgrade Plan draft.

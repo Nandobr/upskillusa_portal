@@ -13,4 +13,5 @@ The Implement route SHALL include a guided Step 4 AI Implementation Lab whose Bu
 
 #### Scenario: Visitor acts on a generated report
 - **WHEN** a visitor views a generated Step 4 report
-- **THEN** the system provides local report actions such as print, copy, or download without requiring backend persistence
+- **THEN** the system provides local report actions such as copy and print-to-PDF download without requiring backend persistence
+- **AND** the PDF flow SHALL print only the generated report card instead of the surrounding form, navigation, comments, or footer
