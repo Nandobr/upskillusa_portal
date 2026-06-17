@@ -11,10 +11,10 @@
 
 ## 2. Server Analysis Surfaces
 
-- [x] 2.1 Create an Employee Task Transformation analysis API/server utility using `GEMINI_API_KEY` and structured output validation.
-- [x] 2.2 Create a Business Leader AI Opportunity audit API/server utility that supports live audit when `OPENAI_API_KEY` and `FIRECRAWL_API_KEY` are configured.
+- [x] 2.1 Create an Employee Task Transformation analysis API/server utility using `GEMINI_API_KEY`, the reference-style role-analysis prompt/schema, `gemini-2.5-flash` by default, and structured output validation.
+- [x] 2.2 Create a Business Leader AI Opportunity audit API/server utility that supports live audit when Gemini, Firecrawl, and The Companies API keys are configured.
 - [x] 2.3 Add Business Leader demo fallback behavior when live audit keys are missing, including an explicit demo-label flag in the response.
-- [x] 2.4 Add error, retry, and malformed-response handling for both report paths.
+- [x] 2.4 Add error, retry, and malformed-response handling for both report paths, including no silent Employee fallback when Gemini is configured but fails.
 
 ## 3. Step 4 UI Replacement
 
@@ -22,7 +22,7 @@
 - [x] 3.2 Build the Business Leader path with company URL, email, submit action, loading checklist, AI Opportunity Report, first opportunity selection, and save action.
 - [x] 3.3 Build the Employee path with work-area selection, task chips, optional custom tasks, submit action, loading checklist, Task Transformation Report, first pilot task selection, and save action.
 - [x] 3.4 Add Start Over behavior that clears only Step 4 state and leaves other saved plan steps intact.
-- [x] 3.5 Style report cards, KPI bands, bucket badges, task rows, tool chips, and selected states using the existing portal design system.
+- [x] 3.5 Style report cards, KPI bands, bucket badges, task rows, tool chips, selected states, and spinning loading indicators using the existing portal design system.
 
 ## 4. Plan Persistence And Content
 

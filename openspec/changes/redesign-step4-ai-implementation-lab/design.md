@@ -14,8 +14,8 @@ The MVP target is not a full clone of the reference app. Step 4 should borrow th
 - Provide an Employee path with work-area selection, task chips, optional custom tasks, loading state, Task Transformation Report, pilot task selection, and save-to-plan.
 - Reuse reference app logic for AUTOMATE / AUGMENT / OWN task classification, time-savings estimates, FTE equivalent, suggested tools, and task-by-task breakdown.
 - Port or adapt the reference app's key data assets: executive audit sample, Maria-style employee demo sample and avatar pattern, sample pilot task definitions, department/task-chip data, report schemas, and simplified cost-model assumptions.
-- Use `GEMINI_API_KEY` for the Employee report in the first implementation.
-- Support future live Business Leader audits with `OPENAI_API_KEY` and `FIRECRAWL_API_KEY`, while showing a labeled demo report when those keys are missing.
+- Use `GEMINI_API_KEY` for the Employee report with reference-style structured output validation.
+- Support live Business Leader audits with Gemini, Firecrawl, and The Companies API keys, while showing a labeled demo report when required live keys are missing.
 - Persist generated report data and selected pilot into the local AI-Ready Action Plan.
 
 **Non-Goals:**
@@ -47,15 +47,22 @@ Step 4 will not require saved Step 3 data. It may save into the same AI-Ready Ac
 
 The Business Leader path keeps the reference flow of company URL plus email, loading checklist, and AI Opportunity Report. If live audit keys are unavailable, the app shows a clearly labeled demo report inspired by the reference app.
 
-- Rationale: this allows the full product journey to be visualized now without blocking on OpenAI/Firecrawl keys.
+- Rationale: this allows the full product journey to be visualized now without blocking on Gemini, Firecrawl, or The Companies API keys.
 - Alternative considered: use Gemini-only URL estimation immediately. That would produce live output with the current key, but it would drift from the reference app's audit architecture and make later replacement less clean.
 
 ### Implement Employee as Gemini task analysis
 
-The Employee path uses work-area selection, reference-style task chips, optional custom tasks, and a Gemini-backed structured report.
+The Employee path uses work-area selection, reference-style task chips, optional custom tasks, and a Gemini-backed structured report. It adapts the reference app's role-analysis framework, including the AUTOMATE / AUGMENT / OWN prompt, task/time-savings schema, and generated report normalization. The default Employee model is `gemini-2.5-flash`, with `GEMINI_EMPLOYEE_MODEL` available for controlled model changes.
 
 - Rationale: `GEMINI_API_KEY` is already configured, and the reference app's onboarding analysis maps cleanly to this portal's Step 4 value demonstration.
 - Alternative considered: show only a static demo employee report. That would be faster but less useful and less convincing.
+
+### Do not silently fallback for configured Employee AI failures
+
+When `GEMINI_API_KEY` is missing, the Employee path returns a visible configuration error. When the key is configured but Gemini returns an error or malformed structured output, the API returns the real error and the UI keeps the visitor in the form flow so they can retry after the issue is corrected.
+
+- Rationale: the reference app shows an explicit analysis error with retry behavior instead of presenting fallback data as if the live analysis succeeded.
+- Alternative considered: keep the local fallback report for all failures. That hides invalid keys, model/schema issues, and production environment problems.
 
 ### Store report data in the existing local plan draft
 
@@ -66,7 +73,7 @@ Extend `ImplementPlanInput` instead of introducing a separate storage key. The s
 
 ### Keep UI aligned to the portal design system
 
-Use the existing navy/gold/white palette, Step 2/Step 3 guided cards, compact report panels, and accessible select-button patterns. Use reference app report composition only where it improves clarity: KPI band, bucket counts, task rows, loading checklist, and tool chips.
+Use the existing navy/gold/white palette, Step 2/Step 3 guided cards, compact report panels, and accessible select-button patterns. Use reference app report composition only where it improves clarity: KPI band, bucket counts, task rows, loading checklist, spinning loader icon, and tool chips.
 
 - Rationale: the user wants the other app's process, not its whole visual shell.
 - Alternative considered: import Tailwind/shadcn styles from the reference repo. That would increase dependencies and clash with `DESIGN.md`.
@@ -91,8 +98,8 @@ Adapt names, labels, and figures to the UpSkill USA portal context rather than c
 ## Risks / Trade-offs
 
 - Business Leader demo fallback could be mistaken for a live scan -> Label the report as demo content when audit keys are missing and avoid claims of verified company scanning.
-- Live audit integration may require more keys later -> Isolate Business Leader audit logic behind a server function/API route so OpenAI/Firecrawl can replace the demo generator without changing the page flow.
-- AI-generated employee analysis may return malformed data -> Validate/coerce report shape server-side and show retry/error state if structured output is invalid.
+- Live audit integration may require more keys later -> Isolate Business Leader audit logic behind a server function/API route so Gemini, Firecrawl, and enrichment services can change without changing the page flow.
+- AI-generated employee analysis may return malformed data -> Validate/coerce report shape server-side and show a visible retry/error state instead of silently falling back when structured output is invalid.
 - Adding optional custom tasks can make the UI heavier -> Keep custom task entry secondary to chips and limit task counts.
 - Extending `ImplementPlanInput` can affect plan completion logic -> Update defaults and completion checks so Step 4 completes only after a report and pilot are saved.
 - Email intake without email delivery may feel misleading -> Phrase email as "report contact" and store locally only; do not promise delivery until email service is added.

@@ -34,10 +34,17 @@ The Implement route SHALL present Step 4 as an audience-gated AI Implementation 
 #### Scenario: Employee generates task transformation report
 - **WHEN** an Employee submits at least the required work area and selected tasks
 - **THEN** the system generates a Task Transformation Report with AUTOMATE, AUGMENT, and OWN classifications, estimated monthly hours saved, FTE equivalent, task-level AI actions, human ownership notes, and suggested tools
+- **AND** the Employee report SHALL use Gemini structured output validation adapted from the reference app's role-analysis schema
+
+#### Scenario: Employee analysis fails while Gemini is configured
+- **WHEN** an Employee submits work context and the configured Gemini analysis request fails or returns invalid structured output
+- **THEN** the system displays a visible error instead of generating a local fallback report
+- **AND** the visitor can retry after correcting the issue or resubmitting
 
 #### Scenario: Visitor reviews report loading state
 - **WHEN** either report is generating
 - **THEN** the system displays a loading checklist that communicates mapping, classification, value estimation, and pilot preparation progress
+- **AND** the loading header uses a spinning loader icon rather than a static clock
 
 #### Scenario: Visitor selects a first pilot
 - **WHEN** either report is available

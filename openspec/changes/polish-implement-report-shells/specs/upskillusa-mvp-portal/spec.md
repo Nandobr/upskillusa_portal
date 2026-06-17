@@ -15,3 +15,7 @@ The Implement route SHALL include a guided Step 4 AI Implementation Lab whose Bu
 - **WHEN** a visitor views a generated Step 4 report
 - **THEN** the system provides local report actions such as copy and print-to-PDF download without requiring backend persistence
 - **AND** the PDF flow SHALL print only the generated report card instead of the surrounding form, navigation, comments, or footer
+
+#### Scenario: Visitor waits for report generation
+- **WHEN** a Step 4 report is generating
+- **THEN** the report shell displays a spinning loader icon with the loading checklist instead of a static clock icon
