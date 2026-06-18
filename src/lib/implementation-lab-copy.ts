@@ -55,7 +55,6 @@ export type ImplementationLabCopy = {
   actions: {
     copy: string;
     downloadPdf: string;
-    printSavePdf: string;
     regenerate: string;
     sampleData: string;
     liveAudit: string;
@@ -189,7 +188,6 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
     actions: {
       copy: "Copy",
       downloadPdf: "Download PDF",
-      printSavePdf: "Print / Save PDF",
       regenerate: "Regenerate",
       sampleData: "Sample data",
       liveAudit: "Live audit",
@@ -323,7 +321,6 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
     actions: {
       copy: "Copiar",
       downloadPdf: "Descargar PDF",
-      printSavePdf: "Imprimir / Guardar PDF",
       regenerate: "Regenerar",
       sampleData: "Datos de muestra",
       liveAudit: "Auditoría en vivo",
@@ -457,7 +454,6 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
     actions: {
       copy: "Copiar",
       downloadPdf: "Baixar PDF",
-      printSavePdf: "Imprimir / Salvar PDF",
       regenerate: "Regenerar",
       sampleData: "Dados de exemplo",
       liveAudit: "Auditoria ao vivo",

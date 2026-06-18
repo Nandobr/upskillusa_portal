@@ -25,7 +25,6 @@ import {
   Megaphone,
   Network,
   PlayCircle,
-  Printer,
   RotateCw,
   Scale,
   Settings,
@@ -2019,7 +2018,6 @@ function BusinessOpportunityReportView({
             label={copy.actions.downloadPdf}
             onClick={() => printReportAsPdf(`${report.companyName} AI Opportunity Report`)}
           />
-          <ReportActionButton icon={Printer} label={copy.actions.printSavePdf} onClick={() => printReportAsPdf(`${report.companyName} AI Opportunity Report`)} />
         </div>
       </div>
       {report.demoReason ? <p className="implementation-demo-note">{report.demoReason}</p> : null}
