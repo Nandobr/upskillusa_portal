@@ -359,7 +359,7 @@ const homepageFrameworkCardCopy: Partial<
     implement: {
       question: "Find a first AI pilot",
       summary: "For business leaders and employees mapping where AI can save time with human review.",
-      cta: "Generate a report",
+      cta: "Build AI pilot plan",
     },
   },
 };
