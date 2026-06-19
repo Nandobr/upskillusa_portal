@@ -334,13 +334,45 @@ const seminarBuilderCopy = {
   },
 } as const;
 
+const homepageFrameworkCardCopy: Partial<
+  Record<
+    Language,
+    Record<FrameworkKey, { question: string; summary: string; cta: string }>
+  >
+> = {
+  en: {
+    inspire: {
+      question: "Find your direction",
+      summary: "For students, displaced workers, and career changers choosing what comes next.",
+      cta: "Start with my role",
+    },
+    learn: {
+      question: "Build practical AI skills",
+      summary: "For anyone who needs a clear, free path to start using AI responsibly.",
+      cta: "Pick a learning path",
+    },
+    adapt: {
+      question: "Prepare people and teams",
+      summary: "For educators, employers, chambers, and partners turning learning into action.",
+      cta: "Build an action plan",
+    },
+    implement: {
+      question: "Find a first AI pilot",
+      summary: "For business leaders and employees mapping where AI can save time with human review.",
+      cta: "Generate a report",
+    },
+  },
+};
+
 function FrameworkCards() {
-  const { content } = usePortalContent();
+  const { content, language } = usePortalContent();
+  const cardCopy = homepageFrameworkCardCopy[language];
 
   return (
     <div className="framework-grid">
       {frameworkOrder.map((key) => {
         const framework = content.frameworks[key];
+        const card = cardCopy?.[key] ?? framework;
         const Icon = icons[key];
 
         return (
@@ -353,12 +385,12 @@ function FrameworkCards() {
                 <Icon size={18} aria-hidden />
               </div>
               <h3>{framework.title}</h3>
-              <p className="framework-question">{framework.question}</p>
-              <p>{framework.summary}</p>
+              <p className="framework-question">{card.question}</p>
+              <p>{card.summary}</p>
             </div>
             <span className="button-row">
               <span className="button blue">
-                {framework.cta}
+                {card.cta}
                 <ArrowRight size={16} aria-hidden />
               </span>
             </span>
@@ -371,13 +403,15 @@ function FrameworkCards() {
 
 export function OverviewPage() {
   const { content } = usePortalContent();
-  const heroLines = content.brand.lockup.split(". ").map((line, index, lines) => {
-    if (index < lines.length - 1 && !line.endsWith(".")) {
-      return `${line}.`;
-    }
+  const heroLines = content.brand.lockup.includes("\n")
+    ? content.brand.lockup.split("\n")
+    : content.brand.lockup.split(". ").map((line, index, lines) => {
+        if (index < lines.length - 1 && !line.endsWith(".")) {
+          return `${line}.`;
+        }
 
-    return line;
-  });
+        return line;
+      });
 
   return (
     <>

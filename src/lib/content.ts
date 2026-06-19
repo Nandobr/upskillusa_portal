@@ -142,7 +142,7 @@ export const portalContent: Record<Language, PortalContent> = {
     ],
     brand: {
       name: "UpSkill USA",
-      lockup: "Create more value with AI. Keep the people.",
+      lockup: "Find where AI can save time\nwithout replacing people.",
       tagline: "Inspire -> Learn -> Seminar -> Implement",
       promise: "We don't fire. We upgrade.",
       jfkLine: "Ask not what AI can do for you. Ask what you can do with AI.",
@@ -150,10 +150,10 @@ export const portalContent: Record<Language, PortalContent> = {
     },
     overview: {
       eyebrow: "AI workforce upgrade portal",
-      title: "Four steps to create value and keep the employees.",
+      title: "Choose the path that fits where you are today.",
       intro:
-        "A practical portal for business leaders to find AI-ready opportunities, prepare teams, and launch human-reviewed workflows that create measurable value.",
-      arc: ["Find your gift", "Learn AI for free", "Build your AI-ready action plan", "Implement at business"],
+        "Use UpSkill USA to find practical paths to learn AI, find business opportunities, redesign work, and launch human-reviewed pilots.",
+      arc: ["Find your direction", "Build practical AI skills", "Prepare people and teams", "Find a first AI pilot"],
       primaryCta: "Map Your AI Opportunity",
       secondaryCta: "Explore the Four Steps",
       metricNote: "Source-note: use the DOCX-corrected figure of 22% of jobs disrupted by 2030.",
