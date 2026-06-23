@@ -334,11 +334,9 @@ const seminarBuilderCopy = {
   },
 } as const;
 
-const homepageFrameworkCardCopy: Partial<
-  Record<
-    Language,
-    Record<FrameworkKey, { question: string; summary: string; cta: string }>
-  >
+const homepageFrameworkCardCopy: Record<
+  Language,
+  Record<FrameworkKey, { question: string; summary: string; cta: string }>
 > = {
   en: {
     inspire: {
@@ -360,6 +358,56 @@ const homepageFrameworkCardCopy: Partial<
       question: "Find a first AI pilot",
       summary: "For business leaders and employees mapping where AI can save time with human review.",
       cta: "Build AI pilot plan",
+    },
+  },
+  es: {
+    inspire: {
+      question: "Encuentra tu dirección",
+      summary:
+        "Para estudiantes, trabajadores desplazados y personas que cambian de carrera y están decidiendo qué sigue.",
+      cta: "Empezar con mi rol",
+    },
+    learn: {
+      question: "Desarrolla habilidades prácticas de IA",
+      summary:
+        "Para cualquier persona que necesita un camino claro y gratuito para empezar a usar IA de forma responsable.",
+      cta: "Elegir una ruta de aprendizaje",
+    },
+    adapt: {
+      question: "Prepara a personas y equipos",
+      summary: "Para educadores, empleadores, cámaras y socios que convierten el aprendizaje en acción.",
+      cta: "Crear un plan de acción",
+    },
+    implement: {
+      question: "Encuentra un primer piloto de IA",
+      summary:
+        "Para líderes empresariales y empleados que identifican dónde la IA puede ahorrar tiempo con revisión humana.",
+      cta: "Crear plan piloto de IA",
+    },
+  },
+  pt: {
+    inspire: {
+      question: "Encontre sua direção",
+      summary:
+        "Para estudantes, trabalhadores deslocados e pessoas em transição de carreira decidindo o próximo passo.",
+      cta: "Começar pelo meu papel",
+    },
+    learn: {
+      question: "Desenvolva habilidades práticas em IA",
+      summary:
+        "Para qualquer pessoa que precisa de um caminho claro e gratuito para começar a usar IA com responsabilidade.",
+      cta: "Escolher uma trilha de aprendizagem",
+    },
+    adapt: {
+      question: "Prepare pessoas e equipes",
+      summary: "Para educadores, empregadores, câmaras e parceiros que transformam aprendizado em ação.",
+      cta: "Criar um plano de ação",
+    },
+    implement: {
+      question: "Encontre um primeiro piloto de IA",
+      summary:
+        "Para líderes empresariais e funcionários mapeando onde a IA pode economizar tempo com revisão humana.",
+      cta: "Criar plano piloto de IA",
     },
   },
 };

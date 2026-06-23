@@ -569,9 +569,10 @@ button {
 
 .framework-step {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: 8px;
+  justify-items: center;
+  gap: 6px;
   color: var(--blue-700);
   font-size: 0.98rem;
   font-weight: 700;
@@ -580,13 +581,15 @@ button {
 }
 
 .framework-step span {
-  grid-column: 2;
+  grid-column: 1;
+  grid-row: 2;
   justify-self: center;
 }
 
 .framework-step svg {
-  grid-column: 3;
-  justify-self: end;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: center;
 }
 
 .framework-card h3,
@@ -627,6 +630,7 @@ button {
   margin: 6px 0;
   font-size: 0.76rem;
   line-height: 1.42;
+  text-align: center;
 }
 
 .framework-question {
@@ -634,6 +638,10 @@ button {
   font-size: 0.8rem;
   font-weight: 650;
   text-align: center;
+}
+
+.framework-question + p {
+  margin-top: 14px;
 }
 
 .framework-card .button {
@@ -3737,6 +3745,10 @@ button {
     margin: 6px 0;
     font-size: 0.76rem;
     line-height: 1.4;
+  }
+
+  .framework-question + p {
+    margin-top: 14px;
   }
 
   .framework-card .button-row {
