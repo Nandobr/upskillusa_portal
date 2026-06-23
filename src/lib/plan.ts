@@ -1,5 +1,10 @@
 import type { FrameworkKey, Language } from "@/lib/content";
 import {
+  getLearnCourseRecommendations,
+  type CourseRecommendation,
+  type CourseRecommendationSlot,
+} from "@/lib/course-recommendations";
+import {
   formatLabNumber,
   formatShortUsd,
   type BusinessOpportunityReport,
@@ -220,6 +225,7 @@ export type LearnReport = {
   profileSummary: string;
   learningPath: string[];
   toolStarterGuide: string[];
+  courseRecommendations: CourseRecommendation[];
   practicePrompt: string;
   nextAction: string;
   planSummary: string;
@@ -405,6 +411,10 @@ const learnLocalization: Record<
       planSummary: (group: string, goal: string, tool: string, format: string) => string;
       learningPath: (goal: string, tool: string, reviewAction: string) => string[];
       starterGuideItems: (tool: string) => string[];
+      courseRecommendationsTitle: string;
+      courseRecommendationsSubtitle: string;
+      openCourse: string;
+      courseSlots: Record<CourseRecommendationSlot, string>;
     };
   }
 > = {
@@ -468,6 +478,15 @@ const learnLocalization: Record<
         "Begin with context, desired output, constraints, and what a good answer should include.",
         "Ask for a revision after you review the first output; the second pass is usually where the value appears.",
       ],
+      courseRecommendationsTitle: "Recommended free courses",
+      courseRecommendationsSubtitle: "Based on your group, goal, tool, and preferred learning style.",
+      openCourse: "Open course",
+      courseSlots: {
+        "understand-ai": "Understand AI",
+        "learn-tool": "Learn your tool",
+        "use-role": "Use AI in your role",
+        "use-responsibly": "Use AI responsibly",
+      },
     },
   },
   es: {
@@ -546,6 +565,15 @@ const learnLocalization: Record<
         "Comienza con contexto, resultado deseado, límites y lo que debe incluir una buena respuesta.",
         "Pide una revisión después de evaluar el primer resultado; normalmente el valor aparece en la segunda pasada.",
       ],
+      courseRecommendationsTitle: "Cursos gratuitos recomendados",
+      courseRecommendationsSubtitle: "Según tu grupo, meta, herramienta y formato de aprendizaje preferido.",
+      openCourse: "Abrir curso",
+      courseSlots: {
+        "understand-ai": "Entender la IA",
+        "learn-tool": "Aprender tu herramienta",
+        "use-role": "Usar IA en tu rol",
+        "use-responsibly": "Usar IA responsablemente",
+      },
     },
   },
   pt: {
@@ -624,6 +652,15 @@ const learnLocalization: Record<
         "Comece com contexto, resultado desejado, limites e o que uma boa resposta deve incluir.",
         "Peça uma revisão depois de avaliar o primeiro resultado; geralmente o valor aparece na segunda passada.",
       ],
+      courseRecommendationsTitle: "Cursos gratuitos recomendados",
+      courseRecommendationsSubtitle: "Com base no seu grupo, meta, ferramenta e formato de aprendizagem preferido.",
+      openCourse: "Abrir curso",
+      courseSlots: {
+        "understand-ai": "Entender IA",
+        "learn-tool": "Aprender sua ferramenta",
+        "use-role": "Usar IA no seu papel",
+        "use-responsibly": "Usar IA com responsabilidade",
+      },
     },
   },
 };
@@ -691,6 +728,7 @@ export function generateLearnReport(input: LearnPlanInput, language: Language = 
   const practicePrompt = copy.prompt(labels.group.label, labels.goal.label, labels.tool.label);
   const nextAction = `${learningVerb} ${labels.time.label.toLowerCase()}. ${timeAction}`;
   const planSummary = copy.planSummary(labels.group.label, labels.goal.label, labels.tool.label, labels.format.label);
+  const courseRecommendations = getLearnCourseRecommendations(input, language);
 
   return {
     title: copy.title,
@@ -704,6 +742,7 @@ export function generateLearnReport(input: LearnPlanInput, language: Language = 
     profileSummary,
     learningPath: copy.learningPath(labels.goal.label, labels.tool.label, reviewAction),
     toolStarterGuide: copy.starterGuideItems(labels.tool.label),
+    courseRecommendations,
     practicePrompt,
     nextAction,
     planSummary,
@@ -728,6 +767,15 @@ export function learnReportToText(report: LearnReport, language: Language = "en"
     "",
     copy.starterGuide,
     ...report.toolStarterGuide.map((item) => `- ${item}`),
+    "",
+    copy.courseRecommendationsTitle,
+    copy.courseRecommendationsSubtitle,
+    ...report.courseRecommendations.flatMap(({ slot, course }) => [
+      `- ${copy.courseSlots[slot]}: ${course.title}`,
+      `  ${course.provider} | ${course.level} | ${course.accessModel} | ${course.languages}`,
+      `  ${course.fitReason}`,
+      `  ${course.url}`,
+    ]),
     "",
     copy.practicePrompt,
     report.practicePrompt,

@@ -926,6 +926,31 @@ function LearnDemo() {
             <h4>{reportCopy.nextAction}</h4>
             <p>{report.nextAction}</p>
           </div>
+          <div className="learn-course-recommendations">
+            <div className="learn-course-heading">
+              <h4>{reportCopy.courseRecommendationsTitle}</h4>
+              <p>{reportCopy.courseRecommendationsSubtitle}</p>
+            </div>
+            <div className="learn-course-grid">
+              {report.courseRecommendations.map(({ slot, course }) => (
+                <article className="learn-course-card" key={`${slot}-${course.url}`}>
+                  <span className="learn-course-slot">{reportCopy.courseSlots[slot]}</span>
+                  <h5>{course.title}</h5>
+                  <p className="learn-course-provider">{course.provider}</p>
+                  <div className="learn-course-meta" aria-label={`${course.level}, ${course.accessModel}, ${course.languages}`}>
+                    <span>{course.level}</span>
+                    <span>{course.accessModel}</span>
+                    <span>{course.languages}</span>
+                  </div>
+                  <p>{course.fitReason}</p>
+                  <a className="button ghost learn-course-link" href={course.url} target="_blank" rel="noreferrer">
+                    {reportCopy.openCourse}
+                    <ArrowRight size={16} aria-hidden />
+                  </a>
+                </article>
+              ))}
+            </div>
+          </div>
           <div className="plan-actions learn-report-actions">
             <button className="button ghost" type="button" onClick={copyReport}>
               {learnCopy.actions.copyReport}

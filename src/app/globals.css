@@ -1764,6 +1764,90 @@ button {
   color: var(--slate-900);
 }
 
+.learn-course-recommendations {
+  display: grid;
+  gap: 12px;
+}
+
+.learn-course-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.learn-course-heading p {
+  margin: 0;
+  color: var(--slate-600);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.learn-course-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.learn-course-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  border: 1px solid rgba(23, 32, 51, 0.1);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 12px;
+}
+
+.learn-course-slot {
+  color: var(--blue-700);
+  font-size: 0.74rem;
+  font-weight: 750;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.learn-course-card h5 {
+  margin: 0;
+  color: var(--slate-900);
+  font-size: 0.96rem;
+  line-height: 1.22;
+}
+
+.learn-course-card p {
+  margin: 0;
+  color: var(--slate-600);
+  font-size: 0.82rem;
+  line-height: 1.48;
+}
+
+.learn-course-provider {
+  font-weight: 650;
+}
+
+.learn-course-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.learn-course-meta span {
+  border: 1px solid rgba(30, 86, 216, 0.14);
+  border-radius: 999px;
+  background: rgba(30, 86, 216, 0.06);
+  color: var(--navy-900);
+  padding: 3px 7px;
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.learn-course-link {
+  align-self: end;
+  justify-self: start;
+  min-height: 32px;
+  padding: 7px 10px;
+  font-size: 0.76rem;
+}
+
 .learn-report-actions {
   justify-content: flex-start;
 }
@@ -3358,6 +3442,7 @@ button {
   body.printing-report .employee-report-body,
   body.printing-report .implementation-workflow-cta,
   body.printing-report .learn-report-grid > div,
+  body.printing-report .learn-course-card,
   body.printing-report .learn-report-prompt,
   body.printing-report .learn-report-next,
   body.printing-report .seminar-print-inputs,
@@ -3407,6 +3492,7 @@ button {
   .assessment-skill-grid,
   .learn-option-grid.three,
   .learn-option-grid.four,
+  .learn-course-grid,
   .learn-report-grid,
   .seminar-print-inputs dl,
   .seminar-value-grid,
@@ -3567,6 +3653,7 @@ button {
 
   .learn-option-grid.three,
   .learn-option-grid.four,
+  .learn-course-grid,
   .learn-report-grid,
   .seminar-print-inputs dl,
   .seminar-value-grid,
