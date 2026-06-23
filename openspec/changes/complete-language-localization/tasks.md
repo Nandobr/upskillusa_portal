@@ -18,6 +18,7 @@
 - [ ] 3.2 Localize IKIGAI assessment headings, prompts, buttons, empty states, review labels, and action-plan labels while keeping occupation dataset values in English for this MVP.
 - [x] 3.3 Localize generated AI-Ready Action Plan surrounding labels and text helpers in copy/download/print flows.
 - [x] 3.4 Preserve English fallback behavior for untranslated assessment or dataset values so no missing or empty labels appear.
+- [x] 3.5 Localize homepage-specific framework card question, summary, and CTA copy in EN, ES, and PT-BR, and require language-complete card copy so missing translations do not silently fall back.
 
 ## 4. AI Report Language Support
 

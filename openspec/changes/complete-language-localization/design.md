@@ -68,6 +68,13 @@ Create an inventory of hardcoded user-facing strings before moving copy. Categor
 - Rationale: this minimizes missed strings and avoids translating code constants or data that should remain stable.
 - Alternative considered: manually patch pages ad hoc. Faster at first, but it tends to miss secondary states, PDFs, errors, and mobile labels.
 
+### Keep homepage-specific copy language-complete
+
+Homepage copy that overrides shared framework content should require entries for English, Spanish, and Brazilian Portuguese instead of using a partial fallback object.
+
+- Rationale: the overview is a high-visibility entry point, and fallback to older shared framework copy can make translated homepage cards diverge from the current English positioning.
+- Alternative considered: rely on shared framework translations when a homepage override is missing. That avoids duplicating copy, but it hides semantic drift from localization QA and TypeScript.
+
 ### Add a lightweight QA script
 
 The QA script should check copy object key parity, empty strings, placeholder consistency, and likely English leftovers in ES/PT-BR copy. It should be conservative and allow documented exceptions.

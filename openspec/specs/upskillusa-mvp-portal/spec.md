@@ -10,6 +10,10 @@ The system SHALL provide a public, unauthenticated UpSkill USA portal with separ
 - **WHEN** a visitor navigates to `/`
 - **THEN** the system displays an overview of the UpSkill USA four-framework journey and links to Inspire, Learn, Adapt, and Implement
 
+#### Scenario: Visitor reviews the overview framework cards
+- **WHEN** a visitor views the overview framework cards
+- **THEN** each card presents the framework icon centered above the step label, centered title and descriptive copy, and a clear call to action for the corresponding framework route
+
 #### Scenario: Visitor opens each framework route
 - **WHEN** a visitor navigates to `/inspire`, `/learn`, `/adapt`, or `/implement`
 - **THEN** the system displays the corresponding framework page without requiring sign-in

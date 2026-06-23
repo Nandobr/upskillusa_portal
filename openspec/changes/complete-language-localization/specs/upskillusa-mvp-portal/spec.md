@@ -8,6 +8,11 @@ The system SHALL provide a client-side language toggle for English, Spanish, and
 - **THEN** the system updates key navigation labels, calls to action, form labels, page summaries, demo text, generated-plan labels, and report shell labels to the selected language where translated copy exists
 - **AND** the system stores the selected language for future visits in the same browser
 
+#### Scenario: Visitor views translated homepage framework cards
+- **WHEN** a visitor selects ES or PT and views the portal overview
+- **THEN** the four homepage framework cards display localized question, summary, and call-to-action copy matching the current English homepage positioning
+- **AND** missing homepage-card translations are caught structurally instead of silently falling back to older shared framework copy
+
 #### Scenario: Visitor returns after selecting a language
 - **WHEN** a visitor has previously selected ES or PT and opens or refreshes the portal
 - **THEN** the system restores the previously selected language instead of resetting to English
