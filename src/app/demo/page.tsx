@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
 import { DemoPageContent } from "@/components/demo-page-content";
+import { createPageMetadata } from "@/lib/metadata";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = createPageMetadata({
   title: "Product Demo — UpSkill USA",
   description:
-    "Watch the UpSkill USA demo: Inspiration, Education, Seminar, and Implementation in action.",
-  openGraph: {
-    title: "Product Demo — UpSkill USA",
-    description:
-      "See how UpSkill USA helps people and organizations create value with AI while keeping people in the loop.",
-  },
-};
+    "Watch a guided walkthrough of the UpSkill USA path from inspiration and learning to action planning and implementation.",
+  path: "/demo",
+});
 
 export default function DemoPage() {
   return <DemoPageContent />;
