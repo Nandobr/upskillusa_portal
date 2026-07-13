@@ -59,6 +59,12 @@ export type PortalContent = {
     primaryCta: string;
     secondaryCta: string;
     metricNote: string;
+    launcher: {
+      companyUrlLabel: string;
+      companyUrlPlaceholder: string;
+      validationError: string;
+      cta: string;
+    };
   };
   frameworks: Record<FrameworkKey, FrameworkSummary>;
   pages: Record<
@@ -135,7 +141,7 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "English",
     nav: [
       { key: "overview", label: "Overview", href: sharedRoutes.overview },
-      { key: "inspire", label: "Inspire", href: sharedRoutes.inspire },
+      { key: "inspire", label: "Imagine", href: sharedRoutes.inspire },
       { key: "learn", label: "Learn", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminar", href: sharedRoutes.adapt },
       { key: "implement", label: "Implement", href: sharedRoutes.implement },
@@ -143,7 +149,7 @@ export const portalContent: Record<Language, PortalContent> = {
     brand: {
       name: "UpSkill USA",
       lockup: "Find where AI can save time\nwithout replacing people.",
-      tagline: "Inspire -> Learn -> Seminar -> Implement",
+      tagline: "Imagine -> Learn -> Seminar -> Implement",
       promise: "We don't fire. We upgrade.",
       jfkLine: "Ask not what AI can do for you. Ask what you can do with AI.",
       giBillLine: "The G.I. Bill for the AI Age.",
@@ -157,13 +163,19 @@ export const portalContent: Record<Language, PortalContent> = {
       primaryCta: "Map Your AI Opportunity",
       secondaryCta: "Explore the Four Steps",
       metricNote: "Source-note: use the DOCX-corrected figure of 22% of jobs disrupted by 2030.",
+      launcher: {
+        companyUrlLabel: "Company URL",
+        companyUrlPlaceholder: "yourcompany.com",
+        validationError: "Enter a valid company URL.",
+        cta: "Get your free AI Opportunity Report",
+      },
     },
     frameworks: {
       inspire: {
         key: "inspire",
         tab: "STEP 1",
         route: "/inspire",
-        title: "Inspiration",
+        title: "Imagine",
         question: "What's your gift?",
         audience: "Students, workers, and anyone who needs a reason to care before learning.",
         summary:
@@ -366,7 +378,7 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "Español",
     nav: [
       { key: "overview", label: "Resumen", href: sharedRoutes.overview },
-      { key: "inspire", label: "Inspirar", href: sharedRoutes.inspire },
+      { key: "inspire", label: "Imaginar", href: sharedRoutes.inspire },
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminario", href: sharedRoutes.adapt },
       { key: "implement", label: "Implementar", href: sharedRoutes.implement },
@@ -374,7 +386,7 @@ export const portalContent: Record<Language, PortalContent> = {
     brand: {
       name: "UpSkill USA",
       lockup: "Mejora el trabajo. Conserva a las personas.",
-      tagline: "Inspirar -> Aprender -> Seminario -> Implementar",
+      tagline: "Imaginar -> Aprender -> Seminario -> Implementar",
       promise: "No despedimos. Mejoramos capacidades.",
       jfkLine: "No preguntes qué puede hacer la IA por ti. Pregunta qué puedes hacer con la IA.",
       giBillLine: "El G.I. Bill para la era de la IA.",
@@ -388,13 +400,19 @@ export const portalContent: Record<Language, PortalContent> = {
       primaryCta: "Mapear oportunidad de IA",
       secondaryCta: "Explorar los cuatro pasos",
       metricNote: "Nota de fuente: usar la cifra corregida del DOCX de 22% de empleos afectados para 2030.",
+      launcher: {
+        companyUrlLabel: "URL de la empresa",
+        companyUrlPlaceholder: "tuempresa.com",
+        validationError: "Ingresa una URL de empresa válida.",
+        cta: "Obtén gratis tu reporte de oportunidad con IA",
+      },
     },
     frameworks: {
       inspire: {
         key: "inspire",
         tab: "PASO 1",
         route: "/inspire",
-        title: "Inspiración",
+        title: "Imaginar",
         question: "¿Cuál es tu don?",
         audience: "Estudiantes, trabajadores y cualquier persona que necesite una razón para interesarse antes de aprender.",
         summary:
@@ -602,7 +620,7 @@ export const portalContent: Record<Language, PortalContent> = {
     languageName: "Português",
     nav: [
       { key: "overview", label: "Visão geral", href: sharedRoutes.overview },
-      { key: "inspire", label: "Inspirar", href: sharedRoutes.inspire },
+      { key: "inspire", label: "Imaginar", href: sharedRoutes.inspire },
       { key: "learn", label: "Aprender", href: sharedRoutes.learn },
       { key: "adapt", label: "Seminário", href: sharedRoutes.adapt },
       { key: "implement", label: "Implementar", href: sharedRoutes.implement },
@@ -610,7 +628,7 @@ export const portalContent: Record<Language, PortalContent> = {
     brand: {
       name: "UpSkill USA",
       lockup: "Atualize o trabalho. Mantenha as pessoas.",
-      tagline: "Inspirar -> Aprender -> Seminário -> Implementar",
+      tagline: "Imaginar -> Aprender -> Seminário -> Implementar",
       promise: "Não demitimos. Requalificamos.",
       jfkLine: "Não pergunte o que a IA pode fazer por você. Pergunte o que você pode fazer com a IA.",
       giBillLine: "O G.I. Bill para a era da IA.",
@@ -624,13 +642,19 @@ export const portalContent: Record<Language, PortalContent> = {
       primaryCta: "Mapear oportunidade de IA",
       secondaryCta: "Explorar os quatro passos",
       metricNote: "Nota de fonte: use o número corrigido do DOCX de 22% dos empregos impactados até 2030.",
+      launcher: {
+        companyUrlLabel: "URL da empresa",
+        companyUrlPlaceholder: "suaempresa.com",
+        validationError: "Insira uma URL válida da empresa.",
+        cta: "Obtenha gratuitamente seu relatório de oportunidade com IA",
+      },
     },
     frameworks: {
       inspire: {
         key: "inspire",
         tab: "PASSO 1",
         route: "/inspire",
-        title: "Inspiração",
+        title: "Imaginar",
         question: "Qual é o seu dom?",
         audience: "Estudantes, trabalhadores e qualquer pessoa que precise de um motivo para se importar antes de aprender.",
         summary:

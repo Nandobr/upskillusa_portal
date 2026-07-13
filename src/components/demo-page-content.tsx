@@ -23,7 +23,7 @@ const demoPageCopy: Record<
   en: {
     eyebrow: "Guided Demo",
     title: "See UpSkill USA in action.",
-    intro: "A walkthrough of the four steps: Inspiration, Education, Seminar, and Implementation.",
+    intro: "A walkthrough of the four steps: Imagine, Education, Seminar, and Implementation.",
     videoTitle: "UpSkill USA Product Demo",
     auditEyebrow: "Free Audit",
     auditTitle: "Ready to see your own audit?",
@@ -33,7 +33,7 @@ const demoPageCopy: Record<
   es: {
     eyebrow: "Demo guiada",
     title: "Mira UpSkill USA en acción.",
-    intro: "Un recorrido por los cuatro pasos: Inspiración, Educación, Seminario e Implementación.",
+    intro: "Un recorrido por los cuatro pasos: Imaginar, Educación, Seminario e Implementación.",
     videoTitle: "Demo de producto de UpSkill USA",
     auditEyebrow: "Auditoría gratis",
     auditTitle: "¿Listo para ver tu propia auditoría?",
@@ -43,7 +43,7 @@ const demoPageCopy: Record<
   pt: {
     eyebrow: "Demo guiada",
     title: "Veja a UpSkill USA em ação.",
-    intro: "Um tour pelos quatro passos: Inspiração, Educação, Seminário e Implementação.",
+    intro: "Um tour pelos quatro passos: Imaginar, Educação, Seminário e Implementação.",
     videoTitle: "Demo do produto UpSkill USA",
     auditEyebrow: "Auditoria grátis",
     auditTitle: "Pronto para ver sua própria auditoria?",

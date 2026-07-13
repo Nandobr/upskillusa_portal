@@ -63,11 +63,28 @@ export type ImplementationLabCopy = {
     eyebrow: string;
     annualCost: string;
     laborValue: (company: string) => string;
-    employees: string;
+    employeePlanningAssumption: string;
+    reportedEmployeeCount: string;
+    conservativeEstimate: string;
+    lowerBoundRange: (range: string) => string;
+    publicInformationReason: string;
+    sampleEstimateReason: string;
+    sampleSource: string;
+    inactiveReason: string;
+    companySizeUnavailable: string;
+    notEstimated: string;
+    source: string;
+    confidence: string;
+    confidenceHigh: string;
+    confidenceMedium: string;
+    confidenceNone: string;
+    observed: string;
     addressableRoles: string;
     recoverableWeek: string;
     hoursShort: string;
     hoursYear: string;
+    annualRecoverable: string;
+    fteEquivalent: string;
     gap: string;
     gapDescription: string;
     workforceScore: string;
@@ -110,7 +127,7 @@ export type ImplementationLabCopy = {
     eyebrow: string;
     title: string;
     selectedPilot: string;
-    estimate: (hours: number, threshold: number) => string;
+    estimate: (hours: number | null, threshold: number) => string;
     inScope: string;
     outOfScope: string;
     viewPlan: string;
@@ -196,11 +213,28 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
       eyebrow: "AI Readiness Diagnostic",
       annualCost: "Annual Cost of Inaction",
       laborValue: (company) => `in fully loaded labor value locked inside repeatable, addressable work at ${company}.`,
-      employees: "Employees",
+      employeePlanningAssumption: "Employee planning assumption",
+      reportedEmployeeCount: "Reported employee count",
+      conservativeEstimate: "Conservative estimate",
+      lowerBoundRange: (range) => `Lower bound of the reported ${range} range.`,
+      publicInformationReason: "Based on public company-size information found online.",
+      sampleEstimateReason: "Sample planning assumption for this demo report.",
+      sampleSource: "Sample report",
+      inactiveReason: "The company domain was identified as inactive; no employee estimate was used.",
+      companySizeUnavailable: "Company size unavailable",
+      notEstimated: "Not estimated",
+      source: "Source",
+      confidence: "Confidence",
+      confidenceHigh: "High",
+      confidenceMedium: "Medium",
+      confidenceNone: "Unavailable",
+      observed: "Observed",
       addressableRoles: "Addressable roles",
       recoverableWeek: "Recoverable / week",
       hoursShort: "hrs",
       hoursYear: "hrs/year",
+      annualRecoverable: "Recoverable / year",
+      fteEquivalent: "FTE equivalent",
       gap: "5-Year Competitive Gap",
       gapDescription: "Cumulative value lost if competitors deploy AI before you do.",
       workforceScore: "Workforce Score",
@@ -245,7 +279,8 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
       eyebrow: "First pilot",
       title: "Add guardrails and save",
       selectedPilot: "Selected pilot",
-      estimate: (hours, threshold) => `${hours} hrs/week estimate · threshold ${threshold}%`,
+      estimate: (hours, threshold) =>
+        `${hours == null ? "Not estimated" : `${hours} hrs/week estimate`} · threshold ${threshold}%`,
       inScope: "In scope",
       outOfScope: "Out of scope",
       viewPlan: "View AI-Ready Action Plan",
@@ -329,11 +364,28 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
       eyebrow: "Diagnóstico de preparación para IA",
       annualCost: "Costo anual de inacción",
       laborValue: (company) => `en valor laboral completo atrapado en trabajo repetible y direccionable en ${company}.`,
-      employees: "Empleados",
+      employeePlanningAssumption: "Supuesto de empleados para la planificación",
+      reportedEmployeeCount: "Número de empleados reportado",
+      conservativeEstimate: "Estimación conservadora",
+      lowerBoundRange: (range) => `Límite inferior del rango reportado de ${range}.`,
+      publicInformationReason: "Basado en información pública sobre el tamaño de la empresa encontrada en línea.",
+      sampleEstimateReason: "Supuesto de planificación de muestra para este reporte de demostración.",
+      sampleSource: "Reporte de muestra",
+      inactiveReason: "El dominio de la empresa fue identificado como inactivo; no se usó una estimación de empleados.",
+      companySizeUnavailable: "Tamaño de la empresa no disponible",
+      notEstimated: "No estimado",
+      source: "Fuente",
+      confidence: "Confianza",
+      confidenceHigh: "Alta",
+      confidenceMedium: "Media",
+      confidenceNone: "No disponible",
+      observed: "Observado",
       addressableRoles: "Roles direccionables",
       recoverableWeek: "Recuperable / semana",
       hoursShort: "hrs",
       hoursYear: "hrs/año",
+      annualRecoverable: "Recuperable / año",
+      fteEquivalent: "Equivalente FTE",
       gap: "Brecha competitiva a 5 años",
       gapDescription: "Valor acumulado perdido si los competidores despliegan IA antes que tú.",
       workforceScore: "Puntaje de fuerza laboral",
@@ -378,7 +430,8 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
       eyebrow: "Primer piloto",
       title: "Agrega controles y guarda",
       selectedPilot: "Piloto seleccionado",
-      estimate: (hours, threshold) => `${hours} hrs/semana estimadas · umbral ${threshold}%`,
+      estimate: (hours, threshold) =>
+        `${hours == null ? "No estimado" : `${hours} hrs/semana estimadas`} · umbral ${threshold}%`,
       inScope: "Dentro del alcance",
       outOfScope: "Fuera del alcance",
       viewPlan: "Ver Plan de acción listo para IA",
@@ -462,11 +515,28 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
       eyebrow: "Diagnóstico de prontidão para IA",
       annualCost: "Custo anual da inação",
       laborValue: (company) => `em valor de trabalho totalmente carregado preso em trabalho repetível e endereçável na ${company}.`,
-      employees: "Empregados",
+      employeePlanningAssumption: "Premissa de empregados para planejamento",
+      reportedEmployeeCount: "Número de empregados informado",
+      conservativeEstimate: "Estimativa conservadora",
+      lowerBoundRange: (range) => `Limite inferior da faixa informada de ${range}.`,
+      publicInformationReason: "Com base em informações públicas sobre o porte da empresa encontradas online.",
+      sampleEstimateReason: "Premissa de planejamento de exemplo para este relatório demonstrativo.",
+      sampleSource: "Relatório de exemplo",
+      inactiveReason: "O domínio da empresa foi identificado como inativo; nenhuma estimativa de empregados foi usada.",
+      companySizeUnavailable: "Porte da empresa indisponível",
+      notEstimated: "Não estimado",
+      source: "Fonte",
+      confidence: "Confiança",
+      confidenceHigh: "Alta",
+      confidenceMedium: "Média",
+      confidenceNone: "Indisponível",
+      observed: "Observado",
       addressableRoles: "Funções endereçáveis",
       recoverableWeek: "Recuperável / semana",
       hoursShort: "hrs",
       hoursYear: "hrs/ano",
+      annualRecoverable: "Recuperável / ano",
+      fteEquivalent: "Equivalente FTE",
       gap: "Lacuna competitiva de 5 anos",
       gapDescription: "Valor acumulado perdido se concorrentes implantarem IA antes de você.",
       workforceScore: "Pontuação da força de trabalho",
@@ -511,7 +581,8 @@ export const implementationLabCopy: Record<Language, ImplementationLabCopy> = {
       eyebrow: "Primeiro piloto",
       title: "Adicione controles e salve",
       selectedPilot: "Piloto selecionado",
-      estimate: (hours, threshold) => `${hours} hrs/semana estimadas · limite ${threshold}%`,
+      estimate: (hours, threshold) =>
+        `${hours == null ? "Não estimado" : `${hours} hrs/semana estimadas`} · limite ${threshold}%`,
       inScope: "Dentro do escopo",
       outOfScope: "Fora do escopo",
       viewPlan: "Ver Plano de ação pronto para IA",

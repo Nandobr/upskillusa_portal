@@ -851,7 +851,7 @@ export const planCopy = {
       pageEyebrow: "AI-READY ACTION PLAN",
       pageTitle: "Your plan so far",
       pageIntro:
-        "This local MVP plan is generated from the four UpSkill USA steps you have completed: Inspire, Learn, Seminar, and Implement.",
+        "This local MVP plan is generated from the four UpSkill USA steps you have completed: Imagine, Learn, Seminar, and Implement.",
       nextThreeDays: "Next 3 Days",
       nextSevenDays: "Next 7 Days",
       afterSevenDays: "After 7 Days",
@@ -958,7 +958,7 @@ export const planCopy = {
       workerSeminarTitle: "Manifest of Saved Hours",
       businessSeminarTitle: "Company AI-Ready Action Plan",
       pilotTitle: "First Workflow Pilot",
-      startTitle: "Start With Inspire",
+      startTitle: "Start With Imagine",
       opportunity: (role: string, outcome: string, strengths: string) =>
         `As ${role}, your opportunity is to use AI to move toward ${outcome} while protecting the human strengths that matter most: ${strengths}.`,
       context: (value: string) => `Context: ${value}`,
@@ -992,7 +992,7 @@ export const planCopy = {
       riskLevel: (value: string) => `Risk level: ${value}`,
       companyUrl: (value: string) => `Company URL: ${value}`,
       startBody:
-        "Complete the Inspire step first so the plan can connect AI adoption to a real role, motivation, and human strength.",
+        "Complete the Imagine step first so the plan can connect AI adoption to a real role, motivation, and human strength.",
     },
     defaults: {
       learner: "a learner",
@@ -1000,6 +1000,7 @@ export const planCopy = {
       strengths: "judgment, care, creativity, and domain knowledge",
       notSpecified: "not specified",
       notSpecifiedYet: "not specified yet",
+      notEstimated: "Not estimated",
       painfulWorkflow: "one workflow or problem",
       selectedWorkArea: "the selected work area",
       mapBeforePilot: "map these before the pilot",
@@ -1063,7 +1064,7 @@ export const planCopy = {
       pageEyebrow: "PLAN DE ACCIÓN LISTO PARA IA",
       pageTitle: "Tu plan hasta ahora",
       pageIntro:
-        "Este plan MVP local se genera con los pasos de UpSkill USA que completaste: Inspirar, Aprender, Seminario e Implementar.",
+        "Este plan MVP local se genera con los pasos de UpSkill USA que completaste: Imaginar, Aprender, Seminario e Implementar.",
       nextThreeDays: "Próximos 3 días",
       nextSevenDays: "Próximos 7 días",
       afterSevenDays: "Después de 7 días",
@@ -1170,7 +1171,7 @@ export const planCopy = {
       workerSeminarTitle: "Manifiesto de horas ahorradas",
       businessSeminarTitle: "Plan de acción empresarial listo para IA",
       pilotTitle: "Primer piloto de flujo de trabajo",
-      startTitle: "Empieza con Inspirar",
+      startTitle: "Empieza con Imaginar",
       opportunity: (role: string, outcome: string, strengths: string) =>
         `Como ${role}, tu oportunidad es usar IA para avanzar hacia ${outcome} mientras proteges las fortalezas humanas más importantes: ${strengths}.`,
       context: (value: string) => `Contexto: ${value}`,
@@ -1204,7 +1205,7 @@ export const planCopy = {
       riskLevel: (value: string) => `Nivel de riesgo: ${value}`,
       companyUrl: (value: string) => `URL de empresa: ${value}`,
       startBody:
-        "Completa primero Inspirar para que el plan conecte la adopción de IA con un rol, una motivación y una fortaleza humana reales.",
+        "Completa primero Imaginar para que el plan conecte la adopción de IA con un rol, una motivación y una fortaleza humana reales.",
     },
     defaults: {
       learner: "una persona que aprende",
@@ -1212,6 +1213,7 @@ export const planCopy = {
       strengths: "juicio, cuidado, creatividad y conocimiento del dominio",
       notSpecified: "sin especificar",
       notSpecifiedYet: "aún sin especificar",
+      notEstimated: "No estimado",
       painfulWorkflow: "un flujo de trabajo o problema",
       selectedWorkArea: "el área de trabajo seleccionada",
       mapBeforePilot: "mapea esto antes del piloto",
@@ -1275,7 +1277,7 @@ export const planCopy = {
       pageEyebrow: "PLANO DE AÇÃO PRONTO PARA IA",
       pageTitle: "Seu plano até agora",
       pageIntro:
-        "Este plano MVP local é gerado a partir dos passos da UpSkill USA que você completou: Inspirar, Aprender, Seminário e Implementar.",
+        "Este plano MVP local é gerado a partir dos passos da UpSkill USA que você completou: Imaginar, Aprender, Seminário e Implementar.",
       nextThreeDays: "Próximos 3 dias",
       nextSevenDays: "Próximos 7 dias",
       afterSevenDays: "Depois de 7 dias",
@@ -1382,7 +1384,7 @@ export const planCopy = {
       workerSeminarTitle: "Manifesto de horas economizadas",
       businessSeminarTitle: "Plano de ação da empresa pronto para IA",
       pilotTitle: "Primeiro piloto de fluxo de trabalho",
-      startTitle: "Comece por Inspirar",
+      startTitle: "Comece por Imaginar",
       opportunity: (role: string, outcome: string, strengths: string) =>
         `Como ${role}, sua oportunidade é usar IA para avançar em direção a ${outcome}, protegendo as forças humanas mais importantes: ${strengths}.`,
       context: (value: string) => `Contexto: ${value}`,
@@ -1416,7 +1418,7 @@ export const planCopy = {
       riskLevel: (value: string) => `Nível de risco: ${value}`,
       companyUrl: (value: string) => `URL da empresa: ${value}`,
       startBody:
-        "Complete Inspirar primeiro para que o plano conecte a adoção de IA a uma função, motivação e força humana reais.",
+        "Complete Imaginar primeiro para que o plano conecte a adoção de IA a uma função, motivação e força humana reais.",
     },
     defaults: {
       learner: "uma pessoa em aprendizagem",
@@ -1424,6 +1426,7 @@ export const planCopy = {
       strengths: "julgamento, cuidado, criatividade e conhecimento do domínio",
       notSpecified: "não especificado",
       notSpecifiedYet: "ainda não especificado",
+      notEstimated: "Não estimado",
       painfulWorkflow: "um fluxo de trabalho ou problema",
       selectedWorkArea: "a área de trabalho selecionada",
       mapBeforePilot: "mapeie isso antes do piloto",
@@ -1855,6 +1858,16 @@ function getImplementationPlanSection(input: ImplementPlanInput, language: Langu
 
   if (input.report?.kind === "business") {
     const report = input.report as BusinessOpportunityReport;
+    const annualValue = report.annualValueAtRisk === null
+      ? copy.defaults.notEstimated
+      : formatShortUsd(report.annualValueAtRisk);
+    const recoverableWork = report.weeklyHoursReclaimable === null
+      ? copy.defaults.notEstimated
+      : `${formatLabNumber(report.weeklyHoursReclaimable)} hours/week${
+        report.fteEquivalent === null
+          ? ""
+          : ` (${report.fteEquivalent.toFixed(1)} FTE equivalent/year)`
+      }`;
 
     return {
       title: "Company AI Opportunity Report",
@@ -1864,10 +1877,8 @@ function getImplementationPlanSection(input: ImplementPlanInput, language: Langu
       items: [
         `Report type: Business Leader`,
         `Contact: ${report.email || input.email || "not specified"}`,
-        `Annual value opportunity: ${formatShortUsd(report.annualValueAtRisk)}`,
-        `Recoverable work: ${formatLabNumber(report.weeklyHoursReclaimable)} hours/week (${report.fteEquivalent.toFixed(
-          1,
-        )} FTE equivalent/year)`,
+        `Annual value opportunity: ${annualValue}`,
+        `Recoverable work: ${recoverableWork}`,
         `Selected pilot: ${pilot?.label || copy.defaults.smallTest}`,
         `AI does: ${pilot?.aiAction || "not specified"}`,
         `Human review: ${pilot?.humanReview || input.humanGate || copy.defaults.approver}`,

@@ -1,3 +1,5 @@
+import type { EmployeeEstimate } from "@/lib/audit-employee-estimate";
+
 export type ImplementAudience = "business" | "employee";
 export type TaskBucket = "AUTOMATE" | "AUGMENT" | "OWN";
 export type TaskConfidence = "HIGH" | "MEDIUM" | "LOW";
@@ -62,7 +64,7 @@ export type BusinessOpportunity = {
   id: string;
   department: string;
   symptom: string;
-  estimatedAnnualHours: number;
+  estimatedAnnualHours: number | null;
   pilotLabel: string;
   aiAction: string;
   humanReview: string;
@@ -75,16 +77,17 @@ export type BusinessOpportunityReport = {
   email: string;
   industry: string;
   sizeEstimate: string;
+  employeeEstimate: EmployeeEstimate;
   opportunityScore: number;
   executiveSummary: string;
   scoreRationale: string;
-  annualValueAtRisk: number;
-  fiveYearCostOfInaction: number;
-  employees: number;
-  addressableRoles: number;
-  weeklyHoursReclaimable: number;
-  annualHoursReclaimable: number;
-  fteEquivalent: number;
+  annualValueAtRisk: number | null;
+  fiveYearCostOfInaction: number | null;
+  employees: number | null;
+  addressableRoles: number | null;
+  weeklyHoursReclaimable: number | null;
+  annualHoursReclaimable: number | null;
+  fteEquivalent: number | null;
   opportunities: BusinessOpportunity[];
   isDemo: boolean;
   demoReason?: string;
@@ -95,7 +98,7 @@ export type ImplementPilot = {
   label: string;
   workflow: string;
   audience: ImplementAudience;
-  hoursPerWeek: number;
+  hoursPerWeek: number | null;
   confidenceThreshold: number;
   reviewer: string;
   aiAction: string;
@@ -386,6 +389,21 @@ export function createDemoBusinessReport(website: string, email: string): Busine
     email,
     industry: "Cross-industry business operations",
     sizeEstimate: "~480 employees",
+    employeeEstimate: {
+      status: "known",
+      value: employees,
+      employees,
+      range: { min: employees, max: employees },
+      declaredRange: null,
+      basis: "reported-exact",
+      provider: "none",
+      confidence: "none",
+      evidenceUrl: null,
+      evidenceExcerpt: null,
+      observedAt: null,
+      domainMatch: "not-required",
+      unavailableReason: null,
+    },
     opportunityScore: 73,
     executiveSummary: `${companyName || "This company"} likely has repeatable work across finance, operations, customer support, and procurement that can be triaged or drafted by AI with human review. The first value is not replacing people; it is recovering hours trapped inside routine handoffs and document work.`,
     scoreRationale: "Demo estimate based on common mid-market workflow patterns; live website scanning is not configured yet.",
@@ -398,7 +416,7 @@ export function createDemoBusinessReport(website: string, email: string): Busine
     fteEquivalent: annualHoursReclaimable / 2080,
     opportunities,
     isDemo: true,
-    demoReason: "Demo report shown because live audit keys are not configured yet.",
+    demoReason: "Demo report shown because live audit keys are not configured; 480 employees is a sample planning assumption, not company evidence.",
   };
 }
 
@@ -619,7 +637,9 @@ export function pilotFromBusinessOpportunity(opportunity: BusinessOpportunity): 
     label: opportunity.pilotLabel,
     workflow: opportunity.department,
     audience: "business",
-    hoursPerWeek: Number((opportunity.estimatedAnnualHours / 50).toFixed(1)),
+    hoursPerWeek: opportunity.estimatedAnnualHours === null
+      ? null
+      : Number((opportunity.estimatedAnnualHours / 50).toFixed(1)),
     confidenceThreshold: matching?.confidenceThreshold ?? 85,
     reviewer: matching?.reviewer ?? "Department manager",
     aiAction: opportunity.aiAction,

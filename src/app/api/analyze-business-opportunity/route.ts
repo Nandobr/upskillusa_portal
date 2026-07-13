@@ -14,6 +14,14 @@ function parseLanguage(value: unknown): Language {
     : defaultLanguage;
 }
 
+function auditErrorMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : "Unknown audit error";
+  if (/fetch failed/i.test(message)) {
+    return "The live audit service could not be reached. Please try again in a moment.";
+  }
+  return message;
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as { website?: unknown; email?: unknown; language?: unknown };
@@ -51,7 +59,6 @@ export async function POST(request: Request) {
       email_sent: result.emailSent,
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown audit error";
-    return NextResponse.json({ ok: false, error: message }, { status: 500 });
+    return NextResponse.json({ ok: false, error: auditErrorMessage(error) }, { status: 500 });
   }
 }

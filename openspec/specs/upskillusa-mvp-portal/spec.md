@@ -1,14 +1,14 @@
 # upskillusa-mvp-portal Specification
 
 ## Purpose
-Define the public UpSkill USA MVP portal experience: a multilingual, unauthenticated Next.js portal that guides visitors through Inspire, Learn, Adapt, and Implement with client-side demo flows and Lovable-inspired visual design.
+Define the public UpSkill USA MVP portal experience: a multilingual, unauthenticated Next.js portal that guides visitors through Imagine, Learn, Adapt, and Implement with client-side demo flows and Lovable-inspired visual design.
 ## Requirements
 ### Requirement: Public portal routes
 The system SHALL provide a public, unauthenticated UpSkill USA portal with separate routes for the overview and the four-framework sequence.
 
 #### Scenario: Visitor opens the portal overview
 - **WHEN** a visitor navigates to `/`
-- **THEN** the system displays an overview of the UpSkill USA four-framework journey and links to Inspire, Learn, Adapt, and Implement
+- **THEN** the system displays an overview of the UpSkill USA four-framework journey and links to Imagine, Learn, Adapt, and Implement
 
 #### Scenario: Visitor reviews the overview framework cards
 - **WHEN** a visitor views the overview framework cards
@@ -19,11 +19,11 @@ The system SHALL provide a public, unauthenticated UpSkill USA portal with separ
 - **THEN** the system displays the corresponding framework page without requiring sign-in
 
 ### Requirement: Sequential navigation
-The system SHALL present the framework navigation in the sequence Inspire, Learn, Seminar, Implement across the portal.
+The system SHALL present the framework navigation in the sequence Imagine, Learn, Seminar, Implement across the portal.
 
 #### Scenario: Visitor views desktop navigation
 - **WHEN** a visitor views any portal route on a desktop viewport
-- **THEN** the system displays persistent navigation with Inspire, Learn, Seminar, and Implement in order
+- **THEN** the system displays persistent navigation with Imagine, Learn, Seminar, and Implement in order
 
 #### Scenario: Visitor views mobile navigation
 - **WHEN** a visitor views any portal route on a mobile viewport
@@ -44,12 +44,12 @@ The system SHALL provide a simple client-side language toggle for English, Spani
 - **WHEN** a visitor selects ES or PT and an assessment-specific label or prompt does not have translated copy
 - **THEN** the system displays the English assessment copy instead of a missing or empty value
 
-### Requirement: Inspire IKIGAI demo
-The Inspire route SHALL replace the lightweight IKIGAI prompt demo with the full in-page Conversational IKIGAI Assessment while preserving the existing Step 1 Inspiration title, route, navigation label, and role as the emotional, self-discovery entry point to the portal.
+### Requirement: Imagine IKIGAI demo
+The `/inspire` route SHALL replace the lightweight IKIGAI prompt demo with the full in-page Conversational IKIGAI Assessment while preserving the existing Step 1 Imagine title, route, navigation label, and role as the emotional, self-discovery entry point to the portal.
 
-#### Scenario: Visitor starts Inspiration assessment
-- **WHEN** a visitor opens the Inspire route
-- **THEN** the system keeps the existing Step 1 Inspiration page identity and displays pathway choices for the Conversational IKIGAI Assessment instead of the previous lightweight profile form
+#### Scenario: Visitor starts Imagine assessment
+- **WHEN** a visitor opens the `/inspire` route
+- **THEN** the system keeps the existing Step 1 Imagine page identity and displays pathway choices for the Conversational IKIGAI Assessment instead of the previous lightweight profile form
 
 #### Scenario: Visitor progresses through assessment
 - **WHEN** a visitor completes assessment steps
@@ -60,11 +60,11 @@ The Inspire route SHALL replace the lightweight IKIGAI prompt demo with the full
 - **THEN** the system displays ranked occupation matches, comparison options, and a local personalized action plan using the visitor's responses
 
 #### Scenario: Visitor has not completed assessment
-- **WHEN** a visitor opens the Inspire route before entering responses
+- **WHEN** a visitor opens the `/inspire` route before entering responses
 - **THEN** the system displays guided assessment entry points and an empty or start state that does not imply a result has been generated
 
 #### Scenario: Visitor wants to view the plan so far
-- **WHEN** a visitor activates the View plan so far action from Inspire after saving assessment progress or results
+- **WHEN** a visitor activates the View plan so far action from Imagine after saving assessment progress or results
 - **THEN** the system routes the visitor to `/plan` and displays the saved assessment result as part of the plan
 
 ### Requirement: Learn resource hub
@@ -199,3 +199,88 @@ The Learn route SHALL add four trusted free or free-to-audit AI course recommend
 - **THEN** the system displays available fields without inventing missing factual details
 - **AND** the recommendation still provides a fit reason based on catalog fields that are available
 
+### Requirement: Homepage AI Opportunity Report launcher
+The overview route SHALL present a URL-only launcher in the existing homepage hero that hands the visitor into the canonical Implement business-leader audit without generating or rendering an audit on the homepage.
+
+#### Scenario: Visitor views the homepage hero launcher
+- **WHEN** a visitor navigates to `/`
+- **THEN** the existing homepage eyebrow, headline, and introduction remain visible
+- **AND** the hero displays a labeled company URL input, the English CTA `Get your free AI Opportunity Report` or its selected-language equivalent, and a Watch Demo link to `/demo`
+- **AND** the hero does not display a trust-claim row or the claims `30-second audit` and `Enterprise-grade security`
+
+#### Scenario: Visitor submits a valid company URL
+- **WHEN** a visitor submits a valid company URL from the homepage hero
+- **THEN** the system stores a fresh Implement draft with Business Leader selected and the trimmed company URL prefilled
+- **AND** it clears the Implement email, report, selected pilot, saved timestamp, workflow, guardrail, and employee-selection state to their defaults
+- **AND** it preserves Inspire, Learn, and Adapt draft data
+- **AND** it navigates to `/implement` without requesting `/api/analyze-business-opportunity`
+
+#### Scenario: Visitor submits an invalid company URL
+- **WHEN** a visitor submits an empty or invalid company URL from the homepage hero
+- **THEN** the visitor remains on `/`
+- **AND** the system displays a localized accessible validation error
+- **AND** it does not update the Implement draft or request the audit API
+
+#### Scenario: Visitor continues the audit in Implement
+- **WHEN** the visitor arrives at `/implement` through the homepage launcher
+- **THEN** the Business Leader path is selected and the submitted company URL is prefilled
+- **AND** the report contact email is empty and required before generation
+- **AND** only the existing Implement submission requests the audit API
+- **AND** the existing Implement business opportunity report renders the response without a homepage-specific report variant
+
+#### Scenario: Visitor watches the demo
+- **WHEN** a visitor activates Watch Demo from the homepage hero
+- **THEN** the system navigates to `/demo` without altering the Implement draft or requesting the audit API
+
+### Requirement: Homepage journey preservation
+The overview route SHALL keep the existing four-framework journey directly below the redesigned hero.
+
+#### Scenario: Visitor views content below the hero
+- **WHEN** a visitor views the homepage below the hero launcher
+- **THEN** the existing overview heading remains visible
+- **AND** exactly four framework cards remain in the existing Imagine, Learn, Seminar, and Implement order
+- **AND** the former user-facing `Inspire` label is renamed to `Imagine` while its `/inspire` route and behavior remain unchanged
+
+### Requirement: Localized and responsive homepage launcher
+The homepage launcher SHALL provide equivalent English, Spanish, and Brazilian Portuguese behavior and SHALL remain accessible and usable across supported viewport widths.
+
+#### Scenario: Visitor changes language
+- **WHEN** a visitor selects EN, ES, or PT
+- **THEN** the URL label, placeholder, validation error, CTA, and Watch Demo label use the selected language
+- **AND** the English CTA remains exactly `Get your free AI Opportunity Report`
+
+#### Scenario: Visitor uses keyboard or assistive technology
+- **WHEN** a visitor operates the launcher without a pointer
+- **THEN** the URL input has a programmatic label, URL autocomplete/input semantics, visible focus, and Enter-key submission
+- **AND** validation feedback is announced as an alert
+- **AND** decorative icons are hidden from assistive technology
+
+#### Scenario: Visitor uses a narrow viewport
+- **WHEN** a visitor views the homepage at smartphone width
+- **THEN** the URL input, CTA, Watch Demo action, and four framework cards stack without clipped text or horizontal scrolling
+- **AND** interactive controls remain at least 44 pixels high
+
+#### Scenario: Visitor views the desktop header and launcher
+- **WHEN** a visitor views the homepage at desktop width
+- **THEN** the URL launcher uses a compact centered width with input and CTA controls no shorter than 44 pixels
+- **AND** the primary header navigation labels use a larger readable font without colliding or wrapping
+- **AND** the homepage Watch Demo button is approximately 30 percent shorter than its previous 48-pixel presentation
+- **AND** the homepage hero headline uses a balanced scale that does not overpower the launcher or alter other page headings
+
+### Requirement: Homepage audit retirement and data cleanup
+The overview route SHALL no longer collect email, generate, render, or persist a homepage-specific audit report and SHALL remove legacy homepage report data when possible.
+
+#### Scenario: Homepage loads with legacy audit data
+- **WHEN** browser storage contains `upskillusa.homepageAuditReport.v1` or `upskillusa.homepageAuditReport.v2`
+- **THEN** the homepage removes both legacy entries on a best-effort basis
+- **AND** it does not hydrate or display the stored report or contact email
+
+#### Scenario: Browser storage cleanup is unavailable
+- **WHEN** browser privacy settings prevent access to local storage
+- **THEN** the homepage hero remains usable and does not crash
+
+#### Scenario: Homepage source and styles are retired
+- **WHEN** the launcher replaces the prior homepage audit section
+- **THEN** homepage-specific audit form, report, persistence, and loading/error rendering code is no longer active
+- **AND** no `.homepage-audit` or `.homepage-audit-*` selector remains in the application styles
+- **AND** shared Implement report code and `.business-audit-*` styles remain available

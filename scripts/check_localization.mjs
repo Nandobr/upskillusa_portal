@@ -98,7 +98,97 @@ for (const language of ["en", "es", "pt"]) {
   for (const key of implementationRequiredKeys) {
     assert(block.includes(key), `implementation-lab-copy.ts ${language} block is missing ${key}`);
   }
+  for (const key of [
+    "employeePlanningAssumption:",
+    "reportedEmployeeCount:",
+    "conservativeEstimate:",
+    "lowerBoundRange:",
+    "publicInformationReason:",
+    "sampleEstimateReason:",
+    "sampleSource:",
+    "companySizeUnavailable:",
+    "notEstimated:",
+    "source:",
+    "confidence:",
+    "observed:",
+    "annualRecoverable:",
+    "fteEquivalent:",
+  ]) {
+    assert(block.includes(key), `implementation-lab-copy.ts ${language} business report copy is missing ${key}`);
+  }
 }
+
+assert(portalPages.includes("formatOptionalUsd"), "business reports must suppress unknown currency metrics");
+assert(portalPages.includes("formatOptionalHours"), "business reports must suppress unknown hour metrics");
+assert(portalPages.includes("formatOptionalNumber(report.fteEquivalent"), "copied business reports must suppress an unknown FTE value");
+assert(portalPages.includes("copy.lowerBoundRange(estimate.declaredRange)"), "range disclosures must explain their lower-bound assumption");
+assert(portalPages.includes('basis: report.isDemo && normalizedBasis !== "inactive" ? "demo"'), "sample reports must disclose a sample assumption");
+assert(portalPages.includes("Company size unavailable") === false, "unknown company-size copy should come from localization");
+
+const homepageLauncherCopy = {
+  en: {
+    label: "Company URL",
+    placeholder: "yourcompany.com",
+    validation: "Enter a valid company URL.",
+    cta: "Get your free AI Opportunity Report",
+    demo: "Watch Demo",
+  },
+  es: {
+    label: "URL de la empresa",
+    placeholder: "tuempresa.com",
+    validation: "Ingresa una URL de empresa válida.",
+    cta: "Obtén gratis tu reporte de oportunidad con IA",
+    demo: "Ver demo",
+  },
+  pt: {
+    label: "URL da empresa",
+    placeholder: "suaempresa.com",
+    validation: "Insira uma URL válida da empresa.",
+    cta: "Obtenha gratuitamente seu relatório de oportunidade com IA",
+    demo: "Ver demo",
+  },
+};
+
+for (const [language, copy] of Object.entries(homepageLauncherCopy)) {
+  const block = extractLanguageBlock(content, language);
+  assert(block.includes("launcher:"), `content.ts ${language} overview is missing launcher copy`);
+  for (const [key, value] of Object.entries(copy)) {
+    assert(block.includes(value), `content.ts ${language} launcher is missing ${key}: ${value}`);
+  }
+}
+
+const firstFrameworkNames = {
+  en: "Imagine",
+  es: "Imaginar",
+  pt: "Imaginar",
+};
+
+assert(content.includes('inspire: "/inspire"'), "content.ts must keep the inspire route at /inspire");
+for (const [language, name] of Object.entries(firstFrameworkNames)) {
+  const block = extractLanguageBlock(content, language);
+  assert(
+    block.includes(`{ key: "inspire", label: "${name}", href: sharedRoutes.inspire }`),
+    `content.ts ${language} navigation must name the first framework ${name} and link to /inspire`,
+  );
+  assert(
+    block.includes(`tagline: "${name} ->`),
+    `content.ts ${language} brand tagline must start with ${name}`,
+  );
+  assert(
+    block.includes(`title: "${name}"`),
+    `content.ts ${language} first framework title must be ${name}`,
+  );
+  assert(
+    block.includes('route: "/inspire"'),
+    `content.ts ${language} first framework route must remain /inspire`,
+  );
+}
+
+const overviewPageStart = portalPages.indexOf("export function OverviewPage()");
+const overviewPageEnd = portalPages.indexOf("function PageHero", overviewPageStart);
+const overviewPageSource = portalPages.slice(overviewPageStart, overviewPageEnd);
+assert(!overviewPageSource.includes("30-second audit"), "homepage must not contain the unsubstantiated timing claim");
+assert(!overviewPageSource.includes("Enterprise-grade security"), "homepage must not contain the unsubstantiated security claim");
 
 const learnBlock = extractObjectBlock(plan, "const learnLocalization");
 for (const language of ["en", "es", "pt"]) {

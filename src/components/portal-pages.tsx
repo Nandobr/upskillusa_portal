@@ -43,6 +43,11 @@ import { mergeWithDefaults, usePlanDraft } from "@/components/plan-provider";
 import { SegmentedProgress } from "@/components/segmented-progress";
 import { implementationLabCopy, type ImplementationLabCopy } from "@/lib/implementation-lab-copy";
 import {
+  clearLegacyHomepageAuditStorage,
+  createHomepageImplementDraft,
+  isValidHomepageCompanyUrl,
+} from "@/lib/homepage-audit-launcher";
+import {
   defaultDraft,
   generateSeminarResult,
   generateUpgradePlan,
@@ -449,8 +454,119 @@ function FrameworkCards() {
   );
 }
 
+type EmployeeEstimatePresentation = {
+  value: number | null;
+  declaredRange: string | null;
+  basis: "exact" | "range-lower-bound" | "inactive" | "unknown" | "demo";
+  provider: string;
+  confidence: "high" | "medium" | "none";
+  evidenceUrl?: string | null;
+  observedAt?: string | null;
+  failureReason?: string | null;
+};
+
+function isNullableNumber(value: unknown): value is number | null {
+  return value === null || typeof value === "number";
+}
+
+function isEmployeeEstimate(value: unknown): value is EmployeeEstimatePresentation {
+  if (!value || typeof value !== "object") return false;
+  const estimate = value as Record<string, unknown>;
+  const numericValue = "value" in estimate ? estimate.value : estimate.employees;
+  const range = "declaredRange" in estimate ? estimate.declaredRange : estimate.range;
+
+  return (
+    isNullableNumber(numericValue) &&
+    (range == null || typeof range === "string") &&
+    ["exact", "reported-exact", "range-lower-bound", "inactive", "inactive-domain", "unknown", "unavailable", "demo"].includes(String(estimate.basis ?? "")) &&
+    typeof estimate.provider === "string" &&
+    ["high", "medium", "none"].includes(String(estimate.confidence ?? ""))
+  );
+}
+
+function getEmployeeEstimate(report: BusinessOpportunityReport): EmployeeEstimatePresentation {
+  const candidate = (report as BusinessOpportunityReport & { employeeEstimate?: unknown }).employeeEstimate;
+  if (isEmployeeEstimate(candidate)) {
+    const estimate = candidate as unknown as Record<string, unknown>;
+    const rawBasis = String(estimate.basis);
+    const normalizedBasis: EmployeeEstimatePresentation["basis"] =
+      rawBasis === "reported-exact"
+        ? "exact"
+        : rawBasis === "inactive-domain"
+          ? "inactive"
+          : rawBasis === "unavailable"
+            ? "unknown"
+            : rawBasis as EmployeeEstimatePresentation["basis"];
+
+    return {
+      value: (estimate.value ?? estimate.employees ?? null) as number | null,
+      declaredRange: (estimate.declaredRange ?? estimate.range ?? null) as string | null,
+      basis: report.isDemo && normalizedBasis !== "inactive" ? "demo" : normalizedBasis,
+      provider: String(estimate.provider),
+      confidence: estimate.confidence as EmployeeEstimatePresentation["confidence"],
+      evidenceUrl: typeof estimate.evidenceUrl === "string" ? estimate.evidenceUrl : null,
+      observedAt: typeof estimate.observedAt === "string" ? estimate.observedAt : null,
+      failureReason: (estimate.failureReason ?? estimate.unavailableReason ?? null) as string | null,
+    };
+  }
+
+  return {
+    value: null,
+    declaredRange: null,
+    basis: "unknown",
+    provider: "unavailable",
+    confidence: "none",
+    failureReason: "legacy-report",
+  };
+}
+
+function getEstimateReason(estimate: EmployeeEstimatePresentation, copy: ImplementationLabCopy["businessReport"]) {
+  if (estimate.basis === "exact") return copy.reportedEmployeeCount;
+  if (estimate.basis === "demo") return copy.sampleEstimateReason;
+  if (estimate.basis === "inactive") return copy.inactiveReason;
+  if (estimate.basis === "range-lower-bound" && estimate.declaredRange) {
+    if (estimate.provider.toLowerCase().includes("firecrawl")) {
+      return `${copy.conservativeEstimate}: ${copy.lowerBoundRange(estimate.declaredRange)} ${copy.publicInformationReason}`;
+    }
+    return `${copy.conservativeEstimate}: ${copy.lowerBoundRange(estimate.declaredRange)}`;
+  }
+  return copy.companySizeUnavailable;
+}
+
+function getEstimateSource(estimate: EmployeeEstimatePresentation, copy: ImplementationLabCopy["businessReport"]) {
+  if (estimate.basis === "demo") return copy.sampleSource;
+  if (!estimate.provider || ["none", "unavailable"].includes(estimate.provider.toLowerCase())) {
+    return copy.confidenceNone;
+  }
+  if (estimate.provider === "the-companies-api") return "The Companies API";
+  if (estimate.provider === "firecrawl") return "Firecrawl";
+  return estimate.provider;
+}
+
+function getConfidenceLabel(estimate: EmployeeEstimatePresentation, copy: ImplementationLabCopy["businessReport"]) {
+  if (estimate.confidence === "high") return copy.confidenceHigh;
+  if (estimate.confidence === "medium") return copy.confidenceMedium;
+  return copy.confidenceNone;
+}
+
+function formatOptionalNumber(value: number | null | undefined, fallback: string) {
+  return value == null ? fallback : formatLabNumber(value);
+}
+
+function formatOptionalUsd(value: number | null | undefined, fallback: string) {
+  return value == null ? fallback : formatShortUsd(value);
+}
+
+function formatOptionalHours(value: number | null | undefined, unit: string, fallback: string) {
+  return value == null ? fallback : `${formatLabNumber(value)} ${unit}`;
+}
+
 export function OverviewPage() {
   const { content } = usePortalContent();
+  const router = useRouter();
+  const { updateImplement } = usePlanDraft();
+  const [companyUrl, setCompanyUrl] = useState("");
+  const [hasLauncherError, setHasLauncherError] = useState(false);
   const heroLines = content.brand.lockup.includes("\n")
     ? content.brand.lockup.split("\n")
     : content.brand.lockup.split(". ").map((line, index, lines) => {
@@ -460,6 +576,35 @@ export function OverviewPage() {
 
         return line;
       });
+
+  useEffect(() => {
+    function clearLegacyAuditData() {
+      try {
+        clearLegacyHomepageAuditStorage(window.localStorage);
+      } catch {
+        // Access to local storage itself can be denied; the launcher remains usable.
+      }
+    }
+
+    clearLegacyAuditData();
+    window.addEventListener("pageshow", clearLegacyAuditData);
+
+    return () => window.removeEventListener("pageshow", clearLegacyAuditData);
+  }, []);
+
+  function submitHomepageLauncher(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const trimmedUrl = companyUrl.trim();
+
+    if (!isValidHomepageCompanyUrl(trimmedUrl)) {
+      setHasLauncherError(true);
+      return;
+    }
+
+    setHasLauncherError(false);
+    updateImplement(createHomepageImplementDraft(defaultDraft.implement, trimmedUrl));
+    router.push("/implement");
+  }
 
   return (
     <>
@@ -477,6 +622,43 @@ export function OverviewPage() {
             ))}
           </h1>
           <p>{content.overview.intro}</p>
+          <div className="homepage-hero-launcher">
+            <form className="homepage-hero-form" onSubmit={submitHomepageLauncher} noValidate>
+              <label className="homepage-hero-label" htmlFor="homepage-company-url">
+                {content.overview.launcher.companyUrlLabel}
+              </label>
+              <span className="homepage-hero-input">
+                <Globe size={22} aria-hidden />
+                <input
+                  id="homepage-company-url"
+                  type="url"
+                  inputMode="url"
+                  autoComplete="url"
+                  value={companyUrl}
+                  onChange={(event) => {
+                    setCompanyUrl(event.target.value);
+                    if (hasLauncherError) setHasLauncherError(false);
+                  }}
+                  placeholder={content.overview.launcher.companyUrlPlaceholder}
+                  aria-invalid={hasLauncherError}
+                  aria-describedby={hasLauncherError ? "homepage-company-url-error" : undefined}
+                />
+              </span>
+              <button className="button blue homepage-hero-submit" type="submit">
+                {content.overview.launcher.cta}
+                <ArrowRight size={20} aria-hidden />
+              </button>
+              {hasLauncherError ? (
+                <p className="homepage-hero-error" id="homepage-company-url-error" role="alert">
+                  {content.overview.launcher.validationError}
+                </p>
+              ) : null}
+            </form>
+            <Link className="button homepage-hero-demo" href="/demo">
+              <PlayCircle size={20} aria-hidden />
+              {content.ui.watchDemoLabel}
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -2107,7 +2289,10 @@ function BusinessOpportunityReportView({
   onSelect: (opportunity: BusinessOpportunity) => void;
 }) {
   const reportCopy = copy.businessReport;
-  const reportText = businessReportToText(report);
+  const reportText = businessReportToText(report, reportCopy);
+  const estimate = getEmployeeEstimate(report);
+  const estimateReason = getEstimateReason(estimate, reportCopy);
+  const estimateValue = estimate.value == null ? reportCopy.companySizeUnavailable : formatLabNumber(estimate.value);
 
   return (
     <section className="implementation-report business-audit-report printable-report">
@@ -2115,7 +2300,10 @@ function BusinessOpportunityReportView({
         <div>
           <span className="implementation-report-eyebrow">{reportCopy.eyebrow}</span>
           <h3>{report.companyName}</h3>
-          <p>{report.website} · {report.industry} · {report.sizeEstimate}</p>
+          <p>
+            {report.website} · {report.industry}
+            {estimate.declaredRange ? ` · ${estimate.declaredRange}` : ""}
+          </p>
         </div>
         <div className="implementation-report-actions">
           <span className="implementation-report-pill">{report.isDemo ? copy.actions.sampleData : copy.actions.liveAudit}</span>
@@ -2135,23 +2323,29 @@ function BusinessOpportunityReportView({
             <TrendingUp size={15} aria-hidden />
             {reportCopy.annualCost}
           </span>
-          <strong>{formatShortUsd(report.annualValueAtRisk)}</strong>
+          <strong>{formatOptionalUsd(report.annualValueAtRisk, reportCopy.notEstimated)}</strong>
           <p>{reportCopy.laborValue(report.companyName)}</p>
           <div className="business-audit-dark-stats">
-            <BusinessDarkStat icon={Users} label={reportCopy.employees} value={formatLabNumber(report.employees)} hint={report.sizeEstimate} />
+            <BusinessDarkStat
+              icon={Users}
+              label={reportCopy.employeePlanningAssumption}
+              value={estimateValue}
+              hint={estimateReason}
+            />
             <BusinessDarkStat
               icon={Users}
               label={reportCopy.addressableRoles}
-              value={formatLabNumber(report.addressableRoles)}
+              value={formatOptionalNumber(report.addressableRoles, reportCopy.notEstimated)}
               hint={report.industry}
             />
             <BusinessDarkStat
               icon={Clock}
               label={reportCopy.recoverableWeek}
-              value={`${formatLabNumber(report.weeklyHoursReclaimable)} ${reportCopy.hoursShort}`}
-              hint={`${formatLabNumber(report.annualHoursReclaimable)} ${reportCopy.hoursYear}`}
+              value={formatOptionalHours(report.weeklyHoursReclaimable, reportCopy.hoursShort, reportCopy.notEstimated)}
+              hint={formatOptionalHours(report.annualHoursReclaimable, reportCopy.hoursYear, reportCopy.notEstimated)}
             />
           </div>
+          <EmployeeEstimateDisclosure estimate={estimate} copy={reportCopy} dark />
         </div>
       </div>
 
@@ -2163,7 +2357,7 @@ function BusinessOpportunityReportView({
           </span>
           <p>{reportCopy.gapDescription}</p>
         </div>
-        <strong>{formatShortUsd(report.fiveYearCostOfInaction)}</strong>
+        <strong>{formatOptionalUsd(report.fiveYearCostOfInaction, reportCopy.notEstimated)}</strong>
       </div>
 
       <div className="business-audit-summary">
@@ -2199,7 +2393,9 @@ function BusinessOpportunityReportView({
                 </div>
                 <em>
                   <span>{reportCopy.trapped}</span>
-                  ~{formatLabNumber(opportunity.estimatedAnnualHours)} {reportCopy.hoursYear}
+                  {opportunity.estimatedAnnualHours == null
+                    ? reportCopy.notEstimated
+                    : `~${formatLabNumber(opportunity.estimatedAnnualHours)} ${reportCopy.hoursYear}`}
                 </em>
               </button>
             );
@@ -2414,6 +2610,43 @@ function BusinessDarkStat({
   );
 }
 
+function EmployeeEstimateDisclosure({
+  estimate,
+  copy,
+  dark = false,
+}: {
+  estimate: EmployeeEstimatePresentation;
+  copy: ImplementationLabCopy["businessReport"];
+  dark?: boolean;
+}) {
+  const source = getEstimateSource(estimate, copy);
+  const confidence = getConfidenceLabel(estimate, copy);
+  const evidenceUrl =
+    estimate.evidenceUrl && /^https?:\/\//i.test(estimate.evidenceUrl) ? estimate.evidenceUrl : null;
+
+  return (
+    <div className={`employee-estimate-disclosure ${dark ? "dark" : ""}`}>
+      <p>{getEstimateReason(estimate, copy)}</p>
+      <dl>
+        <div>
+          <dt>{copy.source}</dt>
+          <dd>{evidenceUrl ? <a href={evidenceUrl} target="_blank" rel="noreferrer">{source}</a> : source}</dd>
+        </div>
+        <div>
+          <dt>{copy.confidence}</dt>
+          <dd>{confidence}</dd>
+        </div>
+        {estimate.observedAt ? (
+          <div>
+            <dt>{copy.observed}</dt>
+            <dd>{estimate.observedAt}</dd>
+          </div>
+        ) : null}
+      </dl>
+    </div>
+  );
+}
+
 function EmployeeMetricCard({
   label,
   value,
@@ -2498,27 +2731,44 @@ function BucketBadge({ bucket }: { bucket: ImplementationTask["bucket"] }) {
   return <span className={`implementation-badge ${bucket.toLowerCase()}`}>{bucket}</span>;
 }
 
-function businessReportToText(report: BusinessOpportunityReport) {
+export function businessReportToText(
+  report: BusinessOpportunityReport,
+  copy: ImplementationLabCopy["businessReport"] = implementationLabCopy.en.businessReport,
+) {
+  const estimate = getEmployeeEstimate(report);
+  const estimateValue = estimate.value == null ? copy.companySizeUnavailable : formatLabNumber(estimate.value);
+  const estimateDetails = [
+    `${copy.source}: ${getEstimateSource(estimate, copy)}`,
+    `${copy.confidence}: ${getConfidenceLabel(estimate, copy)}`,
+    estimate.observedAt ? `${copy.observed}: ${estimate.observedAt}` : null,
+  ].filter(Boolean).join(" · ");
+
   return [
     "AI Opportunity Report",
     `${report.companyName}`,
-    `${report.website} · ${report.industry} · ${report.sizeEstimate}`,
+    `${report.website} · ${report.industry}${estimate.declaredRange ? ` · ${estimate.declaredRange}` : ""}`,
     "",
-    `Annual Cost of Inaction: ${formatShortUsd(report.annualValueAtRisk)}`,
-    `5-Year Competitive Gap: ${formatShortUsd(report.fiveYearCostOfInaction)}`,
-    `Workforce Score: ${Math.round(report.opportunityScore)}/100`,
-    `Recoverable / week: ${formatLabNumber(report.weeklyHoursReclaimable)} hrs`,
+    `${copy.annualCost}: ${formatOptionalUsd(report.annualValueAtRisk, copy.notEstimated)}`,
+    `${copy.gap}: ${formatOptionalUsd(report.fiveYearCostOfInaction, copy.notEstimated)}`,
+    `${copy.workforceScore}: ${Math.round(report.opportunityScore)}/100`,
+    `${copy.employeePlanningAssumption}: ${estimateValue}`,
+    getEstimateReason(estimate, copy),
+    estimateDetails,
+    `${copy.addressableRoles}: ${formatOptionalNumber(report.addressableRoles, copy.notEstimated)}`,
+    `${copy.recoverableWeek}: ${formatOptionalHours(report.weeklyHoursReclaimable, copy.hoursShort, copy.notEstimated)}`,
+    `${copy.annualRecoverable}: ${formatOptionalHours(report.annualHoursReclaimable, copy.hoursYear, copy.notEstimated)}`,
+    `${copy.fteEquivalent}: ${formatOptionalNumber(report.fteEquivalent, copy.notEstimated)}`,
     "",
-    "Executive Summary",
+    copy.executiveSummary,
     report.executiveSummary,
     report.scoreRationale,
     "",
-    "What's hiding in your operations",
+    copy.hiddenTitle,
     ...report.opportunities.map(
       (opportunity) =>
-        `- ${opportunity.department}: ${opportunity.pilotLabel} (${formatLabNumber(
-          opportunity.estimatedAnnualHours,
-        )} hrs/year) - ${opportunity.symptom}`,
+        `- ${opportunity.department}: ${opportunity.pilotLabel} (${opportunity.estimatedAnnualHours == null
+          ? copy.notEstimated
+          : `${formatLabNumber(opportunity.estimatedAnnualHours)} ${copy.hoursYear}`}) - ${opportunity.symptom}`,
     ),
   ].join("\n");
 }

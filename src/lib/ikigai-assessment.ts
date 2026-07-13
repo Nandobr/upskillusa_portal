@@ -111,7 +111,7 @@ export const assessmentCopy = {
   startState:
     "Choose a pathway to begin. Use the buttons at the bottom of each step to move through the assessment.",
   incompleteState:
-    "Complete the assessment on Step 1 Inspiration to add career matches to this plan.",
+    "Complete the assessment on Step 1 Imagine to add career matches to this plan.",
 } as const;
 
 export const pathways: AssessmentPathway[] = [

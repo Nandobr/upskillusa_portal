@@ -10,6 +10,11 @@
     "data:update:bls-oews": "python3 scripts/update_bls_oews.py",
     "courses:test": "node scripts/check_ai_course_catalog.mjs",
     "localization:test": "node scripts/check_localization.mjs",
+    "homepage:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/check_homepage_audit_launcher.mjs",
+    "audit:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/check_audit_employee_estimate.mjs",
+    "audit:search:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/check_audit_employee_search.mjs",
+    "audit:report:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/check_audit_employee_report.mjs",
+    "audit:readiness:test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/check_audit_employee_production_readiness.mjs",
     "services:test": "node scripts/test_services.mjs"
   },
   "dependencies": {
